@@ -11,16 +11,19 @@ from app.errors import InvestigationError
 from app.investigation import InvestigationOrchestrator
 from config.settings import Settings
 from config.versions import INVESTIGATION_VERSION, PIPELINE_VERSION
+from pro.api import router as pro_router
 from schemas.input import RunRequest
 from schemas.output import RunResponse
 
 app = FastAPI(title="PhoenixRepo", version=INVESTIGATION_VERSION)
+app.include_router(pro_router)
 
 
 def get_settings() -> Settings:
     return Settings()
 
 
+@app.get("/healthz")
 @app.get("/health")
 def health() -> dict:
     settings = get_settings()
@@ -120,6 +123,15 @@ def judge_endpoint(request: JudgeRequest):
         return JSONResponse(status_code=422, content={"error": {"type": "CannotJudge", "message": str(exc)}})
     except RelevanceLLMError as exc:
         return JSONResponse(status_code=502, content={"error": {"type": "LLMUnavailable", "message": str(exc)}})
+
+
+@app.get("/")
+def pro_home():
+    """PhoenixRepo Pro. The recorded replay page stays at /ui."""
+
+    from pro.api import ui_response
+
+    return ui_response()
 
 
 @app.get("/ui")
