@@ -389,6 +389,7 @@ class FallbackBudget:
         self.completed_calls = 0
         self.infra_seconds = 0.0
         self.last_cause = ""
+        self._lock = threading.Lock()
 
     def remaining(self) -> float:
         return self.seconds - self.infra_seconds
@@ -432,10 +433,15 @@ class FallbackBudget:
         return max(0.0, self.remaining())
 
     def note_completed(self) -> None:
-        self.completed_calls += 1
+        with self._lock:
+            self.completed_calls += 1
 
     def charge_failure(self, elapsed: float, message: str, *, kind: str) -> None:
         """Count one infrastructure failure. ``elapsed`` is the time of this failed call only."""
+        with self._lock:
+            self._charge_failure(elapsed, message, kind=kind)
+
+    def _charge_failure(self, elapsed: float, message: str, *, kind: str) -> None:
         self.infra_seconds += max(0.0, float(elapsed))
         text = str(message or "").strip()
         if text:
@@ -1465,6 +1471,32 @@ def _normalize_for_quote(text: str) -> str:
     return _DASH_SPACING.sub("-", normalize_whitespace(str(text or "").translate(_MARKUP_TRANS))).casefold()
 
 
+_ZERO_WIDTH = re.compile(r"[\u200b\u200c\u200d\ufeff]")
+_HTML_TAG = re.compile(r"<[^>]+>")
+_MD_LINK = re.compile(r"!\[([^\]]*)\]\([^)]*\)|\[([^\]]*)\]\(([^)]*)\)")
+
+
+def _link_label(match: re.Match[str], *, keep_url: bool) -> str:
+    if match.group(1) is not None:
+        return " " + match.group(1) + " "
+    label = match.group(2) or ""
+    url = match.group(3) or "" if keep_url else ""
+    return " " + label + " " + url + " "
+
+
+def _unfold_markup(text: str, *, keep_url: bool) -> str:
+    """Words in order, after links and tags. A paraphrase still fails.
+
+    Keeping the URL lets a quote of the address match. Dropping it lets a quote
+    of the sentence match when the address sat between two words.
+    """
+
+    raw = _ZERO_WIDTH.sub("", str(text or ""))
+    raw = _MD_LINK.sub(lambda match: _link_label(match, keep_url=keep_url), raw)
+    raw = _HTML_TAG.sub(" ", raw)
+    return _normalize_for_quote(raw).replace('"', "")
+
+
 def quote_in_text(quote: str, text: str) -> bool:
     """Deterministic quote verification: case-insensitive substring check after normalising
     whitespace, Markdown emphasis marks and typographic quotes."""
@@ -1473,7 +1505,59 @@ def quote_in_text(quote: str, text: str) -> bool:
     if normalize_whitespace(quote).casefold() in normalize_whitespace(text).casefold():
         return True
     nq = _normalize_for_quote(quote)
-    return bool(nq) and nq in _normalize_for_quote(text)
+    if nq and nq in _normalize_for_quote(text):
+        return True
+    for keep_url in (True, False):
+        soft = _unfold_markup(quote, keep_url=keep_url)
+        if soft and soft in _unfold_markup(text, keep_url=keep_url):
+            return True
+    return False
+
+
+_CAPABILITY_STOP = frozenset(
+    "a an the of to for and or with from your our this that free web online open source app tool "
+    "software using into over than then just more most some any all not but its".split()
+)
+
+
+def _capability_tokens(text: str) -> set[str]:
+    words = re.findall(r"[a-z0-9]+", str(text or "").casefold())
+    return {word for word in words if len(word) > 3 and word not in _CAPABILITY_STOP}
+
+
+def capability_hold(verdict: str, must_beat: list[dict[str, Any]] | None, cand_text: str) -> str | None:
+    """NEEDS_REVIEW when a full-overlap web quote shares the candidate's job and only metadata failed.
+
+    A name that did not match is not required. The quote still has to be the one the run stored.
+    This does not turn the row into ALREADY_EXISTS: the maturity rule did not pass.
+    """
+
+    if verdict != "CANDIDATE":
+        return None
+    cand = _capability_tokens(cand_text)
+    if len(cand) < 2:
+        return None
+    for item in must_beat or []:
+        if not isinstance(item, dict):
+            continue
+        alt = str(item.get("alternative") or "")
+        if not (alt.startswith("web:") or alt.startswith("http")):
+            continue
+        if str(item.get("overlap") or "") != "full":
+            continue
+        quote = str(item.get("quote") or "")
+        reason = str(item.get("reason") or "").casefold()
+        if not any(token in reason for token in ("no push", "not mature", "stars=")):
+            continue
+        shared = sorted(cand & _capability_tokens(quote))
+        if len(shared) < 2:
+            continue
+        shown = ", ".join(shared[:4])
+        return (
+            f"needs review: {alt} is full overlap and its quote shares {shown} with the candidate. "
+            "The maturity check did not block it, so this is not recorded as worth reviving"
+        )
+    return None
 
 
 def build_search_queries(candidate: dict[str, Any], problem_statement: dict[str, Any]) -> list[str]:
@@ -2234,6 +2318,13 @@ def judge_discovery(
         reason = f"unverified LLM quote: unexpected verdict '{raw_verdict}'"
         path_label = "unexpected"
 
+    hold = capability_hold(verdict, must_beat, cand_text)
+    if hold:
+        verdict = "NEEDS_REVIEW"
+        reason = hold
+        path_label = "capability"
+        picked = []
+
     coverage_override = False
     if verdict == "CANDIDATE" and coverage_blocked:
         # One rule for every path that can reach CANDIDATE (the own-identity and must-beat
@@ -2327,22 +2418,18 @@ def extract_problem_statement(
             "error": "LLM output invalid JSON",
         }
 
-    quotes = obj.get("quotes")
-    if not isinstance(quotes, list) or len(quotes) == 0:
-        return None, {
-            "error": "unverified LLM quote: no quotes provided in problem statement",
-            "unverified_quote": "",
-            "requested_model": req_m,
-            "served_model": srv_m,
-            "fallback": False,
-        }
-
-    for q in quotes:
-        q_str = str(q or "").strip()
-        if not q_str or not quote_in_text(q_str, cand_text):
+    verified, rejected = _problem_quotes(obj.get("quotes"), cand_text)
+    if not verified:
+        retried = _retry_problem_statement(
+            client, prompt_record.text, repo_id, desc, readme, prob, rejected, cand_text,
+        )
+        if retried is not None:
+            obj, verified, req_m, srv_m = retried
+        else:
+            detail = rejected or "no quotes provided in problem statement"
             return None, {
-                "error": f"unverified LLM quote: problem quote '{q_str}' not found in candidate README or description",
-                "unverified_quote": q_str,
+                "error": f"unverified LLM quote: problem quote '{detail}' not found in candidate README or description",
+                "unverified_quote": rejected,
                 "requested_model": req_m,
                 "served_model": srv_m,
                 "fallback": False,
@@ -2356,9 +2443,49 @@ def extract_problem_statement(
         "target_user": str(obj.get("target_user") or "").strip(),
         "category": str(obj.get("category") or "").strip(),
         "search_queries": search_queries[:5],
-        "quotes": [str(q).strip() for q in quotes if str(q).strip()],
+        "quotes": verified,
     }
     return problem_data, {"requested_model": req_m, "served_model": srv_m, "fallback": False}
+
+
+def _problem_quotes(quotes: Any, cand_text: str) -> tuple[list[str], str]:
+    """Every quote must occur in the candidate text. One miss rejects the set."""
+
+    if not isinstance(quotes, list) or not quotes:
+        return [], ""
+    kept: list[str] = []
+    for quote in quotes:
+        q_str = str(quote or "").strip()
+        if not q_str or not quote_in_text(q_str, cand_text):
+            return [], q_str
+        kept.append(q_str)
+    return kept, ""
+
+
+def _retry_problem_statement(client, system_prompt: str, repo_id: str, desc: str, readme: str, prob: str, rejected: str, cand_text: str):
+    """One more call with the source text supplied again. None when the quotes still fail."""
+
+    missed = rejected or "no quote was provided"
+    prompt = (
+        f"Candidate Repository: {repo_id}\n"
+        "Quote only from the text below. Copy the words in order. Do not paraphrase.\n"
+        f"Description: {desc}\n"
+        f"README Excerpt:\n```\n{readme}\n```\n"
+        f"Problem excerpt: {prob}\n\n"
+        f"The previous quote was not found in that text: {missed!r}.\n"
+        "Extract the problem statement, target user, category, 3-5 search queries, "
+        "and verbatim supporting quotes again as strict JSON."
+    )
+    try:
+        obj, _text, req_m, srv_m = _complete_json(client, prompt, system_prompt, repo_id, "problem")
+    except Exception:
+        return None
+    if obj is None:
+        return None
+    verified, _rejected = _problem_quotes(obj.get("quotes"), cand_text)
+    if not verified:
+        return None
+    return obj, verified, req_m, srv_m
 
 
 class SearchResultsList(list):
@@ -3279,6 +3406,74 @@ def _trace_partial_alternatives(
     )
 
 
+def _judge_one_chunk(problem_statement, candidate_repo_id, chunk, client, trace, budget, chunk_index):
+    """One chunk. The HTTP call is outside any caller lock. The trace lock lives on the hosted client."""
+
+    budget.guard_new_chunk()
+    judged = False
+    verified: list[dict[str, Any]] = []
+    if len(chunk) > 1:
+        batch = judge_alternatives_batch(
+            problem_statement, candidate_repo_id, chunk, client=client, trace=trace,
+            fallback_budget=budget, chunk_index=chunk_index,
+        )
+        if batch is not None:
+            verified.extend(batch)
+            judged = True
+    if not judged:
+        if budget.time_exhausted():
+            raise budget.stop("time_cap")
+        per_item_failures = 0
+        for res in chunk:
+            if budget.time_exhausted():
+                raise budget.stop("time_cap")
+            before = budget.failures
+            alt_row = _per_item(
+                problem_statement, candidate_repo_id, res, client, trace, budget,
+                chunk_index=chunk_index,
+            )
+            if budget.failures > before:
+                per_item_failures += 1
+            if alt_row is not None:
+                verified.append(alt_row)
+        judged = per_item_failures == 0
+    return chunk_index, judged, verified
+
+
+def _filter_chunks_parallel(problem_statement, candidate_repo_id, rows, client, trace, budget, identity, chunk_count, searched):
+    from pro.pace import map_ordered
+
+    chunks = [
+        (chunk_index, rows[start:start + ALTERNATIVE_CHUNK_SIZE])
+        for chunk_index, start in enumerate(range(0, len(rows), ALTERNATIVE_CHUNK_SIZE))
+    ]
+    workers = int(getattr(client, "_pace", None).concurrency if getattr(client, "_pace", None) else 4)
+
+    def run(item):
+        chunk_index, chunk = item
+        return _judge_one_chunk(problem_statement, candidate_repo_id, chunk, client, trace, budget, chunk_index)
+
+    try:
+        results = map_ordered(run, chunks, workers=workers)
+    except InfraFallbackStop as exc:
+        from app.agents.own_identity import split_own
+
+        verified, dropped_after = split_own(identity, [])
+        _trace_own(trace, candidate_repo_id, identity, dropped_after)
+        exc.attach(verified, chunk_count, [])
+        _trace_partial_alternatives(trace, candidate_repo_id, searched, exc.verified, exc)
+        raise
+    from app.agents.own_identity import split_own
+
+    verified_alts: list[dict[str, Any]] = []
+    for _index, judged, rows_out in results:
+        if judged:
+            verified_alts.extend(rows_out)
+    verified_alts, dropped_after = split_own(identity, verified_alts)
+    _trace_own(trace, candidate_repo_id, identity, dropped_after)
+    return verified_alts
+
+
 def filter_relevant_alternatives(
     problem_statement: dict[str, Any],
     candidate_repo_id: str,
@@ -3317,6 +3512,10 @@ def filter_relevant_alternatives(
     verified_alts: list[dict[str, Any]] = []
     verified_chunk_indexes: list[int] = []
     finished = 0
+    if getattr(client, "parallel_batches", False) and chunk_count > 1:
+        return _filter_chunks_parallel(
+            problem_statement, candidate_repo_id, rows, client, trace, budget, identity, chunk_count, len(search_results),
+        )
     try:
         for chunk_index, start in enumerate(range(0, len(rows), ALTERNATIVE_CHUNK_SIZE)):
             budget.guard_new_chunk()

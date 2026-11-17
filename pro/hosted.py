@@ -10,6 +10,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import threading
+import time
 from typing import Any
 
 import httpx
@@ -17,11 +20,33 @@ import httpx
 from app.adapters.meterless import message_text
 from app.adapters.nvidia import DEFAULT_BASE_URL, NvidiaDirect, NvidiaError
 from app.agents.relevance import RelevanceClient, RelevanceLLMError
+from pro.pace import Pace
 from config.settings import Settings
 
 DEFAULT_NEMOTRON = "nvidia/nemotron-3-ultra-550b-a55b"
 DEFAULT_GEMINI = "gemini-2.5-flash"
 GEMINI_CHAT_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+PROMPT_LIMIT = 12000
+_SHARED_PACE: Pace | None = None
+
+
+def shared_pace() -> Pace:
+    global _SHARED_PACE
+    if _SHARED_PACE is None:
+        workers = int(os.environ.get("PHOENIX_CALL_CONCURRENCY") or "4")
+        per_minute = int(os.environ.get("PHOENIX_CALLS_PER_MINUTE") or "40")
+        _SHARED_PACE = Pace(concurrency=max(1, workers), per_minute=max(1, per_minute))
+    return _SHARED_PACE
+
+
+def trim_prompt(text: str, limit: int = PROMPT_LIMIT) -> str:
+    """Keep the start and the instructions at the end. The middle is the part that grows."""
+
+    if len(text) <= limit:
+        return text
+    tail = 2400
+    head = max(0, limit - tail - 20)
+    return text[:head] + "\n...[trimmed]...\n" + text[-tail:]
 
 
 def provider_mode(settings: Settings) -> str:
@@ -76,6 +101,10 @@ class HostedRelevanceClient(RelevanceClient):
         self._gemini_transport = gemini_transport
         self._on_step = on_step
         self.providers_used: list[str] = []
+        self.parallel_batches = True
+        self.retry_backoff = 1.0
+        self._trace_lock = threading.Lock()
+        self._pace = shared_pace()
 
     def _complete(
         self,
@@ -93,7 +122,7 @@ class HostedRelevanceClient(RelevanceClient):
         messages: list[dict[str, str]] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
+        messages.append({"role": "user", "content": trim_prompt(prompt)})
         cached = self._read_hosted_cache(model, system_prompt, prompt)
         if cached is not None:
             self._observe(
@@ -107,7 +136,8 @@ class HostedRelevanceClient(RelevanceClient):
         if self._nvidia_key:
             self._charge(step, "nvidia")
             try:
-                text, served = self._call_nvidia(messages, model)
+                with self._pace.slot():
+                    text, served = self._call_nvidia(messages, model)
             except (NvidiaError, httpx.HTTPError, RelevanceLLMError) as exc:
                 errors.append(f"nvidia: {exc}")
                 self._observe(model, "", repo_id, step, status="error", provider="nvidia-direct")
@@ -119,7 +149,8 @@ class HostedRelevanceClient(RelevanceClient):
         if self._gemini_key:
             self._charge(step, "gemini")
             try:
-                text, served = self._call_gemini(messages)
+                with self._pace.slot():
+                    text, served = self._call_gemini(messages)
             except (httpx.HTTPError, RelevanceLLMError, ValueError) as exc:
                 errors.append(f"gemini: {exc}")
                 self._observe(self._gemini_model, "", repo_id, step, status="error", provider="gemini")
@@ -140,18 +171,32 @@ class HostedRelevanceClient(RelevanceClient):
         if self._on_step is not None:
             self._on_step(step, provider)
 
+    def _observe(self, *args, **kwargs):
+        with self._trace_lock:
+            return super()._observe(*args, **kwargs)
+
     def _call_nvidia(self, messages: list[dict[str, str]], model: str) -> tuple[str, str]:
-        client = NvidiaDirect(
-            api_key=self._nvidia_key,
-            base_url=self.nvidia_base_url or DEFAULT_BASE_URL,
-            model=model,
-            timeout_seconds=float(self.wall_clock_timeout or 90),
-            max_tokens=int(self.max_tokens),
-            transport=self._nvidia_transport,
-        )
-        text = client.complete(messages, model=model)
-        served = client.last_served_model or ""
-        return text, served
+        last: Exception | None = None
+        for attempt in range(2):
+            client = NvidiaDirect(
+                api_key=self._nvidia_key,
+                base_url=self.nvidia_base_url or DEFAULT_BASE_URL,
+                model=model,
+                timeout_seconds=float(self.wall_clock_timeout or 45),
+                max_tokens=int(self.max_tokens),
+                transport=self._nvidia_transport,
+            )
+            try:
+                text = client.complete(messages, model=model)
+            except NvidiaError as exc:
+                last = exc
+                if attempt == 0 and _retryable(str(exc)):
+                    time.sleep(self.retry_backoff)
+                    continue
+                raise
+            served = client.last_served_model or ""
+            return text, served
+        raise RelevanceLLMError(f"hosted model call failed: {last}")
 
     def _call_gemini(self, messages: list[dict[str, str]]) -> tuple[str, str]:
         body = {
@@ -210,6 +255,11 @@ class HostedRelevanceClient(RelevanceClient):
             ),
             encoding="utf-8",
         )
+
+
+def _retryable(message: str) -> bool:
+    text = message.casefold()
+    return "429" in text or "timed out" in text
 
 
 def build_hosted_client(settings: Settings, **kwargs) -> HostedRelevanceClient:

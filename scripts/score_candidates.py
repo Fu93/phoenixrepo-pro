@@ -506,10 +506,16 @@ def evaluate_demand_evidence(
     accepted_signals: list[dict[str, Any]] = []
     llm_fallback_occurred = False
 
-    for sig in signals_to_judge:
-        judgment, meta = judge_demand(
-            caps, sig, candidate_repo_id=repo_id, client=relevance_client
-        )
+    def _judge_one_signal(sig):
+        return sig, judge_demand(caps, sig, candidate_repo_id=repo_id, client=relevance_client)
+
+    if getattr(relevance_client, "parallel_batches", False) and len(signals_to_judge) > 1:
+        from pro.pace import map_ordered
+
+        judged_signals = map_ordered(_judge_one_signal, signals_to_judge, workers=4)
+    else:
+        judged_signals = [_judge_one_signal(sig) for sig in signals_to_judge]
+    for sig, (judgment, meta) in judged_signals:
         if meta.get("fallback"):
             llm_fallback_occurred = True
             continue
