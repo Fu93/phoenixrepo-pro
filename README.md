@@ -1,3 +1,99 @@
+# PhoenixRepo Pro
+
+PhoenixRepo Pro is the SLAY HACKS interface on top of PhoenixRepo. You paste a public GitHub repository URL. The existing judge runs, and the page shows the verdict, the quote that was checked, the alternatives, a rescue plan when the verdict is CANDIDATE, and the trace hash.
+
+The judgements in the three examples were made by the engine that already existed at tag `pre-slayhacks` (`8ff6a20`). The pages, the hosted provider, the caps, the cache, and the injection detector are new. The split is `docs/DISCLOSURE.md`. `scripts/disclosure_stats.sh` prints the diff since that tag.
+
+## Quick start
+
+Python 3.12. The same install CI uses:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python main.py
+```
+
+Open `http://127.0.0.1:8000/`. `main.py` binds `0.0.0.0` and `$PORT` (default 8000).
+
+With no `NVIDIA_API_KEY` and no `GEMINI_API_KEY` the site is in demo mode. The three recorded examples load, and the injection demo runs. A new repository is not sent to a model.
+
+To judge a new repository, put a key in `.env` (see `.env.example`). Do not commit `.env`.
+
+```bash
+# .env
+NVIDIA_API_KEY=...
+NVIDIA_MODEL=nvidia/nemotron-3-ultra-550b-a55b
+# optional fallback if NVIDIA is unset or a call fails
+GEMINI_API_KEY=...
+# optional, otherwise GitHub is called without a token
+GITHUB_TOKEN=...
+```
+
+Nightshift (`METERLESS_RUNTIME_TOKEN`) is not required for this UI. `POST /judge` is the older route and still refuses to run without that token.
+
+Regenerate the example JSON from the committed traces, without a model:
+
+```bash
+python scripts/pro_generate_examples.py
+```
+
+`python scripts/pro_generate_examples.py --live` also calls the judge for those three repositories when a hosted key is set. That command was not run here. No key was available.
+
+Tests:
+
+```bash
+python -m pytest -q
+```
+
+## Architecture
+
+```mermaid
+flowchart LR
+  browser[Browser at /]
+  api[FastAPI pro routes]
+  caps[Daily caps and result cache]
+  judge[Existing judge]
+  nvidia[NVIDIA Nemotron]
+  gemini[Gemini fallback]
+  examples[Committed examples]
+  browser -->|paste URL or open an example| api
+  api --> examples
+  api --> caps
+  caps --> judge
+  judge --> nvidia
+  nvidia -->|on failure, if a key is set| gemini
+```
+
+The judge is `scripts/judge_repo.py`. Quote checks stay in `app/agents/relevance.py`. The hosted client is `pro/hosted.py`. It calls the existing `NvidiaDirect` adapter. Gemini is a second HTTP call, not a replacement for the quote check. The trace hash is still `app/trace_log.py`: SHA-256 of the canonical JSON line, chained by `prev_hash`. The trace page recomputes that hash in the browser.
+
+## Screenshots
+
+These are the shots to take once the service is up. They are not in the repo.
+
+1. Home, empty URL field, demo mode, three example chips.
+2. Live progress while a keyed run is scoring.
+3. Permalink for SelfDB: ALREADY_EXISTS, the Para quote, the run hash.
+4. Rescue plan for fichero-printer: Revive, Optimise, Upgrade, each with a quote.
+5. Responsible-AI panel with the injection demo, before and after.
+6. Trace page after Verify, then after Tamper, showing the broken line.
+
+## Limits
+
+- Demo mode does not invent a verdict for a repository that is not one of the three examples.
+- A live run stops at `PHOENIX_MAX_MODEL_CALLS` (default 24). NVIDIA is tried first. Gemini is tried only when that call fails and `GEMINI_API_KEY` is set, and only if the cap still has a call left. Each HTTP call counts.
+- `PHOENIX_DAILY_RUNS_PER_IP` (default 8) and `PHOENIX_DAILY_RUNS_GLOBAL` (default 40) count live runs, not cache hits and not example loads. The per-IP address is the first `X-Forwarded-For` hop. Off Render a client can set that header. The global cap still applies.
+- The result cache key is the repository plus the head commit. A repeat spends nothing. On Render the cache disk is ephemeral and is empty after a restart or a free-tier spin-down.
+- A Gemini answer is not Nemotron. The trace flags `MODEL_MISMATCH` when the served id is outside `nvidia/nemotron-*`.
+- The hash chain shows the lines were not edited. It does not show they are true. The scored set had four false passes, listed in `docs/JUDGES.md`. The invoice example is one of them: the engine said `CANDIDATE`, and the human label only accepts `ALREADY_EXISTS`.
+- `BUDGET_EXHAUSTED` can never produce `CANDIDATE`.
+- Unauthenticated GitHub allows 60 core requests an hour and 10 searches a minute. A missing `GITHUB_TOKEN` can turn a search into `NEEDS_REVIEW`.
+
+Deploy notes: `docs/RENDER.md`. Disclosure: `docs/DISCLOSURE.md`.
+
+## PhoenixRepo record, before the SLAY HACKS window
+
+The rest of this file is the README that shipped with tag `pre-slayhacks`, kept so the recorded claims stay in one place and stay checkable. It describes the earlier hackathon entry. It is not a description of the Pro pages.
+
 # PhoenixRepo
 Before anyone spends a weekend reviving an abandoned GitHub repository, PhoenixRepo checks whether that idea already exists in a maintained form and records the check in a hash-chained trace. Solo Open Agent Hackathon 2026 entry, Track 02, "The Agent That Can Explain Why", for the prize Best use of NVIDIA Nemotron.
 The evidence is the committed traces in `data/replays/`, the case audit in `docs/SCORED_RUN_AUDIT.md`, and `scripts/verify_nemotron_evidence.py` (offline checker, added in pull request #57). Check a recorded trace with `scripts/verify_trace.py --require-nemotron`.
