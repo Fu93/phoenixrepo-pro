@@ -48,22 +48,24 @@ Pre-existing engine files were also edited inside the window, so they are not ne
 
 ## Examples recorded during the window
 
-Three examples were judged live on 17 Nov 2026 by build `59c9bc7` with the hosted NVIDIA path, and packed with `scripts/pro_add_live_example.py`. They are listed first on the Pro page and carry the label "Recorded 17 Nov 2026, during SLAY HACKS". The older three stay below them.
+Three examples were judged live on 17 Nov 2026 (builds `59c9bc7` and `867f5b0`) with the hosted NVIDIA path, and packed with `scripts/pro_add_live_example.py`. They are listed first on the Pro page and carry the label "Recorded 17 Nov 2026, during SLAY HACKS". The older three stay below them.
 
 | id | repository | verdict | model calls | wall time |
 | --- | --- | --- | --- | --- |
 | `live-bower` | `bower/bower` | NO_GO | 6 | 132 s |
-| `live-pspsps` | `melissaboiko/pspsps` | CANDIDATE, with a rescue plan | 11 | 292 s |
+| `live-pspsps` | `melissaboiko/pspsps` | CANDIDATE, with a model-written rescue plan | 10 | 190 s |
 | `live-s3browser` | `powdahound/s3browser` | NEEDS_REVIEW | 7 | 220 s |
 
-Six judgements were run that day on this build, one at a time. All six are listed here, including the three not packed:
+Six judgements were run that day on build `59c9bc7`, one at a time. All six are listed here, including the three not packed:
 
 - `melissaboiko/myougiden`: NEEDS_REVIEW, 6 calls, 155 s. Its prior-art link is a `qgithub.com` mirror address, not github.com, so it was not used.
 - `powdahound/redis-collectd-plugin`: NEEDS_REVIEW, 2 calls, 59 s. A quote the model gave for the problem was not in the README, so the run stopped early. Not used.
 - `melissaboiko/ansi`: NEEDS_REVIEW, 6 calls, 159 s. The only alternative with verified full overlap did not pass the maturity check, and the other was only partial overlap. It was not used.
 
-None of the six came back ALREADY_EXISTS, so there is no such example from this window. The same repository can give a different verdict on another day: `powdahound/s3browser` came back ALREADY_EXISTS on an earlier build and NEEDS_REVIEW on this one.
+None of the six came back ALREADY_EXISTS, and neither did the five runs on `867f5b0` below, so there is no such example from this window. The same repository can give a different verdict on another run: `powdahound/s3browser` came back ALREADY_EXISTS on an earlier build and NEEDS_REVIEW on the next two.
 
-Each packed trace passes `python scripts/verify_trace.py pro/examples/traces/<id>.jsonl --expected-run-hash <run_hash>`. For `live-pspsps` the model call that drafts the rescue plan failed ("chat content was not text"), so its rescue plan is the deterministic one. That failed call was written to the server's trace file after the seal. The packed copy stops at the seal, which is the line the run hash names, and the failed call is not in it. In the stored JSON the word "Meterless" was removed from that error message. Nothing else was edited by hand.
+`live-bower` and `live-s3browser` were judged on build `59c9bc7`. `live-pspsps` was judged again on build `867f5b0` (the sealing fix), because the first copy had a deterministic rescue plan after a failed model call. The new copy has a rescue plan written by the model, and its trace is the server's own file, uncut. Five runs on `867f5b0`, one at a time: `s3browser` NEEDS_REVIEW (106 s, 6 calls), `redis-collectd-plugin` NEEDS_REVIEW (110 s, 6), `pspsps` CANDIDATE (190 s, 10), `myougiden` NEEDS_REVIEW (126 s, 6), `bower` NEEDS_REVIEW (94 s, 6). Because the four NEEDS_REVIEW verdicts were less definite than the copies already packed, `live-bower` (NO_GO, whose verified quote says the project is in maintenance mode) and `live-s3browser` were kept from the earlier build those two were not replaced.
+
+Each packed trace passes `python scripts/verify_trace.py pro/examples/traces/<id>.jsonl --expected-run-hash <run_hash>`. Nothing in the stored JSON was edited by hand.
 
 `scripts/disclosure_stats.sh` prints four counts: everything, code and tests with the packed examples and `data` excluded, the three 17 Nov examples with their traces, and the older packed examples plus data fixtures. The older packed traces are old engine output. The new code and the new tests are the other count.
