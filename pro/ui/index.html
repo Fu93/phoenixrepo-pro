@@ -4,6 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PhoenixRepo Pro</title>
+  <meta name="description" content="Paste a public GitHub repository. Read whether the idea already exists, the quote, and a tamper-evident receipt.">
+  <meta property="og:title" content="PhoenixRepo Pro">
+  <meta property="og:description" content="A verdict, the quote it rests on, and a tamper-evident receipt.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/pro/og.svg">
+  <link rel="icon" href="/pro/og.svg">
   <style>
     :root {
       --ink: #1c1612;
@@ -15,7 +21,7 @@
       --rose: #9f1239;
       --amber: #a16207;
       --line: #e6d9c8;
-      --mute: #6d6258;
+      --mute: #3f342c;
       --shadow: 0 18px 50px rgba(60, 32, 12, 0.08);
     }
     * { box-sizing: border-box; }
@@ -32,6 +38,12 @@
     }
     a { color: var(--ember-deep); }
     button, input { font: inherit; }
+    :focus-visible { outline: 3px solid var(--ember); outline-offset: 3px; }
+    .skip {
+      position: absolute; left: 8px; top: -40px; background: var(--ink); color: #fffaf3;
+      padding: 8px 12px; z-index: 2;
+    }
+    .skip:focus { top: 8px; }
     .wrap { width: min(1080px, calc(100% - 32px)); margin: 0 auto; }
     header {
       display: flex;
@@ -113,6 +125,11 @@
     .log { list-style: none; margin: 0; padding: 0; }
     .log li { display: grid; grid-template-columns: 16px 1fr; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); }
     .log li::before { content: ""; width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: var(--ember); }
+    .steps { list-style: none; margin: 8px 0; padding: 0; }
+    .steps li { color: var(--mute); padding: 3px 0 3px 16px; }
+    .steps li.done { color: var(--moss); }
+    .steps li.now { color: var(--ink); font-weight: 700; }
+    .progress { margin-top: 8px; }
     .alt { padding: 12px 0; border-top: 1px solid var(--line); }
     .tag { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem; letter-spacing: 0.08em; }
     .tag.blocked { color: var(--rose); }
@@ -134,7 +151,9 @@
   </style>
 </head>
 <body>
+  <a class="skip" href="#app">Skip to the judgement</a>
   <div class="wrap">
+    <p class="muted" id="wake">If this page was slow to appear, the free instance was waking up. It is ready now.</p>
     <header>
       <a class="brand" href="/pro">
         <i class="mark" aria-hidden="true"></i>
@@ -149,7 +168,7 @@
         <a href="/ui">Recorded replays</a>
       </nav>
     </header>
-    <main id="app"></main>
+    <main id="app" aria-live="polite"></main>
     <footer>
       Type is the browser’s own serif and monospace. No font file and no paid service is loaded.
       The hash chain shows a trace was not edited. It does not show the verdict is true.
@@ -157,6 +176,48 @@
   </div>
   <script>
     const app = document.getElementById("app");
+    const LABELS = {
+      ALREADY_EXISTS: "Already exists",
+      CANDIDATE: "Worth reviving",
+      NEEDS_REVIEW: "Needs review",
+      NEEDS_PRIOR_ART: "Needs prior art",
+      UNJUDGED: "Not judged",
+      NOT_ENOUGH: "Not enough to judge",
+      NO_GO: "Do not revive",
+    };
+
+    function plainReason(result) {
+      const text = result.plain_reason || result.reason || "";
+      const cut = text.split("Method:")[0].trim();
+      return cut || "No reason was stored.";
+    }
+
+    function detailsFor(result) {
+      const raw = result.reason || "";
+      if (!raw.includes("Method:")) return el("span");
+      const box = el("details");
+      box.append(el("summary", {}, ["How the engine said it"]));
+      box.append(el("p", { class: "mono" }, [raw]));
+      return box;
+    }
+
+    function notEnough(result) {
+      return el("section", { class: "panel" }, [
+        el("h2", {}, ["What would make it judgeable"]),
+        ...(result.would_help || []).map((line) => el("p", {}, [line])),
+      ]);
+    }
+
+    function mismatchNote(result) {
+      const hit = (result.trace || []).some((event) => {
+        const raw = event.canonical || "";
+        return raw.includes("MODEL_MISMATCH") && raw.includes('"status":"error"');
+      });
+      if (!hit) return el("span");
+      return el("p", {}, [
+        "One sealed line is flagged MODEL_MISMATCH with an empty served model and status error. That was a failed NVIDIA call on 26 Oct 2026, not a verdict from another model. Current code records that failure as CALL_FAILED. The sealed line is left as recorded.",
+      ]);
+    }
 
     function el(tag, props, children) {
       const node = document.createElement(tag);
@@ -188,11 +249,11 @@
         el("input", { name: "url", type: "url", required: "true", placeholder: "https://github.com/owner/repository", "aria-label": "Public GitHub repository URL" }),
         el("button", { type: "submit" }, ["Judge"]),
       ]);
-      const log = el("ol", { class: "log" });
+      const progress = el("div", { class: "progress", "aria-live": "polite" });
       const note = el("p", { class: "muted" });
       form.addEventListener("submit", (event) => {
         event.preventDefault();
-        startRun(new FormData(form).get("url"), log, note, form.querySelector("button"));
+        startRun(new FormData(form).get("url"), progress, note, form.querySelector("button"), examples);
       });
       const mode = status.mode === "demo"
         ? "Demo mode. No model key is set, so only the recorded examples run. A live judgement needs NVIDIA_API_KEY, with GEMINI_API_KEY as an optional fallback."
@@ -201,12 +262,15 @@
         el("section", { class: "grid" }, [
           el("div", {}, [
             el("p", { class: "muted" }, ["SLAY HACKS · gate 1, in the browser"]),
-            el("h1", {}, ["Paste a public repository. Read the verdict, the quote, and the hash."]),
+            el("h1", {}, ["Paste a public repository. Read the verdict, the quote, and the tamper-evident receipt."]),
             el("p", { class: "lede" }, ["PhoenixRepo checks whether an abandoned idea already exists in a maintained form. The model proposes. Code keeps a quote only when the words are in the cited text."]),
             form,
+            triageForm(),
             note,
-            log,
-            el("div", { class: "chips" }, examples.map((card) => el("a", { class: "chip", href: "/pro/r/" + card.id }, [card.verdict + " · " + card.repo_id]))),
+            progress,
+            el("div", { class: "chips" }, examples.map((card) => el("a", { class: "chip", href: "/pro/r/" + card.id }, [
+        (LABELS[card.verdict] || card.verdict) + " · " + card.repo_id + (card.recorded_label ? " · " + card.recorded_label : ""),
+      ]))),
           ]),
           el("aside", { class: "panel" }, [
             el("h2", {}, ["This process"]),
@@ -216,12 +280,95 @@
         ]),
         responsibleBlock(null),
       );
+      const preset = new URLSearchParams(location.search).get("url");
+      if (preset) startRun(preset, progress, note, form.querySelector("button"), examples);
     }
 
-    async function startRun(url, log, note, button) {
+    function triageForm() {
+      const form = el("form", { class: "judge" }, [
+        el("input", { name: "user", "aria-label": "GitHub username", placeholder: "GitHub username" }),
+        el("button", { type: "submit" }, ["Find abandoned repos"]),
+      ]);
+      const out = el("div");
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const user = new FormData(form).get("user");
+        const response = await fetch("/pro/api/triage?user=" + encodeURIComponent(user));
+        const data = await response.json();
+        if (!response.ok) {
+          out.replaceChildren(el("p", { class: "error" }, [(data.error && data.error.message) || "Triage failed."]));
+          return;
+        }
+        if (!(data.repos || []).length) {
+          out.replaceChildren(el("p", {}, ["No public repository for that user has gone 12 months without a push."]));
+          return;
+        }
+        out.replaceChildren(...data.repos.slice(0, 12).map((repo) => el("p", {}, [
+          el("a", { href: "/?url=" + encodeURIComponent(repo.url) }, ["Judge " + repo.repo_id]),
+          " · " + repo.stale_days + " days since the last push · " + repo.stars + " stars",
+        ])));
+      });
+      return el("section", {}, [
+        el("h2", {}, ["Abandoned repositories"]),
+        el("p", { class: "muted" }, ["Public repos with no push in 12 months, ranked by stars and how long they have been quiet."]),
+        form,
+        out,
+      ]);
+    }
+
+    const STEP_DEFS = [
+      ["queued", "Queued"],
+      ["fetch", "Fetch the repository"],
+      ["readme", "Check the README for injected instructions"],
+      ["model", "Ask the model, then check every quote"],
+      ["seal", "Seal the verdict"],
+    ];
+
+    function stepRank(event) {
+      const step = event.step || "";
+      const known = STEP_DEFS.findIndex((row) => row[0] === step);
+      if (known >= 0) return known;
+      const text = (event.message || event.action || "").toLowerCase();
+      if (text.includes("verdict") || text.includes("seal") || text.includes("run_seal")) return 4;
+      if (text.includes("model") || text.includes("judge") || text.includes("scoring") || event.type === "trace") return 3;
+      if (text.includes("readme") || text.includes("injection")) return 2;
+      if (text.includes("fetch")) return 1;
+      if (text.includes("queued")) return 0;
+      return -1;
+    }
+
+    function mountWait(progress, examples) {
+      const elapsed = el("p", { class: "mono" }, ["0:00 elapsed · usually 3–6 minutes"]);
+      const items = STEP_DEFS.map((row) => el("li", {}, [row[1]]));
+      const steps = el("ol", { class: "steps" }, items);
+      const log = el("ol", { class: "log" });
+      const chips = el("div", { class: "chips" }, (examples || []).map((card) => el("a", { class: "chip", href: "/pro/r/" + card.id }, [card.verdict + " · " + card.repo_id])));
+      progress.replaceChildren(
+        el("h2", {}, ["This run"]),
+        elapsed,
+        el("p", {}, ["A live judgement usually takes 3–6 minutes. These recorded examples open immediately."]),
+        chips,
+        steps,
+        log,
+      );
+      return { elapsed, items, log, rank: -1 };
+    }
+
+    function applyEvents(view, events) {
+      view.log.replaceChildren();
+      events.forEach((event) => {
+        if (event.message) view.log.append(el("li", {}, [event.message]));
+        const rank = stepRank(event);
+        if (rank > view.rank) view.rank = rank;
+      });
+      view.items.forEach((item, index) => {
+        item.className = index < view.rank ? "done" : index === view.rank ? "now" : "";
+      });
+    }
+
+    async function startRun(url, progress, note, button, examples) {
       button.disabled = true;
       note.textContent = "";
-      log.replaceChildren();
       let response;
       try {
         response = await fetch("/pro/api/runs", {
@@ -250,31 +397,47 @@
         note.textContent = data.message || "Demo mode.";
         return;
       }
-      watch(data.id, log, note);
+      const view = mountWait(progress, examples);
+      watch(data.id, view, note);
     }
 
-    function watch(id, log, note) {
+    function watch(id, view, note) {
       let finished = false;
+      const started = Date.now();
+      const timer = setInterval(() => {
+        const seconds = Math.floor((Date.now() - started) / 1000);
+        const mm = Math.floor(seconds / 60);
+        const ss = String(seconds % 60).padStart(2, "0");
+        view.elapsed.textContent = mm + ":" + ss + " elapsed · usually 3–6 minutes";
+      }, 1000);
       const source = new EventSource("/pro/api/runs/" + id + "/events");
+      const seen = [];
       source.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.message) log.append(el("li", {}, [data.message]));
+        seen.push(data);
+        applyEvents(view, seen);
         if (data.type !== "done" && !(data.type === "status" && data.status && data.status !== "running")) return;
         finished = true;
+        clearInterval(timer);
         source.close();
         if (data.status === "error") note.textContent = data.message || "Judging stopped.";
         else if (data.result_id) location.href = "/pro/r/" + data.result_id;
       };
       source.onerror = () => {
         source.close();
-        if (!finished) poll(id, log, note);
+        clearInterval(timer);
+        if (!finished) poll(id, view, note);
       };
     }
 
-    async function poll(id, log, note) {
-      for (let i = 0; i < 120; i += 1) {
+    async function poll(id, view, note) {
+      for (let i = 0; i < 400; i += 1) {
         const data = await fetch("/pro/api/runs/" + id).then((r) => r.json());
-        log.replaceChildren(...(data.events || []).map((event) => el("li", {}, [event.message || event.type])));
+        applyEvents(view, data.events || []);
+        const seconds = Math.max(0, Math.floor(Date.now() / 1000) - Math.floor(data.started_at || Date.now() / 1000));
+        const mm = Math.floor(seconds / 60);
+        const ss = String(seconds % 60).padStart(2, "0");
+        view.elapsed.textContent = mm + ":" + ss + " elapsed · usually 3–6 minutes";
         if (data.status === "done" && data.result_id) {
           location.href = "/pro/r/" + data.result_id;
           return;
@@ -314,17 +477,28 @@
         : [el("p", { class: "muted" }, ["No alternative quote was stored on this verdict."])];
       return el("article", { class: "stack" }, [
         el("p", { class: "muted" }, [result.repo_id + (result.source ? " · " + result.source : "")]),
-        el("div", { class: "stamp " + result.verdict }, [result.verdict || "NO VERDICT"]),
+        el("div", { class: "stamp " + result.verdict }, [LABELS[result.verdict] || result.verdict || "No verdict"]),
         el("h1", {}, [result.title || result.repo_id]),
         el("p", { class: "muted" }, [quoteLabel(result)]),
-        el("blockquote", {}, [result.quote || "No quote was stored with this verdict."]),
-        el("p", {}, [result.reason || ""]),
+        result.quote ? el("p", {}, [el("span", { class: "tag open" }, ["Found in source ✓"]), " ", result.quote]) : el("p", { class: "muted" }, ["No quote was stored with this verdict."]),
+        el("p", {}, [plainReason(result)]),
+        detailsFor(result),
+        result.verdict === "NOT_ENOUGH" ? notEnough(result) : el("span"),
+        mismatchNote(result),
         links,
         el("section", { class: "panel" }, [
           el("h2", {}, ["Prior art"]),
           ...alts,
         ]),
-        el("p", { class: "hash muted" }, ["Run hash ", result.run_hash || "none"]),
+        el("p", { class: "hash muted" }, [
+          "Tamper-evident receipt ",
+          result.run_hash || "none",
+          ". The hash chain proves the trace was not edited. It does not prove the verdict is correct.",
+        ]),
+        (result.osv || []).length ? el("section", { class: "panel" }, [
+          el("h2", {}, ["Known vulnerabilities"]),
+          ...(result.osv || []).map((row) => el("p", {}, [row.ecosystem + " " + row.name + ": " + (row.ids || []).join(", ")])),
+        ]) : el("span"),
       ]);
     }
 
@@ -340,7 +514,7 @@
       return el("div", { class: "alt" }, [
         el("div", { class: "tag " + (row.blocked ? "blocked" : "open") }, [row.blocked ? "BLOCKED THE REPOSITORY" : "CHECKED, DID NOT BLOCK"]),
         el("div", {}, [name, " · " + (row.overlap || "overlap not recorded")]),
-        el("blockquote", {}, [row.quote || "No quote stored."]),
+        el("p", {}, [row.quote ? el("span", { class: "tag open" }, ["Found in source ✓ "]) : el("span"), row.quote || "No quote stored."]),
         el("p", { class: "muted" }, [row.reason || ""]),
       ]);
     }
@@ -358,6 +532,7 @@
       const stages = result.rescue.stages || [];
       return el("article", { class: "stack" }, [
         back,
+        el("p", {}, [el("a", { href: "/pro/api/results/" + result.id + "/rescue.md" }, ["Download Markdown"])]),
         el("h1", {}, ["Rescue plan"]),
         el("p", { class: "muted" }, [result.rescue_note || ("Drafted by " + (result.rescue.drafted_by || "the engine"))]),
         el("div", { class: "cols" }, stages.map(stageCard)),
@@ -378,7 +553,7 @@
     function traceView(result) {
       const out = el("p", { class: "muted" }, ["Not verified yet."]);
       const list = el("div", { class: "timeline" });
-      (result.trace || []).forEach((event) => {
+      groupTrace(result.trace || []).forEach((event) => {
         list.append(el("article", {}, [
           el("strong", { class: "mono" }, [event.action || "event"]),
           el("div", { class: "muted" }, [event.detail || ""]),
@@ -395,6 +570,26 @@
         out,
         el("section", { class: "panel" }, [list]),
       ]);
+    }
+
+    function groupTrace(events) {
+      const grouped = [];
+      let misses = 0;
+      events.forEach((event) => {
+        const detail = (event.detail || "") + (event.canonical || "");
+        const missing = /HTTP 404|404/.test(detail) && /github/i.test(detail + (event.action || ""));
+        if (missing) {
+          misses += 1;
+          return;
+        }
+        if (misses) {
+          grouped.push({ action: "GitHub 404", detail: misses + " missing GitHub responses grouped", line_hash: "" });
+          misses = 0;
+        }
+        grouped.push(event);
+      });
+      if (misses) grouped.push({ action: "GitHub 404", detail: misses + " missing GitHub responses grouped", line_hash: "" });
+      return grouped;
     }
 
     async function sha256(text) {
@@ -483,8 +678,21 @@
     async function loadInjection(box) {
       const data = await fetch("/pro/api/injection-demo", { method: "POST" }).then((r) => r.json());
       const names = (data.report.findings || []).map((item) => item.pattern).join(", ");
+      const pipeline = data.pipeline || {};
+      const attacks = el("div");
+      (data.attacks || []).forEach((row) => {
+        attacks.append(el("p", {}, [
+          (row.caught ? "Caught" : "Not caught") + " — " + row.text + " (" + row.note + ")",
+        ]));
+      });
       box.replaceChildren(
         el("p", {}, ["Detected " + data.report.count + ": " + names]),
+        el("p", {}, [
+          "Pipeline check: the injected verdict is " + (pipeline.hostile_still_a_quote ? "still" : "not") +
+          " accepted as a quote. The real sentence is " + (pipeline.real_sentence_kept ? "kept" : "missing") + ".",
+        ]),
+        el("h3", {}, ["Attack table"]),
+        attacks,
         el("h3", {}, ["Before"]),
         el("pre", { class: "mono" }, [data.original]),
         el("h3", {}, ["After, the text the model is allowed to see"]),

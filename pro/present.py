@@ -202,9 +202,23 @@ def responsibility(result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def public_trace_ref(value: object) -> str:
+    """A trace name the browser can show. Never an absolute server path."""
+
+    text = str(value or "").replace("\\", "/").strip()
+    if not text:
+        return ""
+    path = Path(text)
+    drive = len(text) > 2 and text[1] == ":"
+    if drive or path.is_absolute() or text.startswith("~") or ".." in path.parts:
+        return path.name
+    return text
+
+
 def public_result(fields: dict[str, Any]) -> dict[str, Any]:
     """Attach the responsible-AI block. Does not drop caller fields."""
 
     result = dict(fields)
+    result["trace_file"] = public_trace_ref(result.get("trace_file"))
     result["responsibility"] = responsibility(result)
     return result

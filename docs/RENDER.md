@@ -17,14 +17,15 @@ In the Dashboard, or as Blueprint env vars with `sync: false` so the value is ty
 | `GITHUB_TOKEN` | no | GitHub API. Unauthenticated if unset. |
 | `PHOENIX_MAX_MODEL_CALLS` | no | Default 24 per run. |
 | `PHOENIX_DAILY_RUNS_PER_IP` | no | Default 8. The first `X-Forwarded-For` hop is the address. A client can spoof that header off Render; the global cap still applies. |
-| `PHOENIX_DAILY_RUNS_GLOBAL` | no | Default 40 per UTC day. |
+| `PHOENIX_DAILY_RUNS_GLOBAL` | no | Default 40 per UTC day. A run counts only after it calls a model. |
+| `PHOENIX_PRO_DIR` | no | Cache and daily counters. Default `data/pro-runtime` inside the container. |
 | `SAMPLE_MODE` | no | Leave `true`. It keeps `POST /run` on the sample investigation. Pro judging does not use it as a silent model. |
 
 Do not put key values in the repo.
 
 ## Free tier
 
-A free web service spins down after about 15 minutes without traffic. The next request cold-starts. The filesystem is ephemeral: `data/pro-runtime/` (the result cache, daily counters, and live traces) is empty after a restart or spin-down. A repeat request is free only until that happens. The three committed examples are in the image and survive a restart.
+A free web service spins down after about 15 minutes without traffic. The next request cold-starts. The filesystem is ephemeral. `PHOENIX_PRO_DIR` defaults to `data/pro-runtime` on that disk, so the result cache, the daily counters, and live traces are wiped on every restart, spin-down, and deploy. A repeat request is free only until that happens. Free web services cannot attach a persistent disk, so there is no durable place to point `PHOENIX_PRO_DIR` on the free plan. The three committed examples are in the image and survive a restart. `PHOENIX_PRO_STORE`, if set to a directory or an `https://` folder of JSON files, is an optional extra copy. A missing permalink says so instead of a bare error.
 
 One service. No disk, no separate worker. Free instances do not scale horizontally.
 

@@ -5,7 +5,7 @@ import os
 import uvicorn
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 
 from app.errors import InvestigationError
 from app.investigation import InvestigationOrchestrator
@@ -15,7 +15,18 @@ from pro.api import router as pro_router
 from schemas.input import RunRequest
 from schemas.output import RunResponse
 
-app = FastAPI(title="PhoenixRepo", version=INVESTIGATION_VERSION)
+def hosted_mode() -> bool:
+    return os.environ.get("PHOENIX_HOSTED", "").strip().lower() in {"1", "true", "yes"}
+
+
+_HOSTED = hosted_mode()
+app = FastAPI(
+    title="PhoenixRepo",
+    version=INVESTIGATION_VERSION,
+    docs_url=None if _HOSTED else "/docs",
+    redoc_url=None if _HOSTED else "/redoc",
+    openapi_url=None if _HOSTED else "/openapi.json",
+)
 app.include_router(pro_router)
 
 
@@ -23,9 +34,19 @@ def get_settings() -> Settings:
     return Settings()
 
 
-@app.get("/healthz")
 @app.get("/health")
+def health_legacy():
+    if hosted_mode():
+        return RedirectResponse("/healthz", status_code=307)
+    return _health_body()
+
+
+@app.get("/healthz")
 def health() -> dict:
+    return _health_body()
+
+
+def _health_body() -> dict:
     settings = get_settings()
     provider = "sample-standin" if settings.sample_mode else settings.llm_provider
     return {
@@ -136,8 +157,13 @@ def pro_home():
 
 @app.get("/ui")
 def replay_ui():
-    """Static replay page. No build step and no external assets."""
+    """Static replay page. No build step and no external assets.
 
+    A hosted deploy sends people to PhoenixRepo Pro. Local checkouts keep /ui.
+    """
+
+    if hosted_mode():
+        return RedirectResponse("/pro", status_code=307)
     from app.replay_ui import ui_path
 
     return FileResponse(ui_path(), media_type="text/html; charset=utf-8")

@@ -1,9 +1,9 @@
 """Hard caps for hosted PhoenixRepo Pro runs.
 
-A cache hit and a pre-judged example do not call reserve(). A live run that
-passes the cap spends one daily slot even if the model later fails. Each HTTP
-call to a model is counted separately against the per-run call cap by the
-hosted client.
+A cache hit, a pre-judged example, and a run that never calls a model do not
+call reserve(). A run that did call a model spends one daily slot, including
+when the verdict is NEEDS_REVIEW or the run errors after that call. Each HTTP
+call still counts against the per-run model-call cap.
 """
 
 from __future__ import annotations
@@ -57,15 +57,31 @@ class RunLedger:
         self._now = now or (lambda: datetime.now(timezone.utc))
         self._lock = threading.Lock()
 
+    def block_reason(self, ip: str) -> str:
+        """``per_ip``, ``global``, or ``ok`` when another run that calls a model may start."""
+
+        who = (ip or "unknown").strip() or "unknown"
+        with self._lock:
+            state = self._state_for_today()
+            used_ip = int((state.get("ips") or {}).get(who) or 0)
+            used_global = int(state.get("global") or 0)
+            if used_ip >= self.config.per_ip_daily:
+                return "per_ip"
+            if used_global >= self.config.global_daily:
+                return "global"
+            return "ok"
+
+    def can_reserve(self, ip: str) -> bool:
+        """False when this IP or the process is already at the daily cap."""
+
+        return self.block_reason(ip) == "ok"
+
     def reserve(self, ip: str) -> dict[str, int]:
         """Take one live-run slot for this IP and for the process. Raises LimitError."""
 
         who = (ip or "unknown").strip() or "unknown"
         with self._lock:
-            state = self._load()
-            day = self._today()
-            if state.get("day") != day:
-                state = {"day": day, "global": 0, "ips": {}}
+            state = self._state_for_today()
             ips = state.setdefault("ips", {})
             used_ip = int(ips.get(who) or 0)
             used_global = int(state.get("global") or 0)
@@ -81,15 +97,13 @@ class RunLedger:
                 )
             ips[who] = used_ip + 1
             state["global"] = used_global + 1
-            state["day"] = day
+            state["day"] = self._today()
             self._save(state)
             return {"ip": ips[who], "global": state["global"]}
 
     def snapshot(self) -> dict[str, object]:
         with self._lock:
-            state = self._load()
-            if state.get("day") != self._today():
-                state = {"day": self._today(), "global": 0, "ips": {}}
+            state = self._state_for_today()
             return {
                 "day": state.get("day"),
                 "global_used": int(state.get("global") or 0),
@@ -100,6 +114,12 @@ class RunLedger:
 
     def _today(self) -> str:
         return self._now().astimezone(timezone.utc).date().isoformat()
+
+    def _state_for_today(self) -> dict:
+        state = self._load()
+        if state.get("day") != self._today():
+            return {"day": self._today(), "global": 0, "ips": {}}
+        return state
 
     def _load(self) -> dict:
         if not self.path.exists():

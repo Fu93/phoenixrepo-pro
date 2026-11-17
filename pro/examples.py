@@ -41,6 +41,9 @@ class ExampleCatalog:
     def cards(self) -> list[dict[str, str]]:
         cards = []
         for row in self.all():
+            recorded = row.get("recorded_on") or ""
+            if not recorded and str(row.get("source") or "") == "recorded-engine-trace":
+                recorded = "2026-10-26"
             cards.append(
                 {
                     "id": str(row.get("id") or ""),
@@ -49,6 +52,8 @@ class ExampleCatalog:
                     "verdict": str(row.get("verdict") or ""),
                     "title": str(row.get("title") or row.get("repo_id") or ""),
                     "source": str(row.get("source") or ""),
+                    "recorded_on": str(recorded),
+                    "recorded_label": "Recorded 26 Oct 2026, before SLAY HACKS" if recorded == "2026-10-26" else "",
                 }
             )
         return cards

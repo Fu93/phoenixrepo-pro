@@ -11,6 +11,13 @@ fi
 echo "base ${base} $(git rev-parse --short "$base")"
 echo "head $(git rev-parse --short HEAD) ($(git rev-parse --abbrev-ref HEAD))"
 echo
+echo "all files"
 git diff --shortstat "$base"
+echo
+echo "code and tests, packed traces excluded"
+git diff --shortstat "$base" -- . ':(exclude)pro/examples' ':(exclude)data'
+echo
+echo "packed examples and data fixtures"
+git diff --shortstat "$base" -- pro/examples data
 echo
 git diff --stat "$base"

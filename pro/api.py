@@ -11,11 +11,12 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel
 
 from config.settings import Settings
-from pro.injection import neutralise
+from pro.injection import attack_table, neutralise, pipeline_check
 from pro.service import ProError, ProService
 
 ROOT = Path(__file__).resolve().parents[1]
 UI_PATH = Path(__file__).resolve().parent / "ui" / "index.html"
+OG_PATH = Path(__file__).resolve().parent / "ui" / "og.svg"
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "injected_readme.md"
 
 router = APIRouter()
@@ -27,18 +28,30 @@ class RunBody(BaseModel):
     prefer_live: bool = False
 
 
+def state_dir() -> Path:
+    """Cache, daily counters, and live results. Override with PHOENIX_PRO_DIR."""
+
+    return Path(os.environ.get("PHOENIX_PRO_DIR") or (ROOT / "data" / "pro-runtime"))
+
+
 def get_service() -> ProService:
     global SERVICE
     if SERVICE is None:
-        directory = Path(os.environ.get("PHOENIX_PRO_DIR") or (ROOT / "data" / "pro-runtime"))
-        SERVICE = ProService(directory, settings_fn=Settings)
+        SERVICE = ProService(state_dir(), settings_fn=Settings)
     return SERVICE
 
 
-def _ip(request: Request) -> str:
+def client_ip(request: Request) -> str:
+    """The platform's hop, not a client-chosen address.
+
+    Render appends the connecting address. A caller can prepend a fake list,
+    so the first value is not the cap key. The last hop is the one the proxy added.
+    """
+
     forwarded = request.headers.get("x-forwarded-for", "")
-    if forwarded.strip():
-        return forwarded.split(",")[0].strip()[:64] or "unknown"
+    parts = [part.strip() for part in forwarded.split(",") if part.strip()]
+    if parts:
+        return parts[-1][:64]
     if request.client and request.client.host:
         return request.client.host
     return "unknown"
@@ -50,6 +63,11 @@ def _error(exc: ProError) -> JSONResponse:
 
 def ui_response():
     return FileResponse(UI_PATH, media_type="text/html; charset=utf-8")
+
+
+@router.get("/pro/og.svg")
+def og_image():
+    return FileResponse(OG_PATH, media_type="image/svg+xml")
 
 
 @router.get("/pro")
@@ -82,7 +100,7 @@ def pro_result(example_id: str):
 @router.post("/pro/api/runs")
 def pro_start(body: RunBody, request: Request):
     try:
-        return get_service().submit(body.url, _ip(request), prefer_live=body.prefer_live)
+        return get_service().submit(body.url, client_ip(request), prefer_live=body.prefer_live)
     except ProError as exc:
         return _error(exc)
 
@@ -112,4 +130,52 @@ def pro_events(job_id: str):
 def injection_demo():
     text = FIXTURE.read_text(encoding="utf-8")
     cleaned, report = neutralise(text)
-    return {"original": text, "neutralised": cleaned, "report": report}
+    checked = pipeline_check(text)
+    return {
+        "original": text,
+        "neutralised": cleaned,
+        "report": report,
+        "pipeline": checked,
+        "attacks": attack_table(),
+    }
+
+
+@router.get("/pro/api/results/{result_id}/rescue.md")
+def rescue_markdown(result_id: str):
+    from fastapi.responses import Response
+
+    try:
+        result = get_service().get_result(result_id)
+    except ProError as exc:
+        return _error(exc)
+    return Response(_rescue_markdown(result), media_type="text/markdown; charset=utf-8")
+
+
+@router.get("/pro/api/triage")
+def triage(user: str):
+    from pro.triage import TriageError, abandoned_repos
+
+    try:
+        return {"user": user, "repos": abandoned_repos(user)}
+    except TriageError as exc:
+        return JSONResponse(status_code=exc.status, content={"error": {"type": "Triage", "message": str(exc)}})
+
+
+def _rescue_markdown(result: dict) -> str:
+    lines = [f"# Rescue plan: {result.get('repo_id') or result.get('id')}", ""]
+    if not result.get("rescue"):
+        lines.append(result.get("rescue_note") or "No rescue plan.")
+        return "\n".join(lines) + "\n"
+    lines.append(result.get("rescue_note") or "")
+    lines.append("")
+    for stage in result["rescue"].get("stages") or []:
+        lines.append(f"## {stage.get('stage')}")
+        lines.append("")
+        for item in stage.get("items") or []:
+            lines.append(f"### {item.get('title')}")
+            lines.append("")
+            lines.append(item.get("why") or "")
+            lines.append("")
+            lines.append(f"> {item.get('quote') or ''}")
+            lines.append("")
+    return "\n".join(lines) + "\n"

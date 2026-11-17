@@ -43,4 +43,6 @@ New code, not present at the tag:
 - The browser's built-in serif and monospace fonts. No font file, CDN, or paid template is used.
 - Render, if you deploy the Dockerfile. The free web service disk is ephemeral.
 
-No model was called from the build environment that produced the committed examples.
+Live judgements have been run from this branch with an NVIDIA key: one took 322 seconds and 15 model calls and returned CANDIDATE; another returned NEEDS_REVIEW because a problem quote did not match the README. Those live JSON files are not all committed. The three examples in `pro/examples/` are still the 26 Oct 2026 recordings.
+
+`scripts/disclosure_stats.sh` prints three counts: everything, code and tests with `pro/examples` and `data` excluded, and the packed examples plus data fixtures on their own. The packed traces are old engine output. The new code and the new tests are the other count.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import threading
+import time
 import uuid
 from pathlib import Path
 from typing import Any, Callable
@@ -48,6 +49,11 @@ class Job:
         self.result_id = ""
         self.error = ""
         self.trace_path: Path | None = None
+        self.model_calls = 0
+        self.charged = False
+        self.admitted = False
+        self.queue_position = 0
+        self.started_at = time.time()
         self.injection: dict[str, Any] = {
             "detected": False,
             "neutralised": False,
@@ -78,7 +84,9 @@ class ProService:
         self.ledger = RunLedger(root / "limits.json", LimitConfig.from_env(), now=clock)
         self.results = root / "results"
         self.jobs: dict[str, Job] = {}
-        self._lock = threading.Lock()
+        self._inflight: dict[tuple[str, str], Job] = {}
+        self._lock = threading.RLock()
+        self.max_inflight = max(1, int(os.environ.get("PHOENIX_MAX_INFLIGHT") or "2"))
 
     def status(self) -> dict[str, Any]:
         from pro.hosted import provider_mode
@@ -124,6 +132,7 @@ class ProService:
         if commit:
             cached = self.cache.get(repo_id, commit)
             if cached:
+                cached = _without_server_paths(cached)
                 self._write_result(cached)
                 return {
                     "status": "done",
@@ -134,15 +143,25 @@ class ProService:
                     "model_calls": 0,
                     "verdict": cached.get("verdict"),
                 }
-        try:
-            self.ledger.reserve(ip or "unknown")
-        except LimitError as exc:
-            raise ProError(str(exc), status=429, kind=exc.kind) from exc
-        job = Job(f"run-{uuid.uuid4().hex[:12]}", url, repo_id, ip or "unknown")
-        job.commit = commit
-        job.events.append({"type": "stage", "message": "Queued"})
+        key = _run_key(repo_id, commit)
         with self._lock:
+            current = self._inflight.get(key)
+            if current is not None and current.status == "running":
+                return self._attached(current)
+            reason = self.ledger.block_reason(ip or "unknown")
+            if reason != "ok":
+                limit = self.ledger.config.per_ip_daily if reason == "per_ip" else self.ledger.config.global_daily
+                noun = "this address" if reason == "per_ip" else "the process"
+                raise ProError(f"Daily run limit reached for {noun} ({limit}).", status=429, kind=reason)
+            job = Job(f"run-{uuid.uuid4().hex[:12]}", url, repo_id, ip or "unknown")
+            job.commit = commit
+            job.events.append({
+                "type": "stage",
+                "step": "queued",
+                "message": "Queued. A live judgement usually takes 3–6 minutes.",
+            })
             self.jobs[job.id] = job
+            self._inflight[key] = job
         if self.background:
             threading.Thread(target=self._execute, args=(job,), daemon=True).start()
             return {
@@ -192,14 +211,49 @@ class ProService:
     def get_result(self, result_id: str) -> dict[str, Any]:
         example = self.examples.get(result_id)
         if example:
-            return example
+            return _without_server_paths(example)
         path = self.results / f"{_safe_id(result_id)}.json"
         if not path.exists():
-            raise ProError("Unknown result.", status=404, kind="NotFound")
+            external = self._external_result(result_id)
+            if external is not None:
+                return external
+            raise ProError(
+                "This permalink is not on this server. A free instance forgets live results when it sleeps. The recorded examples are still available.",
+                status=404,
+                kind="NotFound",
+            )
         data = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
             raise ProError("Result file is not an object.", status=500, kind="Result")
-        return data
+        return _without_server_paths(data)
+
+    def _external_result(self, result_id: str) -> dict | None:
+        store = (os.environ.get("PHOENIX_PRO_STORE") or "").strip()
+        if not store:
+            return None
+        ident = _safe_id(result_id)
+        if store.startswith("https://"):
+            import httpx
+
+            try:
+                response = httpx.get(store.rstrip("/") + "/" + ident + ".json", timeout=8.0)
+            except httpx.HTTPError:
+                return None
+            if response.status_code != 200:
+                return None
+            try:
+                data = response.json()
+            except ValueError:
+                return None
+            return _without_server_paths(data) if isinstance(data, dict) else None
+        path = Path(store) / f"{ident}.json"
+        if not path.is_file():
+            return None
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return None
+        return _without_server_paths(data) if isinstance(data, dict) else None
 
     def _instant(self, example: dict) -> dict[str, Any]:
         return {
@@ -234,7 +288,8 @@ class ProService:
 
     def _execute(self, job: Job) -> None:
         try:
-            self._event(job, {"type": "stage", "message": "Fetching the repository"})
+            self._wait_turn(job)
+            self._event(job, {"type": "stage", "step": "fetch", "message": "Fetching the repository"})
             if self.runner is not None:
                 result = self.runner(job)
             else:
@@ -242,6 +297,7 @@ class ProService:
             result.setdefault("repo_id", job.repo_id)
             result.setdefault("injection", job.injection)
             result = public_result(result)
+            job.model_calls = max(job.model_calls, int(result.get("model_calls") or 0))
             if job.commit:
                 result["commit"] = job.commit
                 result["id"] = permalink_for(job.repo_id, job.commit)
@@ -252,15 +308,125 @@ class ProService:
             stored = self._write_result(stored)
             job.result_id = str(stored.get("id") or "")
             job.status = "done"
-            self._event(job, {"type": "stage", "message": "Verdict ready"})
+            self._event(job, {"type": "stage", "step": "seal", "message": "Verdict ready"})
+        except ProError as exc:
+            if exc.kind == "CannotJudge":
+                self._save_not_enough(job, str(exc))
+            else:
+                job.status = "error"
+                job.error = _public_error(exc, self.settings_fn())
+                self._event(job, {"type": "stage", "step": "seal", "message": "Judging stopped"})
         except Exception as exc:  # noqa: BLE001 — the run page has to show a short public error
             job.status = "error"
             job.error = _public_error(exc, self.settings_fn())
-            self._event(job, {"type": "stage", "message": "Judging stopped"})
+            self._event(job, {"type": "stage", "step": "seal", "message": "Judging stopped"})
+        finally:
+            job.admitted = False
+            self._account(job)
+            self._clear_inflight(job)
         self._event(
             job,
             {"type": "status", "status": job.status, "result_id": job.result_id, "message": job.error},
         )
+
+    def _on_model(self, job: Job, step: str, provider: str) -> None:
+        job.model_calls += 1
+        self._event(
+            job,
+            {
+                "type": "model",
+                "step": "model",
+                "message": f"Model call {step or 'judge'} via {provider}",
+                "provider": provider,
+            },
+        )
+
+    def _wait_turn(self, job: Job) -> None:
+        """At most max_inflight model runs at once. Everyone else sees a queue position."""
+
+        announced = -1
+        while True:
+            with self._lock:
+                active = [
+                    other for other in self._inflight.values()
+                    if other.admitted and other.status == "running" and other is not job
+                ]
+                if len(active) < self.max_inflight:
+                    job.admitted = True
+                    job.queue_position = 0
+                    return
+                waiting = sorted(
+                    (
+                        other for other in self._inflight.values()
+                        if not other.admitted and other.status == "running"
+                    ),
+                    key=lambda other: other.started_at,
+                )
+                job.queue_position = next((index + 1 for index, other in enumerate(waiting) if other is job), 1)
+            if job.queue_position != announced:
+                announced = job.queue_position
+                self._event(job, {
+                    "type": "stage",
+                    "step": "queued",
+                    "message": f"In the queue, position {job.queue_position}. A live judgement usually takes 3–6 minutes.",
+                })
+            time.sleep(0.05)
+
+    def _save_not_enough(self, job: Job, message: str) -> None:
+        result = public_result({
+            "repo_id": job.repo_id,
+            "repo_url": f"https://github.com/{job.repo_id}",
+            "title": job.repo_id,
+            "verdict": "NOT_ENOUGH",
+            "reason": message,
+            "plain_reason": (
+                f"{message} Nothing was sent to a model, and this attempt does not use a daily run."
+            ),
+            "quote": "",
+            "would_help": [
+                "A one-line GitHub description of who the program is for.",
+                "A README of a few sentences, in the repository's own words.",
+                "Source files in the repository. An empty or private repository cannot be judged.",
+            ],
+            "alternatives": [],
+            "trace": [],
+            "rescue": None,
+            "rescue_note": "There is no rescue plan, because there was not enough text to judge.",
+            "model_calls": 0,
+            "quota": "not counted",
+            "source": "not-enough",
+            "demo": False,
+            "injection": job.injection,
+        })
+        job.model_calls = 0
+        if job.commit:
+            result["commit"] = job.commit
+            result["id"] = permalink_for(job.repo_id, job.commit)
+            stored = self.cache.put(job.repo_id, job.commit, result)
+        else:
+            result["id"] = job.id
+            stored = result
+        stored = self._write_result(stored)
+        job.result_id = str(stored.get("id") or "")
+        job.status = "done"
+        self._event(job, {"type": "stage", "step": "seal", "message": "Not enough to judge"})
+
+    def _account(self, job: Job) -> None:
+        """Spend a daily slot only after this run has called a model."""
+
+        if job.model_calls <= 0 or job.charged:
+            return
+        try:
+            self.ledger.reserve(job.ip)
+        except LimitError:
+            return
+        job.charged = True
+
+    def _clear_inflight(self, job: Job) -> None:
+        key = _run_key(job.repo_id, job.commit)
+        with self._lock:
+            if self._inflight.get(key) is job:
+                self._inflight.pop(key, None)
 
     def _judge(self, job: Job) -> dict[str, Any]:
         from pro.hosted import build_hosted_client
@@ -276,15 +442,7 @@ class ProService:
             settings,
             max_calls=self.ledger.config.max_model_calls,
             cache_dir=self.root / "model-cache",
-            on_step=lambda step, provider: self._event(
-                job,
-                {
-                    "type": "model",
-                    "message": f"Model call {step or 'judge'} via {provider}",
-                    "step": step,
-                    "provider": provider,
-                },
-            ),
+            on_step=lambda step, provider: self._on_model(job, step, provider),
         )
 
         def getter(url: str, token: str, accept: str = "application/vnd.github+json"):
@@ -296,6 +454,7 @@ class ProService:
                     job,
                     {
                         "type": "injection",
+                        "step": "readme",
                         "message": (
                             f"README injection detector: {report['count']} span(s) removed"
                             if report.get("detected")
@@ -307,7 +466,7 @@ class ProService:
                 return cleaned
             return body
 
-        self._event(job, {"type": "stage", "message": "Running the judge"})
+        self._event(job, {"type": "stage", "step": "model", "message": "Running the judge"})
         try:
             judged = judge(
                 job.url,
@@ -361,7 +520,7 @@ class ProService:
                 "problem": problem,
                 "run_id": str(judged.get("run_id") or job.id),
                 "run_hash": run_hash,
-                "trace_file": str(trace_path) if trace_path else "",
+                "trace_file": trace_path.name if trace_path else "",
                 "trace": events,
                 "rescue": rescue,
                 "rescue_note": rescue_note,
@@ -372,6 +531,7 @@ class ProService:
                 "demo": False,
                 "model_calls": int(getattr(client, "_http_calls", 0)),
                 "human_label": {},
+                "osv": _osv(job.repo_id),
             }
         )
 
@@ -383,7 +543,16 @@ class ProService:
         result = dict(result)
         result["id"] = ident
         path = self.results / f"{ident}.json"
-        path.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        payload = json.dumps(result, indent=2, ensure_ascii=False) + "\n"
+        path.write_text(payload, encoding="utf-8")
+        store = (os.environ.get("PHOENIX_PRO_STORE") or "").strip()
+        if store and not store.startswith("https://"):
+            mirror = Path(store)
+            try:
+                mirror.mkdir(parents=True, exist_ok=True)
+                (mirror / f"{ident}.json").write_text(payload, encoding="utf-8")
+            except OSError:
+                pass
         return result
 
     def _event(self, job: Job, event: dict) -> None:
@@ -403,7 +572,17 @@ class ProService:
             "events": events,
             "cached": False,
             "demo": False,
+            "started_at": job.started_at,
+            "estimate": "A live judgement usually takes 3–6 minutes.",
+            "model_calls": job.model_calls,
+            "queue_position": job.queue_position,
         }
+
+    def _attached(self, job: Job) -> dict[str, Any]:
+        body = self._job_body(job)
+        body["attached"] = True
+        body["events"] = f"/pro/api/runs/{job.id}/events"
+        return body
 
 
 def read_trace_events(job: Job, seen: int) -> tuple[list[dict[str, Any]], int]:
@@ -431,6 +610,32 @@ def read_trace_events(job: Job, seen: int) -> tuple[list[dict[str, Any]], int]:
             }
         )
     return fresh, seen + len(fresh)
+
+
+def _osv(repo_id: str) -> list:
+    try:
+        from pro.osv import advisories_for_repo
+
+        return advisories_for_repo(repo_id)
+    except Exception:
+        return []
+
+
+def _run_key(repo_id: str, commit: str) -> tuple[str, str]:
+    return ((repo_id or "").strip().lower(), (commit or "").strip())
+
+
+def _without_server_paths(result: dict) -> dict:
+    from pro.present import public_trace_ref
+
+    cleaned = dict(result)
+    cleaned["trace_file"] = public_trace_ref(cleaned.get("trace_file"))
+    duty = cleaned.get("responsibility")
+    if isinstance(duty, dict):
+        duty = dict(duty)
+        duty["trace_file"] = public_trace_ref(duty.get("trace_file"))
+        cleaned["responsibility"] = duty
+    return cleaned
 
 
 def _candidate_row(path: Path, repo_id: str) -> dict | None:
