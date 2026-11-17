@@ -54,4 +54,4 @@ def test_the_three_verdicts_are_the_ones_the_traces_show():
         example_id: json.loads((EXAMPLES_DIR / f"{example_id}.json").read_text(encoding="utf-8"))["verdict"]
         for example_id in LIVE
     }
-    assert verdicts == {"live-bower": "NO_GO", "live-pspsps": "CANDIDATE", "live-s3browser": "NEEDS_REVIEW"}
+    assert verdicts == {"live-bower": "NO_GO", "live-pspsps": "CANDIDATE", "live-s3browser": "ALREADY_EXISTS"}

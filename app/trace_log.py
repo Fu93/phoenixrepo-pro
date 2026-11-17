@@ -11,6 +11,7 @@ import hashlib
 import json
 import re
 import tempfile
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -207,6 +208,7 @@ class HackathonTrace:
         self._prev_hash = ""
         self.run_hash = ""
         self._started = False
+        self._lock = threading.RLock()
 
     def event(
         self,
@@ -262,17 +264,20 @@ class HackathonTrace:
                 record["request_settings"] = settings
                 record["request_settings_sha256"] = request_settings_sha256(settings)
         record = sanitize_metadata(record)
-        record["prev_hash"] = self._prev_hash
-        missing = [field for field in FIELDS if field not in record]
-        if missing:
-            raise RuntimeError(f"trace record missing {missing}")
-        record["line_hash"] = line_hash(record)
-        self._prev_hash = record["line_hash"]
-        self.run_hash = record["line_hash"]
-        line = canonical_line(record)
-        print(line, flush=True)
-        self._lines.append(line)
-        self._write(line)
+        # Parallel tool calls log from several threads. Chaining, printing and writing
+        # happen under one lock so the file order is the chain order.
+        with self._lock:
+            record["prev_hash"] = self._prev_hash
+            missing = [field for field in FIELDS if field not in record]
+            if missing:
+                raise RuntimeError(f"trace record missing {missing}")
+            record["line_hash"] = line_hash(record)
+            self._prev_hash = record["line_hash"]
+            self.run_hash = record["line_hash"]
+            line = canonical_line(record)
+            print(line, flush=True)
+            self._lines.append(line)
+            self._write(line)
         return record
 
     def _flag_count(self, name: str) -> int:

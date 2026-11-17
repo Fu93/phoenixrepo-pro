@@ -54,7 +54,7 @@ Three examples were judged live on 17 Nov 2026 (builds `59c9bc7` and `867f5b0`) 
 | --- | --- | --- | --- | --- |
 | `live-bower` | `bower/bower` | NO_GO | 6 | 132 s |
 | `live-pspsps` | `melissaboiko/pspsps` | CANDIDATE, with a model-written rescue plan | 10 | 190 s |
-| `live-s3browser` | `powdahound/s3browser` | NEEDS_REVIEW | 7 | 220 s |
+| `live-s3browser` | `powdahound/s3browser` | ALREADY_EXISTS (`awslabs/aws-js-s3-explorer`, verified quote), build `10c84b8` | 8 | 142 s |
 
 Six judgements were run that day on build `59c9bc7`, one at a time. All six are listed here, including the three not packed:
 
@@ -64,8 +64,12 @@ Six judgements were run that day on build `59c9bc7`, one at a time. All six are 
 
 None of the six came back ALREADY_EXISTS, and neither did the five runs on `867f5b0` below, so there is no such example from this window. The same repository can give a different verdict on another run: `powdahound/s3browser` came back ALREADY_EXISTS on an earlier build and NEEDS_REVIEW on the next two.
 
-`live-bower` and `live-s3browser` were judged on build `59c9bc7`. `live-pspsps` was judged again on build `867f5b0` (the sealing fix), because the first copy had a deterministic rescue plan after a failed model call. The new copy has a rescue plan written by the model, and its trace is the server's own file, uncut. Five runs on `867f5b0`, one at a time: `s3browser` NEEDS_REVIEW (106 s, 6 calls), `redis-collectd-plugin` NEEDS_REVIEW (110 s, 6), `pspsps` CANDIDATE (190 s, 10), `myougiden` NEEDS_REVIEW (126 s, 6), `bower` NEEDS_REVIEW (94 s, 6). Because the four NEEDS_REVIEW verdicts were less definite than the copies already packed, `live-bower` (NO_GO, whose verified quote says the project is in maintenance mode) and `live-s3browser` were kept from the earlier build those two were not replaced.
+`live-bower` was judged on build `59c9bc7`; `live-s3browser` was replaced on 17 Nov by a run on build `10c84b8` (see below). `live-pspsps` was judged again on build `867f5b0` (the sealing fix), because the first copy had a deterministic rescue plan after a failed model call. The new copy has a rescue plan written by the model, and its trace is the server's own file, uncut. Five runs on `867f5b0`, one at a time: `s3browser` NEEDS_REVIEW (106 s, 6 calls), `redis-collectd-plugin` NEEDS_REVIEW (110 s, 6), `pspsps` CANDIDATE (190 s, 10), `myougiden` NEEDS_REVIEW (126 s, 6), `bower` NEEDS_REVIEW (94 s, 6). Because the four NEEDS_REVIEW verdicts were less definite than the copies already packed, `live-bower` (NO_GO, whose verified quote says the project is in maintenance mode) and `live-s3browser` were kept from the earlier build those two were not replaced.
 
 Each packed trace passes `python scripts/verify_trace.py pro/examples/traces/<id>.jsonl --expected-run-hash <run_hash>`. Nothing in the stored JSON was edited by hand.
 
 `scripts/disclosure_stats.sh` prints four counts: everything, code and tests with the packed examples and `data` excluded, the three 17 Nov examples with their traces, and the older packed examples plus data fixtures. The older packed traces are old engine output. The new code and the new tests are the other count.
+
+### Build `10c84b8` (yes/no overlap rubric), six runs, 17 Nov 2026
+
+Each repeated run used a fresh server and an empty cache. `s3browser`: ALREADY_EXISTS twice (142 s, 8 calls and 142 s, 6 calls), both blocked by `awslabs/aws-js-s3-explorer` with a verified quote. That run is the packed `live-s3browser`. `request/request`: ALREADY_EXISTS (`sindresorhus/got`, 101 s, 6 calls) and then NO_GO (134 s, 7 calls), because the second search did not return `got`, so it is not packed. `bower/bower`: NEEDS_REVIEW (94 s, 6 calls). `melissaboiko/myougiden`: NEEDS_REVIEW (146 s, 13 calls). The server trace of the second `s3browser` run failed `verify_trace.py` (parallel tool calls wrote lines out of chain order); that was a logging race, fixed in the same commit with a lock, and the packed run's trace verifies.
