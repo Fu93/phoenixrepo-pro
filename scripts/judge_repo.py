@@ -9,6 +9,7 @@ evidence report. It never uses the repository's own stars or forks as evidence o
 from __future__ import annotations
 
 import argparse
+import contextvars
 import csv
 import json
 import re
@@ -34,6 +35,9 @@ DEMAND_HEADER = "repo_id,signal_id,kind,url,excerpt,metric_name,metric_value,com
 _URL_RE = re.compile(r"^(?:https?://)?(?:www\.)?github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+?)(?:\.git)?/?(?:[#?].*)?$")
 
 
+_github_cache: contextvars.ContextVar[dict | None] = contextvars.ContextVar("phoenix_github_cache", default=None)
+
+
 class JudgeError(RuntimeError):
     """The repository could not be turned into a judgeable row. The message says why."""
 
@@ -50,6 +54,10 @@ def parse_repo_url(url: str) -> str:
 def _get(url: str, token: str, accept: str = "application/vnd.github+json") -> Any:
     from app.github_auth import mark_unauthorized, token_usable
 
+    cache = _github_cache.get()
+    key = (url, accept, bool(token))
+    if cache is not None and key in cache:
+        return cache[key]
     headers = {"Accept": accept, "User-Agent": "phoenixrepo-judge"}
     if token_usable(token):
         headers["Authorization"] = f"Bearer {token}"
@@ -62,10 +70,20 @@ def _get(url: str, token: str, accept: str = "application/vnd.github+json") -> A
             # An expired token: GitHub refuses even public data. Mark it and ask once without it.
             mark_unauthorized(token)
             return _get(url, token, accept)
+        if exc.code in (403, 429):
+            raise JudgeError(
+                "GitHub rate limit reached. Anonymous access allows about 60 requests an hour. "
+                "Set GITHUB_TOKEN and try again."
+            ) from exc
+        if exc.code == 404 and "/repos/" in url and "/contents" not in url and "/readme" not in url and "/git/" not in url and "/commits/" not in url:
+            raise JudgeError("repository not found") from exc
         raise JudgeError(f"GitHub returned HTTP {exc.code} for {url.split('?')[0]}") from exc
     except (urllib.error.URLError, TimeoutError) as exc:
         raise JudgeError(f"could not reach GitHub: {exc}") from exc
-    return body.decode("utf-8", errors="replace") if accept.endswith("raw") else json.loads(body)
+    parsed = body.decode("utf-8", errors="replace") if accept.endswith("raw") else json.loads(body)
+    if cache is not None:
+        cache[key] = parsed
+    return parsed
 
 
 def fetch_repo(full_name: str, token: str | None = None, getter=_get) -> dict[str, Any]:
@@ -137,6 +155,14 @@ def write_snapshot(row: dict[str, str], directory: Path) -> Path:
 def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None) -> dict[str, Any]:
     """Judge one repository. Returns {repo_id, verdict, reason, run_id, run_hash, report}."""
     full_name = parse_repo_url(url)
+    cache_token = _github_cache.set({})
+    try:
+        return _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client)
+    finally:
+        _github_cache.reset(cache_token)
+
+
+def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client):
     collected_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     fetched = fetch_repo(full_name, getter=getter)
     row = build_row(fetched, collected_at)

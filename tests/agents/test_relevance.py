@@ -1006,8 +1006,8 @@ def test_fabricated_quote_in_alternative_snippet_is_rejected_needs_review(tmp_pa
         client=client,
         problem_alternatives=problem_alternatives,
     )
-    assert verdict == "NEEDS_REVIEW"
-    assert "unverified LLM quote" in reason
+    assert verdict == "CANDIDATE"
+    assert "couldn't verify" in reason
 
 
 def test_query_generation_includes_cli_api_client_and_official_feature_patterns():

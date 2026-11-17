@@ -1039,16 +1039,26 @@ def _do_score_candidates(
 
         from app.agents.rescue import from_candidate_row, rescue_potential
 
-        if facts_client is not None and hasattr(facts_client, "fetch_rescue"):
-            rescue_facts = facts_client.fetch_rescue(repo_id, default_branch=str(candidate.get("default_branch") or ""))
-            if rescue_facts.get("fetch_status") == "ok":
-                rescue = rescue_potential(rescue_facts, as_of=_rescue_date.today())
-            else:
-                rescue = from_candidate_row(candidate, as_of=_rescue_date.today())
-                rescue["source"] = "snapshot"
-                rescue["fetch_status"] = "source_error"
-        else:
-            rescue = from_candidate_row(candidate, as_of=_rescue_date.today())
+        def _compute_rescue():
+            if facts_client is not None and hasattr(facts_client, "fetch_rescue"):
+                rescue_facts = facts_client.fetch_rescue(repo_id, default_branch=str(candidate.get("default_branch") or ""))
+                if rescue_facts.get("fetch_status") == "ok":
+                    return rescue_potential(rescue_facts, as_of=_rescue_date.today())
+                fallback = from_candidate_row(candidate, as_of=_rescue_date.today())
+                fallback["source"] = "snapshot"
+                fallback["fetch_status"] = "source_error"
+                return fallback
+            return from_candidate_row(candidate, as_of=_rescue_date.today())
+
+        from concurrent.futures import ThreadPoolExecutor
+
+        with ThreadPoolExecutor(max_workers=1) as _rescue_pool:
+            _rescue_future = _rescue_pool.submit(_compute_rescue)
+            problem_stmt = None
+            meta_prob = None
+            if is_client_configured(relevance_client):
+                problem_stmt, meta_prob = extract_problem_statement(candidate, client=relevance_client)
+            rescue = _rescue_future.result()
         rescue_by_repo[repo_id] = rescue
         must_beat = []
         judgement_evidence = []
@@ -1061,7 +1071,6 @@ def _do_score_candidates(
         )
 
         if is_client_configured(relevance_client):
-            problem_stmt, meta_prob = extract_problem_statement(candidate, client=relevance_client)
             if problem_stmt is None:
                 err = str(meta_prob.get("error") or "problem statement extraction failed")
                 # Fail loud: if the problem statement could not be extracted (LLM error,
@@ -1124,6 +1133,7 @@ def _do_score_candidates(
                     queries=queries,
                     toolbox=toolbox,
                     language=candidate.get("primary_language"),
+                    parallel_web=bool(getattr(relevance_client, "parallel_batches", False)),
                 )
 
                 trace.event(

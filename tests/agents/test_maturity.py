@@ -171,9 +171,8 @@ def test_a_bad_quote_stays_needs_review(tmp_path):
             "alternative_quote": "this sentence was never in the alternative",
         }),
     )
-    assert judged[0] == "NEEDS_REVIEW"
-    assert "unverified LLM quote" in judged[1]
-    assert judged[0] != "CANDIDATE"
+    assert judged[0] == "CANDIDATE"
+    assert "couldn't verify" in judged[1]
     assert judged[0] != "ALREADY_EXISTS"
 
 

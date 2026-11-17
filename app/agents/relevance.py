@@ -1484,6 +1484,34 @@ def _link_label(match: re.Match[str], *, keep_url: bool) -> str:
     return " " + label + " " + url + " "
 
 
+_CODE_FENCE = re.compile(r"```[^\n]*\n?(.*?)```", re.S)
+_REF_DEF = re.compile(r"^\s*\[[^\]]+\]:\s*\S+.*$", re.M)
+_REF_LINK = re.compile(r"\[([^\]]+)\]\s*\[[^\]]*\]")
+_AUTOLINK = re.compile(r"<(https?://[^>]+)>")
+_HEADING = re.compile(r"^\s{0,3}#{1,6}\s*", re.M)
+_BLOCKQUOTE = re.compile(r"^\s{0,3}>\s?", re.M)
+_LIST_MARK = re.compile(r"^\s{0,3}(?:[-*+]|\d+\.)\s+", re.M)
+_HTML_ENTITY = {"&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'", "&nbsp;": " "}
+
+
+def strip_markdown(text: str) -> str:
+    """Plain words in order. Markers go. Invented sentences still fail the substring check."""
+
+    raw = _ZERO_WIDTH.sub("", str(text or ""))
+    raw = _CODE_FENCE.sub(lambda match: " " + match.group(1) + " ", raw)
+    raw = _MD_LINK.sub(lambda match: _link_label(match, keep_url=False), raw)
+    raw = _REF_LINK.sub(lambda match: " " + match.group(1) + " ", raw)
+    raw = _REF_DEF.sub(" ", raw)
+    raw = _AUTOLINK.sub(" ", raw)
+    raw = _HTML_TAG.sub(" ", raw)
+    for entity, char in _HTML_ENTITY.items():
+        raw = raw.replace(entity, char)
+    raw = _HEADING.sub("", raw)
+    raw = _BLOCKQUOTE.sub("", raw)
+    raw = _LIST_MARK.sub("", raw)
+    return _normalize_for_quote(raw).replace('"', "")
+
+
 def _unfold_markup(text: str, *, keep_url: bool) -> str:
     """Words in order, after links and tags. A paraphrase still fails.
 
@@ -1511,7 +1539,9 @@ def quote_in_text(quote: str, text: str) -> bool:
         soft = _unfold_markup(quote, keep_url=keep_url)
         if soft and soft in _unfold_markup(text, keep_url=keep_url):
             return True
-    return False
+    plain_quote = strip_markdown(quote)
+    plain_text = strip_markdown(text)
+    return bool(plain_quote) and plain_quote in plain_text
 
 
 _CAPABILITY_STOP = frozenset(
@@ -2220,10 +2250,24 @@ def judge_discovery(
         else:
             alt_text = f"{matched_row.get('excerpt', '')} {matched_row.get('description', '')} {matched_row.get('text', '')} {matched_row.get('readme', '')}"
             if not alt_quote or not quote_in_text(alt_quote, alt_text):
-                verdict = "NEEDS_REVIEW"
-                reason = f"unverified LLM quote: alternative_quote '{alt_quote}' not found in alternative {matched_row.get('alternative_id')} text"
-                picked = [{**matched_row, "reason": reason}]
-                path_label = "alt-quote"
+                # The sentence was not in the alternative. Drop that row. Do not
+                # turn the whole repository into NEEDS_REVIEW because of it.
+                must_beat.append({
+                    "alternative": str(matched_row.get("alternative_id") or matched_row.get("url") or ""),
+                    "overlap": str(matched_row.get("overlap") or ""),
+                    "quote": alt_quote or "",
+                    "reason": "couldn't verify: the quote was not in the alternative's text",
+                })
+                if problem_quote and quote_in_text(problem_quote, cand_text):
+                    verdict = "CANDIDATE"
+                    reason = (
+                        f"couldn't verify {matched_row.get('alternative_id')}: "
+                        "the quote was not in its text, so it was dropped"
+                    )
+                else:
+                    verdict = "NEEDS_REVIEW"
+                    reason = f"unverified LLM quote: problem_quote '{problem_quote}' not found in candidate README or description"
+                path_label = "dropped-alt"
                 gate_row = matched_row
             elif matched_row.get("overlap") and matched_row.get("overlap") != "full":
                 verdict = "NEEDS_REVIEW"
@@ -2509,6 +2553,7 @@ def search_prior_art(
     queries: list[str],
     toolbox: Any,
     language: str | None = None,
+    parallel_web: bool = False,
 ) -> SearchResultsList:
     """Search for potential prior-art alternatives across queries via the existing toolbox.
 
@@ -2577,6 +2622,17 @@ def search_prior_art(
     # spend most of it before the search begins.)
     truncated: set[str] = set()
     searched_queries = 0
+    web_prefetch: dict[str, Any] = {}
+    if parallel_web and toolbox is not None and "web" in source_status and queries:
+        from pro.pace import map_ordered
+
+        tool_name = "web_search" if (hasattr(toolbox, "has") and toolbox.has("web_search")) or (hasattr(toolbox, "tools") and "web_search" in getattr(toolbox, "tools", {})) else "web"
+
+        def _fetch_web(query: str):
+            return query, toolbox.call(tool_name, {"query": query})
+
+        for query, result in map_ordered(_fetch_web, list(queries), workers=4):
+            web_prefetch[query] = result
 
     def _plan(index: int) -> set[str]:
         planned = {src for src in ("github", "web") if src in source_status}
@@ -2688,7 +2744,9 @@ def search_prior_art(
             truncated.add("web")
         elif "web" in source_status:
             tool_name = "web_search" if (hasattr(toolbox, "has") and toolbox.has("web_search")) or (hasattr(toolbox, "tools") and "web_search" in toolbox.tools) else "web"
-            web_res = toolbox.call(tool_name, {"query": q})
+            web_res = web_prefetch.get(q)
+            if web_res is None:
+                web_res = toolbox.call(tool_name, {"query": q})
             if web_res.ok and isinstance(web_res.data, dict):
                 for it in (web_res.data.get("items") or [])[:6]:
                     url = str(it.get("url") or "").strip()
@@ -3440,12 +3498,12 @@ def _judge_one_chunk(problem_statement, candidate_repo_id, chunk, client, trace,
     return chunk_index, judged, verified
 
 
-def _filter_chunks_parallel(problem_statement, candidate_repo_id, rows, client, trace, budget, identity, chunk_count, searched):
+def _filter_chunks_parallel(problem_statement, candidate_repo_id, rows, client, trace, budget, identity, chunk_count, searched, chunk_size):
     from pro.pace import map_ordered
 
     chunks = [
-        (chunk_index, rows[start:start + ALTERNATIVE_CHUNK_SIZE])
-        for chunk_index, start in enumerate(range(0, len(rows), ALTERNATIVE_CHUNK_SIZE))
+        (chunk_index, rows[start:start + chunk_size])
+        for chunk_index, start in enumerate(range(0, len(rows), chunk_size))
     ]
     workers = int(getattr(client, "_pace", None).concurrency if getattr(client, "_pace", None) else 4)
 
@@ -3504,7 +3562,8 @@ def filter_relevant_alternatives(
     identity = build_identity(candidate or {"repo_id": candidate_repo_id})
     rows, dropped = split_own(identity, rows)
     _trace_own(trace, candidate_repo_id, identity, dropped)
-    chunk_count = (len(rows) + ALTERNATIVE_CHUNK_SIZE - 1) // ALTERNATIVE_CHUNK_SIZE if rows else 0
+    chunk_size = int(getattr(client, "alternative_batch_size", 0) or ALTERNATIVE_CHUNK_SIZE)
+    chunk_count = (len(rows) + chunk_size - 1) // chunk_size if rows else 0
     if fallback_budget is not None:
         budget = fallback_budget
     else:
@@ -3514,12 +3573,12 @@ def filter_relevant_alternatives(
     finished = 0
     if getattr(client, "parallel_batches", False) and chunk_count > 1:
         return _filter_chunks_parallel(
-            problem_statement, candidate_repo_id, rows, client, trace, budget, identity, chunk_count, len(search_results),
+            problem_statement, candidate_repo_id, rows, client, trace, budget, identity, chunk_count, len(search_results), chunk_size,
         )
     try:
-        for chunk_index, start in enumerate(range(0, len(rows), ALTERNATIVE_CHUNK_SIZE)):
+        for chunk_index, start in enumerate(range(0, len(rows), chunk_size)):
             budget.guard_new_chunk()
-            chunk = rows[start:start + ALTERNATIVE_CHUNK_SIZE]
+            chunk = rows[start:start + chunk_size]
             judged = False
             if len(chunk) > 1:
                 batch = judge_alternatives_batch(
