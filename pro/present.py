@@ -7,6 +7,8 @@ It does not add a new opinion about the repository.
 from __future__ import annotations
 
 import json
+import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -58,15 +60,19 @@ def trace_events(path: Path) -> list[dict[str, str]]:
         if not isinstance(record, dict):
             continue
         summary = parse_summary(record.get("output_summary"))
+        incoming = parse_summary(record.get("input_summary"))
+        step = str(incoming.get("step") or "") if isinstance(incoming, dict) else ""
+        action = str(record.get("action") or record.get("event") or "")
         events.append(
             {
-                "action": str(record.get("action") or record.get("event") or ""),
+                "action": action,
+                "step": step,
                 "status": str(record.get("status") or ""),
                 "timestamp": str(record.get("timestamp") or ""),
                 "prev_hash": str(record.get("prev_hash") or ""),
                 "line_hash": str(record.get("line_hash") or ""),
                 "canonical": canonical_body(record),
-                "detail": detail_for(str(record.get("action") or ""), summary),
+                "detail": detail_for(action, summary),
             }
         )
     return events
@@ -84,6 +90,10 @@ def detail_for(action: str, summary: dict[str, Any]) -> str:
         return " ".join(part for part in (str(served), str(provider), step) if part)[:240]
     if action == "RUN_SEAL":
         return "Run seal. The line hash is the run hash."
+    if action == "STAGE_TIME":
+        problem = summary.get("problem_seconds")
+        search = summary.get("search_seconds")
+        return f"problem {problem}s, search {search}s"
     text = summary.get("text")
     if isinstance(text, str) and text:
         return text[:240]
@@ -268,6 +278,13 @@ def public_trace_ref(value: object) -> str:
     return text
 
 
+_HOSTED_NAME = re.compile(r"nightshift|meterless", re.IGNORECASE)
+
+
+def scrub_hosted_names(text: str) -> str:
+    return _HOSTED_NAME.sub("the model route", text)
+
+
 def public_result(fields: dict[str, Any]) -> dict[str, Any]:
     """Attach the responsible-AI block. Does not drop caller fields."""
 
@@ -292,5 +309,9 @@ def public_result(fields: dict[str, Any]) -> dict[str, Any]:
     ))
     if result.get("quote") and not result["quote_verified"]:
         result["quote"] = ""
+    if os.environ.get("PHOENIX_HOSTED", "").strip().lower() in {"1", "true", "yes"}:
+        for key in ("reason", "plain_reason", "rescue_note", "error", "source_note"):
+            if isinstance(result.get(key), str):
+                result[key] = scrub_hosted_names(result[key])
     result["responsibility"] = responsibility(result)
     return result

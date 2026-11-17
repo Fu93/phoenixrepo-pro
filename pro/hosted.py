@@ -138,7 +138,7 @@ class HostedRelevanceClient(RelevanceClient):
             self._charge(step, "nvidia")
             try:
                 with self._pace.slot():
-                    text, served = self._call_nvidia(messages, model)
+                    text, served = self._call_nvidia(messages, model, step)
             except (NvidiaError, httpx.HTTPError, RelevanceLLMError) as exc:
                 errors.append(f"nvidia: {exc}")
                 self._observe(model, "", repo_id, step, status="error", provider="nvidia-direct")
@@ -176,14 +176,15 @@ class HostedRelevanceClient(RelevanceClient):
         with self._trace_lock:
             return super()._observe(*args, **kwargs)
 
-    def _call_nvidia(self, messages: list[dict[str, str]], model: str) -> tuple[str, str]:
+    def _call_nvidia(self, messages: list[dict[str, str]], model: str, step: str = "") -> tuple[str, str]:
         last: Exception | None = None
+        timeout = call_timeout(step, float(self.wall_clock_timeout or 45))
         for attempt in range(2):
             client = NvidiaDirect(
                 api_key=self._nvidia_key,
                 base_url=self.nvidia_base_url or DEFAULT_BASE_URL,
                 model=model,
-                timeout_seconds=float(self.wall_clock_timeout or 45),
+                timeout_seconds=timeout,
                 max_tokens=int(self.max_tokens),
                 transport=self._nvidia_transport,
             )
@@ -256,6 +257,17 @@ class HostedRelevanceClient(RelevanceClient):
             ),
             encoding="utf-8",
         )
+
+
+RESCUE_TIMEOUT_S = 45.0
+
+
+def call_timeout(step: str, default: float) -> float:
+    """The rescue draft has its own cap, under a minute, so a stuck call cannot dominate the run."""
+
+    if step == "rescue_plan":
+        return min(float(default or RESCUE_TIMEOUT_S), RESCUE_TIMEOUT_S)
+    return float(default or 90)
 
 
 def _retryable(message: str) -> bool:

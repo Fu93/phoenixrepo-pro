@@ -84,7 +84,18 @@ def _draw(width: int, height: int, title: str) -> bytes:
 
 def og_png(title: str) -> bytes:
     clean = " ".join(str(title or "PhoenixRepo Pro").split()) or "PhoenixRepo Pro"
-    return _draw(640, 320, clean[:42])
+    return _draw(1200, 630, clean[:42])
+
+
+def favicon_ico() -> bytes:
+    """A PNG wrapped as an ICO so /favicon.ico is a real icon file."""
+
+    import struct
+
+    png = favicon_png()
+    header = struct.pack("<HHH", 0, 1, 1)
+    entry = struct.pack("<BBBBHHII", 32, 32, 0, 0, 1, 32, len(png), 22)
+    return header + entry + png
 
 
 def favicon_png() -> bytes:

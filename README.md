@@ -81,7 +81,7 @@ These are the shots to take once the service is up. They are not in the repo.
 
 - Demo mode does not invent a verdict for a repository that is not one of the three examples.
 - A live run stops at `PHOENIX_MAX_MODEL_CALLS` (default 24). NVIDIA is tried first. Gemini is tried only when that call fails and `GEMINI_API_KEY` is set, and only if the cap still has a call left. Each HTTP call counts.
-- `PHOENIX_DAILY_RUNS_PER_IP` (default 8) and `PHOENIX_DAILY_RUNS_GLOBAL` (default 40) count runs that called a model. A cache hit, an example, and a failure before any model call (a repository that is too small to judge, or an error during fetch) do not. The per-IP address is `CF-Connecting-IP` when present, otherwise the last `X-Forwarded-For` hop. The global cap still applies.
+- `PHOENIX_DAILY_RUNS_PER_IP` (default 8) and `PHOENIX_DAILY_RUNS_GLOBAL` (default 40) count runs that called a model. A cache hit, an example, and a failure before any model call (a repository that is too small to judge, or an error during fetch) do not. The per-IP address is `CF-Connecting-IP` only when `PHOENIX_TRUST_CF=true`, otherwise the last `X-Forwarded-For` hop that is an IP. The global cap still applies.
 - The result cache key is the repository plus the head commit. A repeat spends nothing. `PHOENIX_PRO_DIR` is the directory for that cache and the daily counters (default `data/pro-runtime`). On Render's free tier that directory is ephemeral and is empty after a restart or spin-down.
 - A Gemini answer is not Nemotron. The trace flags `MODEL_MISMATCH` when the served id is outside `nvidia/nemotron-*`.
 - The hash chain shows the lines were not edited. It does not show they are true. The scored set had four false passes, listed in `docs/JUDGES.md`. The invoice example is one of them: the engine said `CANDIDATE`, and the human label only accepts `ALREADY_EXISTS`.
@@ -89,7 +89,7 @@ These are the shots to take once the service is up. They are not in the repo.
 - Unauthenticated GitHub allows 60 core requests an hour and 10 searches a minute. A missing `GITHUB_TOKEN` can turn a search into `NEEDS_REVIEW`.
 - Alternative and demand model calls run concurrently on the hosted path, at most 4 at a time and about 40 a minute (`PHOENIX_CALL_CONCURRENCY`, `PHOENIX_CALLS_PER_MINUTE`). A 429 from NVIDIA is retried once.
 - A repository with no description or not enough files becomes `NOT_ENOUGH` and does not spend a daily run.
-- The per-IP cap uses `CF-Connecting-IP` when Cloudflare set it, otherwise the last `X-Forwarded-For` hop. The slot is taken when the run is admitted and refunded if no model is called. A full queue is HTTP 429.
+- The per-IP cap uses `CF-Connecting-IP` only when `PHOENIX_TRUST_CF=true`, otherwise the last `X-Forwarded-For` hop that parses as an IP. The slot is taken when the run is admitted and refunded if no model is called. A missing repository is HTTP 404 before a slot is taken. A full queue is HTTP 429.
 - `PHOENIX_HOSTED=true` (set in `render.yaml`) redirects `/ui` and `/health` to Pro and `/healthz`, and turns off the API docs. Local checkouts leave those pages in place.
 
 Deploy notes: `docs/RENDER.md`. Disclosure: `docs/DISCLOSURE.md`.

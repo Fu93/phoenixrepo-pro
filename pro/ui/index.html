@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PhoenixRepo Pro</title>
   <meta name="description" content="Paste a public GitHub repository. Read whether the idea already exists, the quote, and a tamper-evident receipt.">
-  <meta property="og:title" content="PhoenixRepo Pro">
+  <meta property="og:title" content="__OG_TITLE__">
   <meta property="og:description" content="A verdict, the quote it rests on, and a tamper-evident receipt.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="/pro/og.png">
-  <link rel="icon" href="/favicon.png">
+  <meta property="og:url" content="__OG_URL__">
+  <meta property="og:image" content="__OG_IMAGE__">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="__OG_IMAGE__">
+  <link rel="icon" href="/favicon.ico">
   <style>
     :root {
       --ink: #1c1612;
@@ -518,6 +521,7 @@
           result.quote,
         ]) : el("p", { class: "muted" }, ["No verified quote was stored with this verdict."]),
         el("p", {}, [plainReason(result)]),
+        durations(result),
         detailsFor(result),
         result.verdict === "NOT_ENOUGH" ? notEnough(result) : el("span"),
         mismatchNote(result),
@@ -642,17 +646,45 @@
       ]);
     }
 
+    function durations(result) {
+      const line = (result.trace || []).find((event) => event.action === "STAGE_TIME");
+      if (!line || !line.detail) return el("p", {});
+      return el("p", { class: "muted" }, ["Stage time: " + line.detail]);
+    }
+
     function shown(text) {
       return String(text || "").replace(/nightshift/ig, "the model route").replace(/meterless/ig, "the model route");
     }
 
     function stageName(event) {
-      const blob = ((event.action || "") + " " + (event.detail || "") + " " + (event.step || "")).toLowerCase();
-      if (blob.includes("run_seal") || blob.includes("discovery_filter") || blob.includes("verdict")) return "Verdict";
-      if (blob.includes("alternative") || blob.includes("model")) return "Alternatives";
-      if (blob.includes("search") || blob.includes("query") || blob.includes("prior")) return "Search";
-      if (blob.includes("problem") || blob.includes("readme") || blob.includes("rescue")) return "Read";
-      return "Fetch";
+      const action = String(event.action || "").toUpperCase();
+      const step = String(event.step || "");
+      if (action === "LLM_CALL") {
+        const byStep = {
+          problem: "Read",
+          rescue_plan: "Rescue",
+          alternative: "Alternatives",
+          alternative_batch: "Alternatives",
+          demand: "Alternatives",
+          capabilities: "Alternatives",
+        };
+        return byStep[step] || "Model";
+      }
+      const byAction = {
+        RUN_SEAL: "Verdict",
+        DISCOVERY_FILTER: "Verdict",
+        PROTAGONIST_SELECTION: "Verdict",
+        HMEM_VERDICT_MEMORY: "Verdict",
+        PROBLEM_STATEMENT: "Read",
+        RESCUE_POTENTIAL: "Read",
+        RESCUE_PLAN: "Rescue",
+        RESCUE_PLAN_INPUT: "Rescue",
+        QUERY_GENERATION: "Search",
+        PRIOR_ART_SEARCH: "Search",
+        STAGE_TIME: "Timing",
+        EVIDENCE_BUNDLE: "Fetch",
+      };
+      return byAction[action] || "Other";
     }
 
     function groupTrace(events) {

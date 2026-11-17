@@ -24,7 +24,7 @@ In the Dashboard, or as Blueprint env vars with `sync: false` so the value is ty
 
 Do not put key values in the repo.
 
-The daily cap reads `CF-Connecting-IP` when that header is present. Render's public site sits behind Cloudflare, which sets the header and overwrites a value the browser sent. If it is absent, the cap uses the last `X-Forwarded-For` hop, the one Render appends. A fake address at the front of that list does not pick a new bucket.
+The daily cap reads `CF-Connecting-IP` only when `PHOENIX_TRUST_CF=true` (set in `render.yaml`, because Render's public edge sits behind Cloudflare). The value has to parse as an IP address. Otherwise the cap uses the last `X-Forwarded-For` hop that parses as an IP. A name or a fake prefix is ignored.
 
 ## Free tier
 

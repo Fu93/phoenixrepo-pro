@@ -66,6 +66,7 @@
   "trace": [
     {
       "action": "evidence_source",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:13:25.926618+00:00",
       "prev_hash": "",
@@ -75,6 +76,7 @@
     },
     {
       "action": "RESCUE_POTENTIAL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:13:31.975581+00:00",
       "prev_hash": "f4f4ef013ab95220151a07bb04e1d385ca5543af28d7d248921e428c521bc279",
@@ -84,6 +86,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "problem",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:38.915552+00:00",
       "prev_hash": "33748c884f797e834816dd7735ed08965ef4727f2b315e68e0e1a526d3a2fe55",
@@ -93,6 +96,7 @@
     },
     {
       "action": "PROBLEM_STATEMENT",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:38.919524+00:00",
       "prev_hash": "11d5357d1b672d0998bef6c0c328e6df4c1e6ad4d81f5bdc36ee17ddeac390f3",
@@ -102,6 +106,7 @@
     },
     {
       "action": "QUERY_GENERATION",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:38.923554+00:00",
       "prev_hash": "841fca4f5e234e6972983dd83a437b16775945817749ea9fec82038af65f0421",
@@ -111,6 +116,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
       "timestamp": "2026-10-26T20:14:39.960022+00:00",
       "prev_hash": "6006a8cff9fe72910c1e851ff57e37ea48d356ebe5c065168289197c69ff7898",
@@ -120,6 +126,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
       "timestamp": "2026-10-26T20:14:40.927086+00:00",
       "prev_hash": "ebf3ea0e409454c2c9dbd6f047a7fe731697bd5900e030de562118c4b2717c98",
@@ -129,6 +136,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
       "timestamp": "2026-10-26T20:14:41.901826+00:00",
       "prev_hash": "655eb9ac88ec73d18c89a5e0b5f7becac26437d0d81e4d30f20feb7134a1c19b",
@@ -138,6 +146,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
       "timestamp": "2026-10-26T20:14:42.801473+00:00",
       "prev_hash": "d947564609bd6f1ed8769ec5a0009d83ec0c8932d22dd8e75e6afcdab2075e38",
@@ -147,6 +156,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
       "timestamp": "2026-10-26T20:14:43.770060+00:00",
       "prev_hash": "62fe81515dd14ec82ec9f36f60a7bdb5c27461b1ce8eab387b7a4e94d584b224",
@@ -156,6 +166,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:45.025904+00:00",
       "prev_hash": "9591ab6c57dda338ddce0445cf5dd47c084da866aa623f52172d9f6fb7b3a2b2",
@@ -165,6 +176,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:45.035302+00:00",
       "prev_hash": "38e3d9e576c5d9de166f883f8f4d0d39571c8a8f2c30401771850a1207cc49cb",
@@ -174,6 +186,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:45.039235+00:00",
       "prev_hash": "5a00bb2f1cce6be4536b9fcd4561629daed10279556ab24e04e2d63da7bf65c0",
@@ -183,6 +196,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:46.326363+00:00",
       "prev_hash": "369ab14a3a76b38454dba300c343906e5861656eac2d03b4664ddd43964c5d38",
@@ -192,6 +206,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:48.007052+00:00",
       "prev_hash": "aef0bd09e4bcaa4f65283c0969b1bd5ed8768e804bd9d5fd4b0ccab6dc8d9f3d",
@@ -201,6 +216,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:50.719967+00:00",
       "prev_hash": "5532b58ca61b73d53ac5906cdccc62d04bc395669ffccd1b2e5f3c2aa5967c21",
@@ -210,6 +226,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:51.828174+00:00",
       "prev_hash": "cbd18ee2087aecbc9ade1eb203c4b13de95200997b4dad5cbb3427b127062669",
@@ -219,6 +236,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:51.834068+00:00",
       "prev_hash": "bf27318ec464d4ba89e5f8e253c58f76492c489cafb7255bfc33fbf047702a3c",
@@ -228,6 +246,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:51.837077+00:00",
       "prev_hash": "c7643ae05e294a742251d3d12944d0187133bafc56bdf756e741e0b524209c1e",
@@ -237,6 +256,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:52.970335+00:00",
       "prev_hash": "4b50a15d96bae20ebc746f616404d65f70074230dffbc653b66fb6d1272eb594",
@@ -246,6 +266,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:55.786961+00:00",
       "prev_hash": "a3193f7b61a49c585ccca96fb9ecd505836ceb6861131624f6ea9fcaaad33391",
@@ -255,6 +276,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:57.765854+00:00",
       "prev_hash": "06c2ca0dfdd70c9cc3f70507db5b578bd5dc33380187158766e54f502f8ee384",
@@ -264,6 +286,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:57.774005+00:00",
       "prev_hash": "8de6344d6fb42770252ccadc6354cdb1053edd4cc7aae08fb71551ba351de0f7",
@@ -273,6 +296,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:14:58.986844+00:00",
       "prev_hash": "880feee1cebfca1fc7ed9aec3954e0c7ae891b1f44b2dc0cf921cd722dfc7f9e",
@@ -282,6 +306,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:01.951543+00:00",
       "prev_hash": "236ed9540d24c22737083ac553ee7528213c76013cc0f382a8631b4dafa8e13f",
@@ -291,6 +316,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:03.488930+00:00",
       "prev_hash": "7fda7deea2282ef3f0d97898cefb8fbea6a3979db1909bd61ace1592ae613312",
@@ -300,6 +326,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:03.495357+00:00",
       "prev_hash": "92768acff888f904774b24d5ab44c0fa2b698398b194242082974c0a4d981d4e",
@@ -309,6 +336,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:04.524238+00:00",
       "prev_hash": "1e9cea6eeb3bc43bd0b445c9dac73df4186a8f0b3aabadb1012982cad2cf7747",
@@ -318,6 +346,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:05.647154+00:00",
       "prev_hash": "5116194d2c951eb347bf76b2f6ed1174cf4f2d55ad678630f10a76937d8e3a11",
@@ -327,6 +356,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:06.798820+00:00",
       "prev_hash": "b9d1a07a515ce396e009c83c82c55f7db5b054fe07d7b53e849575f5832664e9",
@@ -336,6 +366,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:07.887955+00:00",
       "prev_hash": "1f6c25022d3c1d4042c67cfee1d300d66eb25a824d55ba46073d603cc99b8d63",
@@ -345,6 +376,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:09.031373+00:00",
       "prev_hash": "d9791a41d4bec3c6d58b3fb9482c7223da41fba894daedeeb62d883443158fdf",
@@ -354,6 +386,7 @@
     },
     {
       "action": "TOOL_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:10.165870+00:00",
       "prev_hash": "bcdc9566b342c0b1e922799896f4f3d60144cb5bc33d33531ca62f3c6cf7daf3",
@@ -363,6 +396,7 @@
     },
     {
       "action": "PRIOR_ART_SEARCH",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:10.167873+00:00",
       "prev_hash": "078091d9f543c89b464824b3b9a9dcc87882b2fa372d1965ea8aee5aeb78b495",
@@ -372,6 +406,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "alternative_batch",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:41.539998+00:00",
       "prev_hash": "4ea583d9833186f48b1f96c53a070c93362b8f56ea6904f3112f3dbfd6f07720",
@@ -381,6 +416,7 @@
     },
     {
       "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:41.561528+00:00",
       "prev_hash": "bb88142ce742d7eaef0f6d23d7498cc1feb1e0b743f0eb54c9ec7edd5580bc81",
@@ -390,6 +426,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "alternative_batch",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:51.414652+00:00",
       "prev_hash": "46c846229fb838263cf97b0c7bbfc6c6a59397dc4cfd6e0cccda1275c42ab475",
@@ -399,6 +436,7 @@
     },
     {
       "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
       "status": "error",
       "timestamp": "2026-10-26T20:15:51.421614+00:00",
       "prev_hash": "cb53192c43495e9e21a426de3c1e453dde461fac2288f9f313c330ced388b909",
@@ -408,6 +446,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "alternative_batch",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:58.041729+00:00",
       "prev_hash": "329700154711a35e7f3dd9513b800b7b34372a99f26020ea94aa2f12ee755c14",
@@ -417,6 +456,7 @@
     },
     {
       "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:15:58.044299+00:00",
       "prev_hash": "65706325fa3e21bfafdc6f55f28e5a3c0abef907c5b382b49aa05aacb8c9c497",
@@ -426,6 +466,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "alternative_batch",
       "status": "ok",
       "timestamp": "2026-10-26T20:16:46.803046+00:00",
       "prev_hash": "4676ebc9fcd304358d342942c20f62c102d7fa6f940385e54cf29dc18a2cdaf1",
@@ -435,6 +476,7 @@
     },
     {
       "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:16:46.804578+00:00",
       "prev_hash": "e3bb4d9882193c5702fcd84d7a0ecf75db774779ccc15811113b5ff8d2b103fd",
@@ -444,6 +486,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "alternative_batch",
       "status": "ok",
       "timestamp": "2026-10-26T20:17:22.338092+00:00",
       "prev_hash": "95e0c18a35b1eee59bd53a1dc0d0e964453a2599d9d559bc70bf36b268ed2b60",
@@ -453,6 +496,7 @@
     },
     {
       "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:17:22.340092+00:00",
       "prev_hash": "42918aac1f19fe05c296e30108207ce616a5716b457ee69c5703557603887bf3",
@@ -462,6 +506,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "alternative_batch",
       "status": "ok",
       "timestamp": "2026-10-26T20:18:09.072592+00:00",
       "prev_hash": "883d0665baabaf0098d67c9dfa99b5fda248aff86c3392d08ba2aed05c53dcd6",
@@ -471,6 +516,7 @@
     },
     {
       "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:18:09.073605+00:00",
       "prev_hash": "2a7ad87473d3891a58fa99c0e6bda1838da99b20613a451c9a92ec855844ff30",
@@ -480,6 +526,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "alternative_batch",
       "status": "ok",
       "timestamp": "2026-10-26T20:18:41.242401+00:00",
       "prev_hash": "5e710061611c5bb2111723180ba0d033aca08a63fa40b4f40eba31460753fda4",
@@ -489,6 +536,7 @@
     },
     {
       "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:18:41.243924+00:00",
       "prev_hash": "4f9608d012e8d03ca6dca8508cab06ceb0a7edc39a03afe31b1e7ebbfd0dc5ef",
@@ -498,6 +546,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "alternative_batch",
       "status": "ok",
       "timestamp": "2026-10-26T20:18:55.899686+00:00",
       "prev_hash": "8ab19fed6a6ec6b58f88a7fd8db43b4a2252f70bf2b62f66f3658206990a0eab",
@@ -507,6 +556,7 @@
     },
     {
       "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:18:55.900687+00:00",
       "prev_hash": "c4873622a7ca7169c0a292bd8c24f0e50244f5da06bb911f6b7fe04d7632afbf",
@@ -516,6 +566,7 @@
     },
     {
       "action": "UNVERIFIED_ALTERNATIVE_QUOTE",
+      "step": "",
       "status": "error",
       "timestamp": "2026-10-26T20:18:55.903203+00:00",
       "prev_hash": "00e4220c4bb805da44e1575e1fae9e6a03354ce9ae5183f26fb37841194c3385",
@@ -525,6 +576,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "alternative",
       "status": "ok",
       "timestamp": "2026-10-26T20:19:10.823295+00:00",
       "prev_hash": "1962ee5539c46403daeb076c1beaaee711815635c63564d0f61efdc7fc20def8",
@@ -534,6 +586,7 @@
     },
     {
       "action": "UNVERIFIED_ALTERNATIVE_QUOTE",
+      "step": "",
       "status": "error",
       "timestamp": "2026-10-26T20:19:10.825794+00:00",
       "prev_hash": "3ea56151991e96e1381cd0c455e371d4bf21765a85d0b42a13474b9e07675053",
@@ -543,6 +596,7 @@
     },
     {
       "action": "ALTERNATIVE_CALL",
+      "step": "",
       "status": "error",
       "timestamp": "2026-10-26T20:19:10.826794+00:00",
       "prev_hash": "4dac59d4e1aadbc13a4a5b54ee8f9a325f3eb870069111ab38cb79e5c3c45951",
@@ -552,6 +606,7 @@
     },
     {
       "action": "ALTERNATIVES_VERIFIED",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:19:10.829794+00:00",
       "prev_hash": "52f764a2f1c3dfd93dde9e1c29ca3f7f221f5066e8af3a962a163f8a7ea96ac1",
@@ -561,6 +616,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "discovery",
       "status": "ok",
       "timestamp": "2026-10-26T20:19:48.806045+00:00",
       "prev_hash": "5722b0498f16b2e9ab70d5eb7748267542aae6b0de0717c75d4b36ef8ca20996",
@@ -570,6 +626,7 @@
     },
     {
       "action": "DISCOVERY_FILTER",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:19:48.808047+00:00",
       "prev_hash": "cc74d198c6d2f3735b98a53d5375ab55920f3bf0fb44a7dde500283b9c5caba0",
@@ -579,6 +636,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "capabilities",
       "status": "ok",
       "timestamp": "2026-10-26T20:20:29.381288+00:00",
       "prev_hash": "b4373899c779e3df4db0c6da906b9f03e57c0c243f3798f025f9c4fca08c544a",
@@ -588,6 +646,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "demand",
       "status": "ok",
       "timestamp": "2026-10-26T20:20:36.821804+00:00",
       "prev_hash": "b38a93a199128ba64645bbce165400b054afe3b758a85716ba8b0f607b3e9107",
@@ -597,6 +656,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "demand",
       "status": "ok",
       "timestamp": "2026-10-26T20:21:37.350426+00:00",
       "prev_hash": "114f0d2bc7bc1b55183df19fb74bec09102f51ad02ae758995a2c83bacbab7e3",
@@ -606,6 +666,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "demand",
       "status": "ok",
       "timestamp": "2026-10-26T20:23:06.165651+00:00",
       "prev_hash": "2e94fc1255bd3f99054067cc1e0e34c0c61f6142fa4b1b011099051608b08487",
@@ -615,6 +676,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "demand",
       "status": "ok",
       "timestamp": "2026-10-26T20:23:57.398889+00:00",
       "prev_hash": "0aaf3a5bc208d6cb95a102acf2fc21938c565b31a9ef28fc72f89fce35cf4200",
@@ -624,6 +686,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "demand",
       "status": "ok",
       "timestamp": "2026-10-26T20:24:03.310500+00:00",
       "prev_hash": "10589fc1db54d4e1304e7d790539cc98794ef4c171b0738b7564ef8c1b6bdfdc",
@@ -633,6 +696,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "demand",
       "status": "ok",
       "timestamp": "2026-10-26T20:24:07.977058+00:00",
       "prev_hash": "f64ed2d4c1fcc743ee3a0e6d8665ed05624fcfb1ae0b67b14015cc42f56fbb58",
@@ -642,6 +706,7 @@
     },
     {
       "action": "LLM_CALL",
+      "step": "demand",
       "status": "ok",
       "timestamp": "2026-10-26T20:24:32.545731+00:00",
       "prev_hash": "36da00806ab7985f45dcf31ad45f0d5aaa634cb9893fa659c2d665cac42b4a27",
@@ -651,6 +716,7 @@
     },
     {
       "action": "LLM_SCORE",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:26:02.418975+00:00",
       "prev_hash": "94286d6f6c1d36efdcc03ce6ad1fa38721f4710fd5a4344409311ea80695accd",
@@ -660,6 +726,7 @@
     },
     {
       "action": "INITIAL_SCORECARD",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:26:02.421783+00:00",
       "prev_hash": "f5a068319ac2559e5640a9bbd644c3a46097e68b4cde31394accd520c564f619",
@@ -669,6 +736,7 @@
     },
     {
       "action": "PROTAGONIST_SELECTION",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:26:02.423328+00:00",
       "prev_hash": "80f0e16317456e70c7614e463e4bc213839a9b996cf6f4acf9fb88a0c1a831f6",
@@ -678,6 +746,7 @@
     },
     {
       "action": "RUN_SEAL",
+      "step": "",
       "status": "ok",
       "timestamp": "2026-10-26T20:26:02.425338+00:00",
       "prev_hash": "6894bb34b41bafdeddb854e22bb474e8529e5a5d7aaec825c263d9f17eafc877",

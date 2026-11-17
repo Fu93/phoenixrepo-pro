@@ -13,6 +13,8 @@ services:
         value: "true"
       - key: PHOENIX_HOSTED
         value: "true"
+      - key: PHOENIX_TRUST_CF
+        value: "true"
       - key: PHOENIX_MAX_INFLIGHT
         value: "2"
       - key: PHOENIX_CALL_CONCURRENCY

@@ -50,7 +50,7 @@ def test_healthz_and_status_and_injection_demo(tmp_path, monkeypatch):
     assert "PhoenixRepo Pro" in home.text
     status = client.get("/pro/api/status").json()
     assert status["mode"] == "demo"
-    assert status["nightshift_required"] is False
+    assert status["local_model_required"] is False
     demo = client.post("/pro/api/injection-demo").json()
     assert demo["report"]["detected"] is True
     assert "ignore previous instructions" not in demo["neutralised"].lower()

@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -798,6 +799,7 @@ def score_all(
     facts_client: Any | None = None,
     evidence_source: str | None = None,
     zetaris_client: Any | None = None,
+    before_seal: Any | None = None,
 ) -> dict[str, Any]:
     """Main execution pipeline for candidate scoring and protagonist selection."""
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -827,6 +829,7 @@ def score_all(
             facts_client=facts_client,
             evidence_source=evidence_source,
             zetaris_client=zetaris_client,
+            before_seal=before_seal,
         )
     except RelevanceLLMError as exc:
         trace.event(
@@ -867,6 +870,7 @@ def _do_score_candidates(
     facts_client: Any | None = None,
     evidence_source: str | None = None,
     zetaris_client: Any | None = None,
+    before_seal: Any | None = None,
 ) -> dict[str, Any]:
     require_llm = use_llm and ("--llm" in (command_str or "").split())
     llm_bound = None
@@ -1056,8 +1060,10 @@ def _do_score_candidates(
             _rescue_future = _rescue_pool.submit(_compute_rescue)
             problem_stmt = None
             meta_prob = None
+            _problem_started = time.perf_counter()
             if is_client_configured(relevance_client):
                 problem_stmt, meta_prob = extract_problem_statement(candidate, client=relevance_client)
+            _problem_seconds = round(time.perf_counter() - _problem_started, 2)
             rescue = _rescue_future.result()
         rescue_by_repo[repo_id] = rescue
         must_beat = []
@@ -1128,6 +1134,7 @@ def _do_score_candidates(
                 )
 
                 candidate["_manifest_texts"] = load_manifests(toolbox, repo_id)
+                _search_started = time.perf_counter()
                 search_results = search_prior_art(
                     candidate=candidate,
                     queries=queries,
@@ -1135,6 +1142,7 @@ def _do_score_candidates(
                     language=candidate.get("primary_language"),
                     parallel_web=bool(getattr(relevance_client, "parallel_batches", False)),
                 )
+                _search_seconds = round(time.perf_counter() - _search_started, 2)
 
                 trace.event(
                     agent_name="orchestrator",
@@ -1695,6 +1703,22 @@ def _do_score_candidates(
             )
         except Exception:
             pass
+
+    # Durations sit in the sealed chain so a later reader can see where the wall time went.
+    trace.event(
+        agent_name="orchestrator",
+        action="STAGE_TIME",
+        input_summary={"stages": ["problem", "search"]},
+        output_summary={
+            "problem_seconds": locals().get("_problem_seconds", 0),
+            "search_seconds": locals().get("_search_seconds", 0),
+        },
+        status="ok",
+    )
+    if before_seal is not None:
+        # Rescue and any other post-verdict lines have to land before RUN_SEAL.
+        # A line after the seal breaks verify_trace.py.
+        before_seal(trace, candidates_output, ineligible_repos)
 
     # 6. Seal trace
     run_hash = trace.seal()

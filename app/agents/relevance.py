@@ -2506,19 +2506,48 @@ def _problem_quotes(quotes: Any, cand_text: str) -> tuple[list[str], str]:
     return kept, ""
 
 
-def _retry_problem_statement(client, system_prompt: str, repo_id: str, desc: str, readme: str, prob: str, rejected: str, cand_text: str):
-    """One more call with the source text supplied again. None when the quotes still fail."""
+def _numbered_sentences(text: str) -> list[str]:
+    chunks = re.split(r"\n+|(?<=[.!?])\s+", str(text or ""))
+    sentences: list[str] = []
+    for chunk in chunks:
+        sentence = " ".join(chunk.split()).strip(" *-#>")
+        if len(sentence) >= 8:
+            sentences.append(sentence)
+    return sentences[:40]
 
+
+def _indexes_to_quotes(obj: dict[str, Any], sentences: list[str]) -> list[str]:
+    raw = obj.get("sentence_indexes")
+    if not isinstance(raw, list):
+        raw = obj.get("quote_indexes") if isinstance(obj.get("quote_indexes"), list) else []
+    if not raw and isinstance(obj.get("sentence_index"), int):
+        raw = [obj["sentence_index"]]
+    picked: list[str] = []
+    for item in raw:
+        try:
+            index = int(item)
+        except (TypeError, ValueError):
+            continue
+        if 0 <= index < len(sentences):
+            picked.append(sentences[index])
+    return picked
+
+
+def _retry_problem_statement(client, system_prompt: str, repo_id: str, desc: str, readme: str, prob: str, rejected: str, cand_text: str):
+    """One more call. The model returns sentence indexes, not a free-text quote."""
+
+    sentences = _numbered_sentences(cand_text)
+    if not sentences:
+        return None
+    numbered = "\n".join(f"{index}. {sentence}" for index, sentence in enumerate(sentences))
     missed = rejected or "no quote was provided"
     prompt = (
         f"Candidate Repository: {repo_id}\n"
-        "Quote only from the text below. Copy the words in order. Do not paraphrase.\n"
-        f"Description: {desc}\n"
-        f"README Excerpt:\n```\n{readme}\n```\n"
-        f"Problem excerpt: {prob}\n\n"
-        f"The previous quote was not found in that text: {missed!r}.\n"
-        "Extract the problem statement, target user, category, 3-5 search queries, "
-        "and verbatim supporting quotes again as strict JSON."
+        f"The previous quote was not in the source: {missed!r}.\n"
+        "Do not paraphrase. Choose the sentence numbers that state the problem.\n"
+        "Return strict JSON with problem, target_user, category, search_queries, "
+        "and sentence_indexes (integers from the list).\n"
+        f"{numbered}"
     )
     try:
         obj, _text, req_m, srv_m = _complete_json(client, prompt, system_prompt, repo_id, "problem")
@@ -2526,9 +2555,12 @@ def _retry_problem_statement(client, system_prompt: str, repo_id: str, desc: str
         return None
     if obj is None:
         return None
-    verified, _rejected = _problem_quotes(obj.get("quotes"), cand_text)
+    picked = _indexes_to_quotes(obj, sentences) or [str(quote) for quote in (obj.get("quotes") or [])]
+    verified, _rejected = _problem_quotes(picked, cand_text)
     if not verified:
         return None
+    obj = dict(obj)
+    obj["quotes"] = verified
     return obj, verified, req_m, srv_m
 
 

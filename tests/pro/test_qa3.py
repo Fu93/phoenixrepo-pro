@@ -105,6 +105,7 @@ def test_a_full_queue_is_429(tmp_path, monkeypatch):
 def test_spoofed_forwarded_for_does_not_reset_the_cap(tmp_path, monkeypatch):
     monkeypatch.setenv("PHOENIX_DAILY_RUNS_PER_IP", "1")
     monkeypatch.setenv("PHOENIX_DAILY_RUNS_GLOBAL", "5")
+    monkeypatch.setenv("PHOENIX_TRUST_CF", "true")
 
     def runner(job):
         job.model_calls = 1

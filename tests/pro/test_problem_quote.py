@@ -19,17 +19,21 @@ def test_problem_extraction_retries_once_with_the_readme_and_keeps_a_real_quote(
     def fake(prompt, _system):
         calls["n"] += 1
         if calls["n"] == 1:
-            quote = "petabyte-scale streaming compression"
-        else:
-            assert "README Excerpt" in prompt
-            assert readme in prompt
-            quote = "Compress files quickly using multithreaded gzip."
+            return json.dumps({
+                "problem": "Files are large.",
+                "target_user": "people with files",
+                "category": "compression",
+                "search_queries": ["gzip tool"],
+                "quotes": ["petabyte-scale streaming compression"],
+            })
+        assert "sentence_indexes" in prompt
+        number = next(int(line.split(".", 1)[0]) for line in prompt.splitlines() if readme in line)
         return json.dumps({
             "problem": "Files are large.",
             "target_user": "people with files",
             "category": "compression",
             "search_queries": ["gzip tool"],
-            "quotes": [quote],
+            "sentence_indexes": [number],
         })
 
     client = RelevanceClient(cache_dir=tmp_path, mock_handler=fake)

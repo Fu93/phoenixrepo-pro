@@ -98,7 +98,7 @@ class ProService:
             "mode": mode,
             "nvidia": bool(settings.nvidia_api_key),
             "gemini": bool(settings.gemini_api_key),
-            "nightshift_required": False,
+            "local_model_required": False,
             "model": _public_model(settings, mode),
             "limits": self.ledger.snapshot(),
             "examples": self.examples.cards(),
@@ -128,7 +128,10 @@ class ProService:
         commit = ""
         try:
             commit = self._commit(repo_id)
-        except ProError:
+        except ProError as exc:
+            # A missing repository is refused here, before a daily slot is taken.
+            if exc.status in {404, 429} or exc.kind in {"NotFound", "RateLimit"}:
+                raise
             commit = ""
         if commit:
             cached = self.cache.get(repo_id, commit)
@@ -358,13 +361,17 @@ class ProService:
 
     def _on_model(self, job: Job, step: str, provider: str) -> None:
         job.model_calls += 1
+        now = time.perf_counter()
+        elapsed = now - getattr(job, "stage_clock", now)
+        job.stage_clock = now
         self._event(
             job,
             {
                 "type": "model",
                 "step": "model",
-                "message": f"Model call {step or 'judge'} via {provider}",
+                "message": f"Model call {step or 'judge'} via {provider} ({elapsed:.0f}s since the previous step)",
                 "provider": provider,
+                "seconds": round(elapsed, 2),
             },
         )
 
@@ -472,7 +479,9 @@ class ProService:
         )
 
         def getter(url: str, token: str, accept: str = "application/vnd.github+json"):
+            started = time.perf_counter()
             body = _get(url, token, accept)
+            job.github_seconds = getattr(job, "github_seconds", 0.0) + (time.perf_counter() - started)
             if isinstance(body, str):
                 cleaned, report = neutralise(body)
                 job.injection = report
@@ -492,6 +501,7 @@ class ProService:
                 return cleaned
             return body
 
+        job.stage_clock = time.perf_counter()
         self._event(job, {"type": "stage", "step": "model", "message": "Running the judge"})
         try:
             judged = judge(
@@ -502,14 +512,20 @@ class ProService:
                 log_dir=log_dir,
                 getter=getter,
                 relevance_client=client,
+                plan_rescue=True,
             )
         except JudgeError as exc:
             raise ProError(str(exc), status=422, kind="CannotJudge") from exc
+        github_seconds = round(getattr(job, "github_seconds", 0.0), 1)
+        self._event(job, {
+            "type": "stage",
+            "step": "fetch",
+            "message": f"GitHub requests took {github_seconds:.0f}s",
+            "seconds": github_seconds,
+        })
         return self._from_judge(job, judged, out_dir, client)
 
     def _from_judge(self, job: Job, judged: dict, out_dir: Path, client) -> dict[str, Any]:
-        from app.rescue_plan import build_plan
-
         trace_path = job.trace_path
         events = trace_events(trace_path) if trace_path and trace_path.exists() else []
         discovery = discovery_from_events(events) if events else {}
@@ -518,19 +534,13 @@ class ProService:
         alternatives = alternatives_from_discovery(discovery)
         problem = problem_from_events(events) if events else ""
         rescue = None
-        rescue_note = "Gate 2 writes a rescue plan only after CANDIDATE."
-        if verdict == "CANDIDATE":
-            scores_path = out_dir / "scores.json"
-            row = _candidate_row(scores_path, job.repo_id)
-            if row:
-                try:
-                    rescue = build_plan(row, client=client, use_llm=True)
-                    rescue_note = f"Drafted by {rescue.get('drafted_by')}. Every kept item quotes evidence."
-                except Exception as exc:  # noqa: BLE001 — a plan failure must not hide the verdict
-                    rescue = None
-                    rescue_note = f"No rescue plan was kept: {type(exc).__name__}"
-            else:
-                rescue_note = "The score file had no CANDIDATE row to plan from."
+        rescue_note = "A rescue plan is written only for a worth-reviving verdict, and it is sealed with the trace."
+        plans = [item for item in (judged.get("rescue_plans") or []) if isinstance(item, dict)]
+        if plans and plans[0].get("drafted_by"):
+            rescue = plans[0]
+            rescue_note = f"Drafted by {rescue.get('drafted_by')}. Every kept item quotes evidence."
+        elif verdict == "CANDIDATE":
+            rescue_note = str((plans[0].get("error") if plans else "") or "No rescue plan was kept.")
         run_hash = str(judged.get("run_hash") or "")
         if events:
             run_hash = events[-1].get("line_hash") or run_hash
@@ -713,6 +723,10 @@ def _public_error(exc: BaseException, settings: Settings) -> str:
     for secret in settings.secret_values():
         if secret:
             text = text.replace(secret, "[REDACTED]")
+    if os.environ.get("PHOENIX_HOSTED", "").strip().lower() in {"1", "true", "yes"}:
+        from pro.present import scrub_hosted_names
+
+        text = scrub_hosted_names(text)
     return text or type(exc).__name__
 
 

@@ -292,6 +292,18 @@ def _prompt(row: dict[str, Any], index: dict[str, dict[str, Any]], org: dict[str
     return "\n".join(lines)
 
 
+def _short_prompt(row: dict[str, Any], index: dict[str, dict[str, Any]]) -> str:
+    """Second attempt after a failed or empty rescue reply. Fewer words, same ids."""
+
+    lines = [
+        f"Candidate: {row.get('repo_id')}",
+        "Return strict JSON with stages REVIVE, OPTIMISE and UPGRADE. Cite only these ids.",
+    ]
+    for entry in list(index.values())[:8]:
+        lines.append(f"- {entry['id']}: {entry['text'][:160]}")
+    return "\n".join(lines)
+
+
 def build_plan(
     row: dict[str, Any],
     *,
@@ -317,14 +329,22 @@ def build_plan(
         if trace is not None and getattr(client, "trace", None) is None:
             client.trace = trace
         prompt = load_prompt("rescue_plan")
+        obj = None
         try:
             obj, _text, requested, served = _complete_json(
                 client, _prompt(row, index, org), prompt.text, repo_id, "rescue_plan",
                 validate=lambda o: isinstance(o.get("stages"), list),
             )
         except Exception as exc:  # a model outage gives the deterministic plan, never a guess
-            obj = None
             rejected.append({"stage": "MODEL", "title": "rescue_plan call", "reason": f"{type(exc).__name__}: {str(exc)[:160]}"})
+        if obj is None:
+            try:
+                obj, _text, requested, served = _complete_json(
+                    client, _short_prompt(row, index), prompt.text, repo_id, "rescue_plan",
+                    validate=lambda o: isinstance(o.get("stages"), list),
+                )
+            except Exception as exc:
+                rejected.append({"stage": "MODEL", "title": "rescue_plan retry", "reason": f"{type(exc).__name__}: {str(exc)[:160]}"})
         if obj is not None:
             candidate_plan, rejected_items = verify_plan(obj, index)
             rejected += rejected_items

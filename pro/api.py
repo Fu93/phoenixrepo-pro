@@ -41,24 +41,42 @@ def get_service() -> ProService:
     return SERVICE
 
 
+def _parse_ip(value: str) -> str:
+    import ipaddress
+
+    text = (value or "").strip()
+    if not text:
+        return ""
+    try:
+        return str(ipaddress.ip_address(text))
+    except ValueError:
+        return ""
+
+
 def client_ip(request: Request) -> str:
     """Who the daily cap applies to.
 
-    Render's public edge sits behind Cloudflare, which sets CF-Connecting-IP
-    and overwrites a client-supplied value. That header wins when it is present.
-    Otherwise the last X-Forwarded-For hop is used, because Render appends the
-    connecting address and a caller can prepend a fake list.
+    CF-Connecting-IP is trusted only when PHOENIX_TRUST_CF=true (Render's public
+    edge, which sits behind Cloudflare). Otherwise the last X-Forwarded-For hop
+    that parses as an IP address is used. Anything that is not an IP is ignored.
     """
 
-    cloudflare = (request.headers.get("cf-connecting-ip") or "").strip()
-    if cloudflare:
-        return cloudflare[:64]
+    import os
+
+    if os.environ.get("PHOENIX_TRUST_CF", "").strip().lower() in {"1", "true", "yes"}:
+        cloudflare = _parse_ip(request.headers.get("cf-connecting-ip") or "")
+        if cloudflare:
+            return cloudflare
     forwarded = request.headers.get("x-forwarded-for", "")
     parts = [part.strip() for part in forwarded.split(",") if part.strip()]
-    if parts:
-        return parts[-1][:64]
+    for part in reversed(parts):
+        parsed = _parse_ip(part)
+        if parsed:
+            return parsed
     if request.client and request.client.host:
-        return request.client.host
+        parsed = _parse_ip(request.client.host)
+        if parsed:
+            return parsed
     return "unknown"
 
 
@@ -66,8 +84,22 @@ def _error(exc: ProError) -> JSONResponse:
     return JSONResponse(status_code=exc.status, content={"error": {"type": exc.kind, "message": str(exc)}})
 
 
-def ui_response():
-    return FileResponse(UI_PATH, media_type="text/html; charset=utf-8")
+def ui_response(request: Request | None = None, result_id: str = ""):
+    from fastapi.responses import HTMLResponse
+
+    base = ""
+    path = "/pro"
+    if request is not None:
+        import os
+
+        base = (os.environ.get("PUBLIC_BASE_URL") or str(request.base_url)).strip().rstrip("/")
+        path = request.url.path
+    html = UI_PATH.read_text(encoding="utf-8")
+    image = f"{base}/pro/og.png" if base else "/pro/og.png"
+    url = f"{base}{path}" if base else path
+    title = f"PhoenixRepo Pro · {result_id}" if result_id else "PhoenixRepo Pro"
+    html = html.replace("__OG_IMAGE__", image).replace("__OG_URL__", url).replace("__OG_TITLE__", title)
+    return HTMLResponse(html)
 
 
 @router.get("/pro/og.svg")
@@ -93,6 +125,15 @@ def favicon():
     return Response(favicon_png(), media_type="image/png")
 
 
+@router.get("/favicon.ico")
+def favicon_ico():
+    from fastapi.responses import Response
+
+    from pro.brand import favicon_ico as render_ico
+
+    return Response(render_ico(), media_type="image/x-icon")
+
+
 @router.get("/robots.txt")
 def robots():
     from fastapi.responses import Response
@@ -105,8 +146,8 @@ def robots():
 @router.get("/pro/r/{result_id}")
 @router.get("/pro/r/{result_id}/rescue")
 @router.get("/pro/r/{result_id}/trace")
-def pro_page(result_id: str = ""):
-    return ui_response()
+def pro_page(request: Request, result_id: str = ""):
+    return ui_response(request, result_id)
 
 
 @router.get("/pro/api/status")

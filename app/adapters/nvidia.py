@@ -85,7 +85,13 @@ class NvidiaDirect:
         }
         chosen = model or self.model
         self.last_requested_model = chosen
-        body = {"model": chosen, "messages": messages, "stream": False, "max_tokens": self.max_tokens}
+        body = {
+            "model": chosen,
+            "messages": messages,
+            "temperature": 0,
+            "stream": False,
+            "max_tokens": self.max_tokens,
+        }
         try:
             with httpx.Client(timeout=self.timeout_seconds, transport=self._transport) as client:
                 response = client.post(url, headers=headers, json=body)

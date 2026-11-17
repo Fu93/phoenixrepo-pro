@@ -152,17 +152,17 @@ def write_snapshot(row: dict[str, str], directory: Path) -> Path:
     return directory
 
 
-def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None) -> dict[str, Any]:
+def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None, plan_rescue: bool = False) -> dict[str, Any]:
     """Judge one repository. Returns {repo_id, verdict, reason, run_id, run_hash, report}."""
     full_name = parse_repo_url(url)
     cache_token = _github_cache.set({})
     try:
-        return _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client)
+        return _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue)
     finally:
         _github_cache.reset(cache_token)
 
 
-def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client):
+def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue=False):
     collected_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     fetched = fetch_repo(full_name, getter=getter)
     row = build_row(fetched, collected_at)
@@ -187,12 +187,26 @@ def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, score
             # function just wrote, and the trace records evidence_source=csv.
             evidence_source="csv",
         )
+        rescue_plans: list[dict] = []
         if scorer is None:
             from app.agents.repo_facts import RepoFactsClient
 
             score_kwargs["facts_client"] = RepoFactsClient(cache_dir=snap / ".cache" / "repo_facts")
             if relevance_client is not None:
                 score_kwargs["relevance_client"] = relevance_client
+            if plan_rescue and relevance_client is not None:
+                def _before_seal(trace, candidates, _ineligible):
+                    from app.rescue_plan import build_plan
+
+                    for row in candidates or []:
+                        if str(row.get("verdict") or "") != "CANDIDATE":
+                            continue
+                        try:
+                            rescue_plans.append(build_plan(row, client=relevance_client, trace=trace, use_llm=True))
+                        except Exception as exc:  # noqa: BLE001 — the verdict is already decided
+                            rescue_plans.append({"error": f"{type(exc).__name__}: {exc}"})
+
+                score_kwargs["before_seal"] = _before_seal
             results = score_candidates.score_all(**score_kwargs)
         else:
             results = scorer(**score_kwargs)
@@ -230,6 +244,7 @@ def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, score
         "served_models": {row["served_model"]: row["calls"] for row in model_rows},
         "answers_used": used,
         "answers_by_nemotron": by_nemotron,
+        "rescue_plans": rescue_plans if plan_rescue else [],
     }
 
 
