@@ -17,7 +17,10 @@ echo
 echo "code and tests, packed traces excluded"
 git diff --shortstat "$base" -- . ':(exclude)pro/examples' ':(exclude)data'
 echo
-echo "packed examples and data fixtures"
-git diff --shortstat "$base" -- pro/examples data
+echo "examples recorded in the window (17 Nov 2026) and their traces"
+git diff --shortstat "$base" -- ':(glob)pro/examples/live-*.json' pro/examples/traces
+echo
+echo "older packed examples (26 Oct 2026) and data fixtures"
+git diff --shortstat "$base" -- pro/examples data ':(exclude,glob)pro/examples/live-*.json' ':(exclude)pro/examples/traces'
 echo
 git diff --stat "$base"

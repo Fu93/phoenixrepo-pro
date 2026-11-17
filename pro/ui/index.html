@@ -38,7 +38,7 @@
       overflow-x: hidden;
     }
     .wrap, main, article, section, pre, table, .hash, .alt { max-width: 100%; }
-    pre, code, .hash, .mono, a, td, th, p {
+    pre, code, .hash, .mono, a, td, th, p, h1, h2, h3, li, blockquote, .muted {
       overflow-wrap: anywhere;
       word-break: break-word;
     }
@@ -111,7 +111,7 @@
       color: inherit;
     }
     .grid { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 16px; }
-    .stack { display: grid; gap: 16px; }
+    .stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
     .stamp {
       display: inline-block;
       border: 3px solid currentColor;
@@ -142,7 +142,7 @@
     .tag { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem; letter-spacing: 0.08em; }
     .tag.blocked { color: var(--rose); }
     .tag.open { color: var(--moss); }
-    .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
     .item { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line); }
     .error { color: var(--rose); }
     footer { color: var(--mute); padding: 28px 0 40px; font-size: 0.92rem; }
@@ -151,7 +151,7 @@
     .ok { color: var(--moss); }
     .bad { color: var(--rose); }
     @media (max-width: 800px) {
-      .grid, .cols { grid-template-columns: 1fr; }
+      .grid, .cols { grid-template-columns: minmax(0, 1fr); }
       header { align-items: flex-start; flex-direction: column; }
       form.judge { flex-direction: column; }
       form.judge button { width: 100%; }
@@ -509,7 +509,7 @@
         ? (result.alternatives || []).map(altCard)
         : [el("p", { class: "muted" }, ["No alternative quote was stored on this verdict."])];
       return el("article", { class: "stack" }, [
-        el("p", { class: "muted" }, [result.repo_id + (result.source ? " · " + result.source : "")]),
+        el("p", { class: "muted" }, [result.repo_id + (result.recorded_label ? " · " + result.recorded_label : (result.source ? " · " + result.source : ""))]),
         el("div", { class: "stamp " + result.verdict }, [LABELS[result.verdict] || result.verdict || "No verdict"]),
         el("h1", {}, [result.title || result.repo_id]),
         el("p", { class: "muted" }, [quoteLabel(result)]),
@@ -531,10 +531,20 @@
           result.run_hash || "none",
           ". The hash chain proves the trace was not edited. It does not prove the verdict is correct.",
         ]),
-        (result.osv || []).length ? el("section", { class: "panel" }, [
-          el("h2", {}, ["Known vulnerabilities"]),
-          ...(result.osv || []).map((row) => el("p", {}, [row.ecosystem + " " + row.name + ": " + (row.ids || []).join(", ")])),
-        ]) : el("span"),
+        osvPanel(result),
+      ]);
+    }
+
+    function osvPanel(result) {
+      const rows = result.osv || [];
+      const found = rows.filter((row) => (row.ids || []).length);
+      const skipped = rows.length - found.length;
+      const note = skipped ? skipped + " listed package" + (skipped === 1 ? " has" : "s have") + " no pinned version, so no advisory check was made for " + (skipped === 1 ? "it" : "them") + "." : "";
+      if (!found.length && !note) return el("span");
+      return el("section", { class: "panel" }, [
+        el("h2", {}, [found.length ? "Known vulnerabilities" : "Dependency check"]),
+        ...found.map((row) => el("p", {}, [row.ecosystem + " " + row.name + (row.version ? " " + row.version : "") + ": " + row.ids.join(", ")])),
+        note ? el("p", { class: "muted" }, [note]) : el("span"),
       ]);
     }
 

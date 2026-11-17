@@ -18,7 +18,7 @@ This is not new work for SLAY HACKS. It is the PhoenixRepo codebase the tag poin
 - The investigation API `POST /run`, sample mode, and the existing test suite.
 - The scored-run numbers, audits, and the previous README sections kept under the PhoenixRepo record.
 
-The three examples in `pro/examples/` are views of those recorded traces. The verdicts were produced by that older engine. Packing them into the Pro page is new. Running a model again to produce them was not possible in the build environment: no `NVIDIA_API_KEY` or `GEMINI_API_KEY` was available. `scripts/pro_generate_examples.py --live` is the command that does call the model when a key is set.
+The three examples `ex-selfdb`, `ex-invoice` and `ex-fichero` in `pro/examples/` are views of those recorded traces. Their verdicts were produced by that older engine on 26 Oct 2026, before the window. They stay in the list and are labelled "Recorded 26 Oct 2026, before SLAY HACKS".
 
 ## Built during SLAY HACKS
 
@@ -30,6 +30,7 @@ New code, not present at the tag:
 - `render.yaml`, `docs/RENDER.md`, and this file.
 - The README section that introduces PhoenixRepo Pro. The older README text is still in the file so the recorded claims stay checkable.
 - Tests under `tests/pro/`.
+- Three examples recorded live during the window, on 17 Nov 2026 (below), and `scripts/pro_add_live_example.py`, which packs one.
 - A small optional `relevance_client` argument on `judge()`, and `GEMINI_API_KEY` on settings so a Gemini key is redacted from traces.
 
 `judge()` still runs the pre-existing scorer. The new hosted client is passed in. It does not replace the quote checks.
@@ -43,6 +44,26 @@ New code, not present at the tag:
 - The browser's built-in serif and monospace fonts. No font file, CDN, or paid template is used.
 - Render, if you deploy the Dockerfile. The free web service disk is ephemeral.
 
-Live judgements have been run from this branch with an NVIDIA key: one took 322 seconds and 15 model calls and returned CANDIDATE; another returned NEEDS_REVIEW because a problem quote did not match the README. Those live JSON files are not all committed. The three examples in `pro/examples/` are still the 26 Oct 2026 recordings.
+Pre-existing engine files were also edited inside the window, so they are not new files but they are changed work: `app/agents/relevance.py`, `api/run.py` (the old routes are hidden when `PHOENIX_HOSTED` is set), `scripts/judge_repo.py`, `scripts/score_candidates.py`, `config/settings.py` and the `Dockerfile`. `git diff pre-slayhacks -- app api config scripts Dockerfile` shows them.
 
-`scripts/disclosure_stats.sh` prints three counts: everything, code and tests with `pro/examples` and `data` excluded, and the packed examples plus data fixtures on their own. The packed traces are old engine output. The new code and the new tests are the other count.
+## Examples recorded during the window
+
+Three examples were judged live on 17 Nov 2026 by build `59c9bc7` with the hosted NVIDIA path, and packed with `scripts/pro_add_live_example.py`. They are listed first on the Pro page and carry the label "Recorded 17 Nov 2026, during SLAY HACKS". The older three stay below them.
+
+| id | repository | verdict | model calls | wall time |
+| --- | --- | --- | --- | --- |
+| `live-bower` | `bower/bower` | NO_GO | 6 | 132 s |
+| `live-pspsps` | `melissaboiko/pspsps` | CANDIDATE, with a rescue plan | 11 | 292 s |
+| `live-s3browser` | `powdahound/s3browser` | NEEDS_REVIEW | 7 | 220 s |
+
+Six judgements were run that day on this build, one at a time. All six are listed here, including the three not packed:
+
+- `melissaboiko/myougiden`: NEEDS_REVIEW, 6 calls, 155 s. Its prior-art link is a `qgithub.com` mirror address, not github.com, so it was not used.
+- `powdahound/redis-collectd-plugin`: NEEDS_REVIEW, 2 calls, 59 s. A quote the model gave for the problem was not in the README, so the run stopped early. Not used.
+- `melissaboiko/ansi`: NEEDS_REVIEW, 6 calls, 159 s. The only alternative with verified full overlap did not pass the maturity check, and the other was only partial overlap. It was not used.
+
+None of the six came back ALREADY_EXISTS, so there is no such example from this window. The same repository can give a different verdict on another day: `powdahound/s3browser` came back ALREADY_EXISTS on an earlier build and NEEDS_REVIEW on this one.
+
+Each packed trace passes `python scripts/verify_trace.py pro/examples/traces/<id>.jsonl --expected-run-hash <run_hash>`. For `live-pspsps` the model call that drafts the rescue plan failed ("chat content was not text"), so its rescue plan is the deterministic one. That failed call was written to the server's trace file after the seal. The packed copy stops at the seal, which is the line the run hash names, and the failed call is not in it. In the stored JSON the word "Meterless" was removed from that error message. Nothing else was edited by hand.
+
+`scripts/disclosure_stats.sh` prints four counts: everything, code and tests with the packed examples and `data` excluded, the three 17 Nov examples with their traces, and the older packed examples plus data fixtures. The older packed traces are old engine output. The new code and the new tests are the other count.
