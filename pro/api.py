@@ -42,12 +42,17 @@ def get_service() -> ProService:
 
 
 def client_ip(request: Request) -> str:
-    """The platform's hop, not a client-chosen address.
+    """Who the daily cap applies to.
 
-    Render appends the connecting address. A caller can prepend a fake list,
-    so the first value is not the cap key. The last hop is the one the proxy added.
+    Render's public edge sits behind Cloudflare, which sets CF-Connecting-IP
+    and overwrites a client-supplied value. That header wins when it is present.
+    Otherwise the last X-Forwarded-For hop is used, because Render appends the
+    connecting address and a caller can prepend a fake list.
     """
 
+    cloudflare = (request.headers.get("cf-connecting-ip") or "").strip()
+    if cloudflare:
+        return cloudflare[:64]
     forwarded = request.headers.get("x-forwarded-for", "")
     parts = [part.strip() for part in forwarded.split(",") if part.strip()]
     if parts:
@@ -70,7 +75,33 @@ def og_image():
     return FileResponse(OG_PATH, media_type="image/svg+xml")
 
 
+@router.get("/pro/og.png")
+def og_png(title: str = "PhoenixRepo Pro"):
+    from fastapi.responses import Response
+
+    from pro.brand import og_png as render_png
+
+    return Response(render_png(title), media_type="image/png")
+
+
+@router.get("/favicon.png")
+def favicon():
+    from fastapi.responses import Response
+
+    from pro.brand import favicon_png
+
+    return Response(favicon_png(), media_type="image/png")
+
+
+@router.get("/robots.txt")
+def robots():
+    from fastapi.responses import Response
+
+    return Response("User-agent: *\nAllow: /\n", media_type="text/plain")
+
+
 @router.get("/pro")
+@router.get("/pro/run/{job_id}")
 @router.get("/pro/r/{result_id}")
 @router.get("/pro/r/{result_id}/rescue")
 @router.get("/pro/r/{result_id}/trace")

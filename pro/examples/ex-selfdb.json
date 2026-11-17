@@ -14,7 +14,9 @@
       "overlap": "full",
       "quote": "Multitenant backend server for building web and mobile apps rapidly. The backend for busy developers. (self-hosted or hosted)",
       "reason": "verified full-overlap alternative https://github.com/Erudika/para already solves the same problem (quote: 'Multitenant backend server for building web and mobile apps rapidly. The backend for busy developers. (self-hosted or hosted)')",
-      "blocked": true
+      "quote_verified": true,
+      "blocked": true,
+      "state": "blocked"
     },
     {
       "name": "https://appwrite.io/alternative-to/firebase",
@@ -22,7 +24,9 @@
       "overlap": "full",
       "quote": "Appwrite is open source and runs anywhere Docker runs, with the same APIs, SDKs, and Console as Appwrite Cloud.",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=164, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "https://www.open-source-tools.com/alternatives/supabase",
@@ -30,7 +34,9 @@
       "overlap": "full",
       "quote": "Open source alternatives to Supabase",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=164, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "https://fossy.dev/alternative-to/firebase",
@@ -38,7 +44,9 @@
       "overlap": "full",
       "quote": "An open, sub-millisecond, single-executable Firebase alternative with type-safe APIs, built-in WebAssembly runtime, realtime subscriptions, auth, and admin UI built on Rust, SQLite & Wasmtime.",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=164, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "https://nself.org/",
@@ -46,7 +54,9 @@
       "overlap": "full",
       "quote": "Your backend. Your rules. Free forever. nSelf gives you a complete production backend — PostgreSQL, GraphQL, Auth, Storage, SSL, monitoring — on your own server in five minutes. MIT licensed. No cloud lock-in.",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=164, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "https://trailbase.io/",
@@ -54,7 +64,9 @@
       "overlap": "full",
       "quote": "An open, sub-millisecond, single-executable Firebase alternative with type-safe REST & realtime APIs, multi-DB, WebAssembly runtime, geospatial support, SSR, auth and admin UI built on Rust, Wasmtime & SQLite (or now experimentally Postgres).",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=164, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "https://github.com/atomo-cc/atomo",
@@ -62,7 +74,9 @@
       "overlap": "full",
       "quote": "A self-hosted **Firebase/Supabase alternative**",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=164, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "powabase-ai/powabase",
@@ -70,7 +84,9 @@
       "overlap": "full",
       "quote": "Powabase — self-hostable OSS AI Backend-as-a-Service. Single-project Supabase stack + Studio dashboard + the powabase-ai AI backend.",
       "reason": "did not block: not mature or official: stars=26, candidate_stars=164, official=False",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     }
   ],
   "problem": "Developers building applications struggle to find a self-hosted, open-source backend-as-a-service alternative to proprietary platforms like Supabase and Firebase that avoids vendor lock-in and gives full control over their infrastructure.",
@@ -645,6 +661,8 @@
   "demo": true,
   "cached": true,
   "model_calls": 0,
+  "plain_reason": "A maintained alternative already does this job. The quote was found in that alternative's own text.",
+  "quote_verified": true,
   "responsibility": {
     "model_decides": [
       "What the repository's problem and user are, in the problem step.",

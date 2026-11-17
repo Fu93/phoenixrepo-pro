@@ -14,7 +14,9 @@
       "overlap": "full",
       "quote": "Create and export free invoices online to customers with tailored, fully customized templates",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=0, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "https://www.canva.com/invoice/",
@@ -22,7 +24,9 @@
       "overlap": "full",
       "quote": "Free Online Invoice Generator - browser",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=0, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "https://www.canva.com/invoice/templates/",
@@ -30,7 +34,9 @@
       "overlap": "full",
       "quote": "Free, printable, professional invoice templates to customize",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=0, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "https://invoiceninja.com/",
@@ -38,7 +44,9 @@
       "overlap": "full",
       "quote": "Create, send and manage invoices with ease. 11 customizable templates, branded with your logo and colors.",
       "reason": "did not block: no push or release date; not mature or official: stars=0, candidate_stars=0, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "jeroenvheel/MyClientBase",
@@ -46,7 +54,9 @@
       "overlap": "full",
       "quote": "MyClientBase is a simple, intuitive, free and open source web based invoice management system developed with freelancers in mind.",
       "reason": "did not block: last update 2012-05-23 is 5269 days before 2026-10-26; not mature or official: stars=42, candidate_stars=0, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     }
   ],
   "problem": "Businesses and freelancers struggle to create, manage, and send professional invoices efficiently without a streamlined tool offering real-time previews, PDF export, email delivery, and persistent storage.",
@@ -828,6 +838,8 @@
   "demo": true,
   "cached": true,
   "model_calls": 0,
+  "plain_reason": "Nothing that was checked already does this job. Listed quotes were found in the sources named.",
+  "quote_verified": true,
   "responsibility": {
     "model_decides": [
       "What the repository's problem and user are, in the problem step.",

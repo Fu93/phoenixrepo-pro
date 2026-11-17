@@ -22,6 +22,11 @@ def abandoned_repos(user: str, *, getter: Callable[[str, str], Any] | None = Non
     try:
         payload = fetch(f"https://api.github.com/users/{name}/repos?per_page=100&type=owner&sort=pushed", "")
     except Exception as exc:  # noqa: BLE001 — the page shows the reason
+        text = str(exc)
+        if "404" in text or "not found" in text.casefold():
+            raise TriageError(f"GitHub user {name} was not found.", status=404) from exc
+        if "rate limit" in text.casefold():
+            raise TriageError(text, status=429) from exc
         raise TriageError(f"GitHub did not return repositories for {name}.", status=502) from exc
     if isinstance(payload, dict) and payload.get("message"):
         raise TriageError(str(payload.get("message")), status=404)

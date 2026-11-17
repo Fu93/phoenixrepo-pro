@@ -48,6 +48,14 @@ def health() -> dict:
 
 def _health_body() -> dict:
     settings = get_settings()
+    if hosted_mode():
+        from pro.hosted import provider_mode
+
+        return {
+            "status": "ok",
+            "service": "phoenixrepo-pro",
+            "llm_provider": provider_mode(settings),
+        }
     provider = "sample-standin" if settings.sample_mode else settings.llm_provider
     return {
         "status": "ok",
@@ -60,8 +68,20 @@ def _health_body() -> dict:
     }
 
 
+def _hidden_when_hosted():
+    if hosted_mode():
+        return JSONResponse(
+            status_code=404,
+            content={"error": {"type": "NotFound", "message": "Not available on the hosted site."}},
+        )
+    return None
+
+
 @app.post("/run", response_model=RunResponse)
 def run(request: RunRequest):
+    hidden = _hidden_when_hosted()
+    if hidden is not None:
+        return hidden
     settings = get_settings()
     if request.mode == "live" and settings.sample_mode:
         return JSONResponse(
@@ -114,6 +134,9 @@ def _nightshift_token_configured(settings: Settings) -> bool:
 
 @app.post("/judge")
 def judge_endpoint(request: JudgeRequest):
+    hidden = _hidden_when_hosted()
+    if hidden is not None:
+        return hidden
     """Judge one repository when a Nightshift token is configured.
 
     With no token this returns HTTP 503 and does not call the judge, so no
@@ -171,6 +194,9 @@ def replay_ui():
 
 @app.get("/api/replays")
 def list_replays():
+    hidden = _hidden_when_hosted()
+    if hidden is not None:
+        return hidden
     from app.replay_ui import catalog
 
     return catalog()

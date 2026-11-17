@@ -14,7 +14,9 @@
       "overlap": "full",
       "quote": "Reverse-Engineering The Bluetooth Fichero Thermal Label Printer Protocol",
       "reason": "did not block: category is not an alternative; no push or release date; not mature or official: stars=0, candidate_stars=305, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     },
     {
       "name": "https://github.com/ChiaraCannolee/thermal-pocket-printer-basic",
@@ -22,7 +24,9 @@
       "overlap": "partial",
       "quote": "Print to a **DP-L1S** thermal pocket printer directly from your computer over Bluetooth, no app required",
       "reason": "did not block: overlap is partial, not the same job on the same platform; not mature or official: stars=0, candidate_stars=305, official=False",
-      "blocked": false
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
     }
   ],
   "problem": "Users of the Fichero D11s thermal label printer cannot print without installing the official closed-source Android app that demands 26 invasive permissions including precise GPS location, camera access, and ad tracking.",
@@ -851,6 +855,8 @@
   "demo": true,
   "cached": true,
   "model_calls": 0,
+  "plain_reason": "Nothing that was checked already does this job. Listed quotes were found in the sources named.",
+  "quote_verified": true,
   "responsibility": {
     "model_decides": [
       "What the repository's problem and user are, in the problem step.",

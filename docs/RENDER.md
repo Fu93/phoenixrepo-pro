@@ -16,12 +16,15 @@ In the Dashboard, or as Blueprint env vars with `sync: false` so the value is ty
 | `GEMINI_MODEL` | no | Default `gemini-2.5-flash`. |
 | `GITHUB_TOKEN` | no | GitHub API. Unauthenticated if unset. |
 | `PHOENIX_MAX_MODEL_CALLS` | no | Default 24 per run. |
-| `PHOENIX_DAILY_RUNS_PER_IP` | no | Default 8. The first `X-Forwarded-For` hop is the address. A client can spoof that header off Render; the global cap still applies. |
+| `PHOENIX_DAILY_RUNS_PER_IP` | no | Default 8. Taken when a run is admitted and refunded if no model is called. |
+| `PHOENIX_MAX_QUEUE` | no | Default 4 waiting runs. A longer queue is HTTP 429. |
 | `PHOENIX_DAILY_RUNS_GLOBAL` | no | Default 40 per UTC day. A run counts only after it calls a model. |
 | `PHOENIX_PRO_DIR` | no | Cache and daily counters. Default `data/pro-runtime` inside the container. |
 | `SAMPLE_MODE` | no | Leave `true`. It keeps `POST /run` on the sample investigation. Pro judging does not use it as a silent model. |
 
 Do not put key values in the repo.
+
+The daily cap reads `CF-Connecting-IP` when that header is present. Render's public site sits behind Cloudflare, which sets the header and overwrites a value the browser sent. If it is absent, the cap uses the last `X-Forwarded-For` hop, the one Render appends. A fake address at the front of that list does not pick a new bucket.
 
 ## Free tier
 

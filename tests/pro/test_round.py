@@ -192,10 +192,16 @@ def test_osv_reports_only_packages_with_an_advisory():
         return httpx.Response(200, json={"results": [{"vulns": [{"id": "PYSEC-1"}]}, {"vulns": []}]})
 
     rows = query_batch(
-        [{"name": "requests", "ecosystem": "PyPI"}, {"name": "ok", "ecosystem": "PyPI"}],
+        [
+            {"name": "requests", "ecosystem": "PyPI", "version": "2.0.0"},
+            {"name": "ok", "ecosystem": "PyPI", "version": "1.0.0"},
+            {"name": "flask", "ecosystem": "PyPI", "version": ""},
+        ],
         transport=httpx.MockTransport(handler),
     )
-    assert rows == [{"name": "requests", "ecosystem": "PyPI", "ids": ["PYSEC-1"]}]
+    assert rows[0]["note"] == "version unknown"
+    assert rows[0]["ids"] == []
+    assert {"name": "requests", "ecosystem": "PyPI", "version": "2.0.0", "ids": ["PYSEC-1"]} in rows
 
 
 def test_page_uses_plain_verdict_language():

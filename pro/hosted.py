@@ -102,6 +102,7 @@ class HostedRelevanceClient(RelevanceClient):
         self._on_step = on_step
         self.providers_used: list[str] = []
         self.parallel_batches = True
+        self.alternative_batch_size = 4
         self.retry_backoff = 1.0
         self._trace_lock = threading.Lock()
         self._pace = shared_pace()

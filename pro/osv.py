@@ -11,32 +11,57 @@ OSV_QUERY = "https://api.osv.dev/v1/querybatch"
 
 
 def query_batch(packages: list[dict[str, str]], *, transport: httpx.BaseTransport | None = None) -> list[dict[str, Any]]:
-    """packages are {name, ecosystem}. Returns one row per package that has a vulnerability."""
+    """Pinned packages are queried with their version. Unpinned ones are not flagged."""
 
     if not packages:
         return []
-    body = {"queries": [{"package": {"name": item["name"], "ecosystem": item["ecosystem"]}} for item in packages]}
+    rows: list[dict[str, Any]] = []
+    pinned = []
+    for item in packages:
+        version = str(item.get("version") or "").strip()
+        if not version:
+            rows.append({
+                "name": item["name"],
+                "ecosystem": item["ecosystem"],
+                "version": "",
+                "note": "version unknown",
+                "ids": [],
+            })
+            continue
+        pinned.append(item)
+    if not pinned:
+        return rows
+    body = {
+        "queries": [
+            {"version": item["version"], "package": {"name": item["name"], "ecosystem": item["ecosystem"]}}
+            for item in pinned
+        ]
+    }
     try:
         with httpx.Client(timeout=15.0, transport=transport) as client:
             response = client.post(OSV_QUERY, json=body)
     except httpx.HTTPError:
-        return []
+        return rows
     if response.status_code != 200:
-        return []
+        return rows
     try:
         payload = response.json()
     except ValueError:
-        return []
+        return rows
     results = payload.get("results") if isinstance(payload, dict) else None
     if not isinstance(results, list):
-        return []
-    rows = []
-    for item, result in zip(packages, results):
+        return rows
+    for item, result in zip(pinned, results):
         vulns = result.get("vulns") if isinstance(result, dict) else None
         if not vulns:
             continue
         ids = [str(v.get("id")) for v in vulns if isinstance(v, dict) and v.get("id")]
-        rows.append({"name": item["name"], "ecosystem": item["ecosystem"], "ids": ids[:8]})
+        rows.append({
+            "name": item["name"],
+            "ecosystem": item["ecosystem"],
+            "version": item.get("version") or "",
+            "ids": ids[:8],
+        })
     return rows
 
 
@@ -46,9 +71,17 @@ def parse_requirements(text: str) -> list[dict[str, str]]:
         raw = line.split("#", 1)[0].strip()
         if not raw or raw.startswith("-"):
             continue
-        name = raw.split("==", 1)[0].split(">=", 1)[0].split("[", 1)[0].strip()
-        if name:
-            rows.append({"name": name, "ecosystem": "PyPI"})
+        name, version = raw, ""
+        if "==" in raw:
+            name, version = raw.split("==", 1)
+            version = version.split(",")[0].strip()
+        name = name.split(">=")[0].split("<=")[0].split("~=")[0].split("!=")[0].split("[")[0].strip()
+        if not name:
+            continue
+        # Only an exact == pin is a version. A range is not sent to OSV.
+        if "==" not in raw:
+            version = ""
+        rows.append({"name": name, "ecosystem": "PyPI", "version": version})
     return rows
 
 
@@ -87,5 +120,8 @@ def parse_package_json(text: str) -> list[dict[str, str]]:
     for key in ("dependencies", "devDependencies"):
         deps = data.get(key) if isinstance(data, dict) else None
         if isinstance(deps, dict):
-            rows.extend({"name": name, "ecosystem": "npm"} for name in deps)
+            for name, spec in deps.items():
+                text = spec.strip() if isinstance(spec, str) else ""
+                version = text if text[:1].isdigit() else ""
+                rows.append({"name": name, "ecosystem": "npm", "version": version})
     return rows

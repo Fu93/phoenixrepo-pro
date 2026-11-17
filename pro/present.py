@@ -126,46 +126,99 @@ def _url_for(name: str) -> str:
     return ""
 
 
+def _row_state(reason: str, blocked_flag: bool) -> str:
+    text = (reason or "").casefold()
+    if any(phrase in text for phrase in ("couldn't verify", "could not verify", "not found", "unverified")):
+        return "could_not_verify"
+    if "did not block" in text or not blocked_flag:
+        return "did_not_block"
+    return "blocked"
+
+
+def annotate_alternative(row: dict[str, Any], *, blocked_flag: bool) -> dict[str, Any]:
+    """Badges follow the check, not the mere presence of a quote string."""
+
+    reason = str(row.get("reason") or "")
+    state = _row_state(reason, blocked_flag)
+    quote = str(row.get("quote") or "")
+    verified = bool(quote) and state != "could_not_verify"
+    noted = dict(row)
+    noted["quote"] = quote
+    noted["quote_verified"] = verified
+    noted["blocked"] = state == "blocked"
+    noted["state"] = state
+    return noted
+
+
+def plain_verdict_reason(verdict: str, reason: str) -> str:
+    """One sentence a reader can use without the engine's method string."""
+
+    text = (reason or "").split("Method:")[0].strip().rstrip(".")
+    low = text.casefold()
+    if verdict == "NOT_ENOUGH":
+        return text or "There is not enough public text to judge this repository."
+    if "couldn't verify" in low or "could not verify" in low:
+        return "A named alternative was dropped because its quote was not in that source. The verdict does not rest on it."
+    if "not found" in low or "unverified" in low:
+        return "A quote the model offered was not in the source, so that claim was not used."
+    if verdict == "ALREADY_EXISTS":
+        return "A maintained alternative already does this job. The quote was found in that alternative's own text."
+    if verdict == "CANDIDATE":
+        return "Nothing that was checked already does this job. Listed quotes were found in the sources named."
+    if verdict == "NEEDS_REVIEW":
+        return text or "The check did not finish cleanly, so this is not a pass and not a refusal."
+    if verdict == "NEEDS_PRIOR_ART":
+        return "Not enough alternatives were checked to decide."
+    if verdict == "UNJUDGED":
+        return "The model call did not finish, so there is no verdict."
+    if verdict == "NO_GO":
+        return text or "The check says not to revive this repository."
+    return text or "No reason was stored."
+
+
 def alternatives_from_discovery(summary: dict[str, Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for item in summary.get("evidence") or []:
         if not isinstance(item, dict):
             continue
         name = _plain_name(str(item.get("alternative") or item.get("name") or ""))
-        rows.append(
+        rows.append(annotate_alternative(
             {
                 "name": name,
                 "url": _url_for(str(item.get("url") or name)),
                 "overlap": str(item.get("overlap") or ""),
                 "quote": str(item.get("quote") or ""),
                 "reason": str(item.get("reason") or ""),
-                "blocked": True,
-            }
-        )
+            },
+            blocked_flag=True,
+        ))
     for item in summary.get("must_beat") or []:
         if not isinstance(item, dict):
             continue
         name = _plain_name(str(item.get("alternative") or ""))
-        rows.append(
+        rows.append(annotate_alternative(
             {
                 "name": name,
                 "url": _url_for(name),
                 "overlap": str(item.get("overlap") or ""),
                 "quote": str(item.get("quote") or ""),
                 "reason": str(item.get("reason") or ""),
-                "blocked": False,
-            }
-        )
+            },
+            blocked_flag=False,
+        ))
     return rows
 
 
 def primary_quote(verdict: str, reason: str, alternatives: list[dict[str, Any]]) -> str:
     for row in alternatives:
-        if row.get("blocked") and row.get("quote"):
+        if row.get("blocked") and row.get("quote_verified") and row.get("quote"):
             return str(row["quote"])
     for row in alternatives:
-        if row.get("quote"):
+        if row.get("quote_verified") and row.get("quote"):
             return str(row["quote"])
+    low = (reason or "").casefold()
+    if any(phrase in low for phrase in ("not found", "unverified", "couldn't verify", "could not verify")):
+        return ""
     marker = "quote: '"
     if marker in reason:
         return reason.split(marker, 1)[1].split("'", 1)[0]
@@ -220,5 +273,24 @@ def public_result(fields: dict[str, Any]) -> dict[str, Any]:
 
     result = dict(fields)
     result["trace_file"] = public_trace_ref(result.get("trace_file"))
+    rows = []
+    for row in result.get("alternatives") or []:
+        if isinstance(row, dict) and "state" not in row:
+            rows.append(annotate_alternative(row, blocked_flag=bool(row.get("blocked"))))
+        elif isinstance(row, dict):
+            rows.append(row)
+    if rows:
+        result["alternatives"] = rows
+    if not result.get("plain_reason"):
+        result["plain_reason"] = plain_verdict_reason(str(result.get("verdict") or ""), str(result.get("reason") or ""))
+    verified_rows = [row for row in result.get("alternatives") or [] if row.get("quote_verified")]
+    result["quote_verified"] = bool(result.get("quote")) and bool(verified_rows or (
+        result.get("quote") and not any(
+            phrase in str(result.get("reason") or "").casefold()
+            for phrase in ("not found", "unverified", "couldn't verify", "could not verify")
+        )
+    ))
+    if result.get("quote") and not result["quote_verified"]:
+        result["quote"] = ""
     result["responsibility"] = responsibility(result)
     return result

@@ -87,6 +87,7 @@ class ProService:
         self._inflight: dict[tuple[str, str], Job] = {}
         self._lock = threading.RLock()
         self.max_inflight = max(1, int(os.environ.get("PHOENIX_MAX_INFLIGHT") or "2"))
+        self.max_queue = max(0, int(os.environ.get("PHOENIX_MAX_QUEUE") or "4"))
 
     def status(self) -> dict[str, Any]:
         from pro.hosted import provider_mode
@@ -148,12 +149,24 @@ class ProService:
             current = self._inflight.get(key)
             if current is not None and current.status == "running":
                 return self._attached(current)
+            active = [other for other in self._inflight.values() if other.admitted and other.status == "running"]
+            waiting = [other for other in self._inflight.values() if not other.admitted and other.status == "running"]
+            can_start = len(active) < self.max_inflight
+            if not can_start and len(waiting) >= self.max_queue:
+                raise ProError(
+                    "The queue is full. Wait for a running judgement to finish, then try again.",
+                    status=429,
+                    kind="queue",
+                )
             reason = self.ledger.block_reason(ip or "unknown")
             if reason != "ok":
                 limit = self.ledger.config.per_ip_daily if reason == "per_ip" else self.ledger.config.global_daily
                 noun = "this address" if reason == "per_ip" else "the process"
                 raise ProError(f"Daily run limit reached for {noun} ({limit}).", status=429, kind=reason)
+            self.ledger.reserve(ip or "unknown")
             job = Job(f"run-{uuid.uuid4().hex[:12]}", url, repo_id, ip or "unknown")
+            job.charged = True
+            job.admitted = can_start
             job.commit = commit
             job.events.append({
                 "type": "stage",
@@ -170,6 +183,7 @@ class ProService:
                 "demo": False,
                 "cached": False,
                 "events": f"/pro/api/runs/{job.id}/events",
+                "url": f"/pro/run/{job.id}",
             }
         self._execute(job)
         return self._job_body(job)
@@ -271,6 +285,11 @@ class ProService:
         try:
             repo = self.github(f"https://api.github.com/repos/{repo_id}", token)
         except Exception as exc:  # noqa: BLE001 — the caller treats a missing sha as uncached
+            text = str(exc)
+            if "repository not found" in text.casefold() or "HTTP 404" in text:
+                raise ProError("repository not found", status=404, kind="NotFound") from exc
+            if "rate limit" in text.casefold():
+                raise ProError(text, status=429, kind="RateLimit") from exc
             raise ProError(f"Could not read {repo_id} from GitHub.", status=502, kind="GitHub") from exc
         if not isinstance(repo, dict):
             raise ProError("GitHub did not return a repository object.", status=502, kind="GitHub")
@@ -310,7 +329,15 @@ class ProService:
             job.status = "done"
             self._event(job, {"type": "stage", "step": "seal", "message": "Verdict ready"})
         except ProError as exc:
-            if exc.kind == "CannotJudge":
+            if "repository not found" in str(exc).casefold() or exc.kind == "NotFound":
+                job.status = "error"
+                job.error = "repository not found"
+                self._event(job, {"type": "stage", "step": "seal", "message": "repository not found"})
+            elif "rate limit" in str(exc).casefold():
+                job.status = "error"
+                job.error = str(exc)
+                self._event(job, {"type": "stage", "step": "seal", "message": str(exc)})
+            elif exc.kind == "CannotJudge":
                 self._save_not_enough(job, str(exc))
             else:
                 job.status = "error"
@@ -344,6 +371,9 @@ class ProService:
     def _wait_turn(self, job: Job) -> None:
         """At most max_inflight model runs at once. Everyone else sees a queue position."""
 
+        if job.admitted:
+            job.queue_position = 0
+            return
         announced = -1
         while True:
             with self._lock:
@@ -412,15 +442,11 @@ class ProService:
         self._event(job, {"type": "stage", "step": "seal", "message": "Not enough to judge"})
 
     def _account(self, job: Job) -> None:
-        """Spend a daily slot only after this run has called a model."""
+        """The slot was taken at admission. Give it back if no model was called."""
 
-        if job.model_calls <= 0 or job.charged:
-            return
-        try:
-            self.ledger.reserve(job.ip)
-        except LimitError:
-            return
-        job.charged = True
+        if job.charged and job.model_calls <= 0:
+            self.ledger.release(job.ip)
+            job.charged = False
 
     def _clear_inflight(self, job: Job) -> None:
         key = _run_key(job.repo_id, job.commit)
@@ -527,7 +553,7 @@ class ProService:
                 "injection": job.injection,
                 "provider": _provider_label(client),
                 "source": "live-judge",
-                "source_note": "Judged in this process with the hosted provider. Nightshift was not required.",
+                "source_note": "Judged in this process with the hosted provider.",
                 "demo": False,
                 "model_calls": int(getattr(client, "_http_calls", 0)),
                 "human_label": {},

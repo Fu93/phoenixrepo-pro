@@ -101,6 +101,20 @@ class RunLedger:
             self._save(state)
             return {"ip": ips[who], "global": state["global"]}
 
+    def release(self, ip: str) -> None:
+        """Give back a slot when the run never called a model."""
+
+        who = (ip or "unknown").strip() or "unknown"
+        with self._lock:
+            state = self._state_for_today()
+            ips = state.setdefault("ips", {})
+            if int(ips.get(who) or 0) > 0:
+                ips[who] = int(ips[who]) - 1
+            if int(state.get("global") or 0) > 0:
+                state["global"] = int(state["global"]) - 1
+            state["day"] = self._today()
+            self._save(state)
+
     def snapshot(self) -> dict[str, object]:
         with self._lock:
             state = self._state_for_today()

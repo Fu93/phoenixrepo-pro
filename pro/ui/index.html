@@ -8,8 +8,8 @@
   <meta property="og:title" content="PhoenixRepo Pro">
   <meta property="og:description" content="A verdict, the quote it rests on, and a tamper-evident receipt.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="/pro/og.svg">
-  <link rel="icon" href="/pro/og.svg">
+  <meta property="og:image" content="/pro/og.png">
+  <link rel="icon" href="/favicon.png">
   <style>
     :root {
       --ink: #1c1612;
@@ -35,7 +35,15 @@
         var(--paper);
       font-family: "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
       line-height: 1.5;
+      overflow-x: hidden;
     }
+    .wrap, main, article, section, pre, table, .hash, .alt { max-width: 100%; }
+    pre, code, .hash, .mono, a, td, th, p {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    pre { white-space: pre-wrap; }
+    table { display: block; overflow-x: auto; }
     a { color: var(--ember-deep); }
     button, input { font: inherit; }
     :focus-visible { outline: 3px solid var(--ember); outline-offset: 3px; }
@@ -234,11 +242,32 @@
       const path = location.pathname.replace(/\/$/, "") || "/";
       const rescue = path.match(/^\/pro\/r\/([^/]+)\/rescue$/);
       const trace = path.match(/^\/pro\/r\/([^/]+)\/trace$/);
+      const live = path.match(/^\/pro\/run\/([^/]+)$/);
       const result = path.match(/^\/pro\/r\/([^/]+)$/);
+      if (live) return renderRun(decodeURIComponent(live[1]));
       if (rescue) return renderResult(decodeURIComponent(rescue[1]), "rescue");
       if (trace) return renderResult(decodeURIComponent(trace[1]), "trace");
       if (result) return renderResult(decodeURIComponent(result[1]), "verdict");
       return renderHome();
+    }
+
+    async function renderRun(id) {
+      const progress = el("div", { class: "progress", "aria-live": "polite" });
+      const note = el("p", { class: "muted" });
+      app.replaceChildren(el("h1", {}, ["Judgement in progress"]), el("p", { class: "muted" }, ["This address stays valid if you refresh."]), progress, note);
+      const status = await fetch("/pro/api/status").then((response) => response.json());
+      const view = mountWait(progress, status.examples || []);
+      const job = await fetch("/pro/api/runs/" + encodeURIComponent(id)).then((response) => response.json());
+      if (job.status === "done" && job.result_id) {
+        location.href = "/pro/r/" + job.result_id;
+        return;
+      }
+      if (job.status === "error") {
+        note.textContent = job.error || "Judging stopped.";
+        note.className = "error";
+        return;
+      }
+      watch(id, view, note);
     }
 
     async function renderHome() {
@@ -257,7 +286,7 @@
       });
       const mode = status.mode === "demo"
         ? "Demo mode. No model key is set, so only the recorded examples run. A live judgement needs NVIDIA_API_KEY, with GEMINI_API_KEY as an optional fallback."
-        : `Hosted mode: ${status.mode}. Nightshift is not required. Model ${status.model || "configured"}. Daily cap ${status.limits.global_used}/${status.limits.global_limit}, ${status.limits.max_model_calls} model calls per run.`;
+        : `Hosted mode: ${status.mode}. Model ${status.model || "configured"}. Daily cap ${status.limits.global_used}/${status.limits.global_limit}, ${status.limits.max_model_calls} model calls per run.`;
       app.replaceChildren(
         el("section", { class: "grid" }, [
           el("div", {}, [
@@ -397,6 +426,10 @@
         note.textContent = data.message || "Demo mode.";
         return;
       }
+      if (data.url) {
+        location.href = data.url;
+        return;
+      }
       const view = mountWait(progress, examples);
       watch(data.id, view, note);
     }
@@ -480,7 +513,10 @@
         el("div", { class: "stamp " + result.verdict }, [LABELS[result.verdict] || result.verdict || "No verdict"]),
         el("h1", {}, [result.title || result.repo_id]),
         el("p", { class: "muted" }, [quoteLabel(result)]),
-        result.quote ? el("p", {}, [el("span", { class: "tag open" }, ["Found in source ✓"]), " ", result.quote]) : el("p", { class: "muted" }, ["No quote was stored with this verdict."]),
+        result.quote ? el("p", {}, [
+          result.quote_verified ? el("span", { class: "tag open" }, ["Found in source ✓ "]) : el("span", { class: "tag blocked" }, ["Not in the source "]),
+          result.quote,
+        ]) : el("p", { class: "muted" }, ["No verified quote was stored with this verdict."]),
         el("p", {}, [plainReason(result)]),
         detailsFor(result),
         result.verdict === "NOT_ENOUGH" ? notEnough(result) : el("span"),
@@ -503,18 +539,36 @@
     }
 
     function quoteLabel(result) {
-      const blocked = (result.alternatives || []).some((row) => row.blocked && row.quote);
-      if (!result.quote) return "";
+      if (!result.quote || result.quote_verified === false) return "";
+      const blocked = (result.alternatives || []).some((row) => row.state === "blocked" || (row.blocked && row.quote_verified !== false));
       return blocked ? "Quote that blocked the repository" : "Quoted evidence stored with the verdict";
+    }
+
+    function rowState(row) {
+      if (row.state) return row.state;
+      const reason = (row.reason || "").toLowerCase();
+      if (reason.includes("couldn't verify") || reason.includes("not found") || reason.includes("unverified")) return "could_not_verify";
+      if (reason.includes("did not block") || !row.blocked) return "did_not_block";
+      return "blocked";
     }
 
     function altCard(row) {
       const label = (row.name || row.url || "alternative").replace(/^web:/, "");
       const name = row.url ? el("a", { href: row.url }, [label]) : el("span", {}, [label]);
+      const state = rowState(row);
+      const titles = {
+        blocked: ["blocked", "BLOCKED THE REPOSITORY"],
+        did_not_block: ["open", "CHECKED, DID NOT BLOCK"],
+        could_not_verify: ["blocked", "COULDN'T VERIFY"],
+      };
+      const shown = titles[state] || titles.did_not_block;
       return el("div", { class: "alt" }, [
-        el("div", { class: "tag " + (row.blocked ? "blocked" : "open") }, [row.blocked ? "BLOCKED THE REPOSITORY" : "CHECKED, DID NOT BLOCK"]),
+        el("div", { class: "tag " + shown[0] }, [shown[1]]),
         el("div", {}, [name, " · " + (row.overlap || "overlap not recorded")]),
-        el("p", {}, [row.quote ? el("span", { class: "tag open" }, ["Found in source ✓ "]) : el("span"), row.quote || "No quote stored."]),
+        el("p", {}, [
+          row.quote && row.quote_verified ? el("span", { class: "tag open" }, ["Found in source ✓ "]) : el("span"),
+          row.quote || "No quote stored.",
+        ]),
         el("p", { class: "muted" }, [row.reason || ""]),
       ]);
     }
@@ -553,10 +607,16 @@
     function traceView(result) {
       const out = el("p", { class: "muted" }, ["Not verified yet."]);
       const list = el("div", { class: "timeline" });
+      let stage = "";
       groupTrace(result.trace || []).forEach((event) => {
+        const name = stageName(event);
+        if (name !== stage) {
+          stage = name;
+          list.append(el("h2", {}, [name]));
+        }
         list.append(el("article", {}, [
-          el("strong", { class: "mono" }, [event.action || "event"]),
-          el("div", { class: "muted" }, [event.detail || ""]),
+          el("strong", { class: "mono" }, [shown(event.action || "event")]),
+          el("div", { class: "muted" }, [shown(event.detail || "")]),
           el("div", { class: "hash muted" }, [(event.line_hash || "").slice(0, 16)]),
         ]));
       });
@@ -570,6 +630,19 @@
         out,
         el("section", { class: "panel" }, [list]),
       ]);
+    }
+
+    function shown(text) {
+      return String(text || "").replace(/nightshift/ig, "the model route").replace(/meterless/ig, "the model route");
+    }
+
+    function stageName(event) {
+      const blob = ((event.action || "") + " " + (event.detail || "") + " " + (event.step || "")).toLowerCase();
+      if (blob.includes("run_seal") || blob.includes("discovery_filter") || blob.includes("verdict")) return "Verdict";
+      if (blob.includes("alternative") || blob.includes("model")) return "Alternatives";
+      if (blob.includes("search") || blob.includes("query") || blob.includes("prior")) return "Search";
+      if (blob.includes("problem") || blob.includes("readme") || blob.includes("rescue")) return "Read";
+      return "Fetch";
     }
 
     function groupTrace(events) {
