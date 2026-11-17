@@ -19,31 +19,88 @@ from app.agents.alt_key import canonical_alternative_key, dedupe_alternatives
 
 _STOP = frozenset(
     "a an the of to for and or with from your our this that free web online open source into over "
-    "than then just more most some any all not but its app tool software using".split()
+    "than then just more most some any all not but its app tool software using simplified simple "
+    "modern fast better best new minimal tiny easy lightweight library libraries package".split()
 )
+MIN_STARS = 50
+_JUNK_REPO = re.compile(r"^\.|(^dotfiles?$)|(^config$)|(^\.config$)", re.IGNORECASE)
+
+
+def _topics(candidate: dict[str, Any]) -> list[str]:
+    raw = candidate.get("topics") or ""
+    if isinstance(raw, str):
+        parts = raw.replace("|", " ").replace(",", " ").split()
+    else:
+        parts = [str(topic) for topic in raw]
+    out: list[str] = []
+    for part in parts:
+        token = re.sub(r"[^A-Za-z0-9+-]", "", part).strip("-")
+        if len(token) < 2 or token.casefold() in _STOP:
+            continue
+        if token.casefold() not in {item.casefold() for item in out}:
+            out.append(token)
+    return out[:3]
+
+
+def _phrase(text: str, limit: int = 3) -> str:
+    words: list[str] = []
+    for word in re.findall(r"[A-Za-z][A-Za-z0-9+#-]*", text or ""):
+        if len(word) <= 2 or word.casefold() in _STOP:
+            continue
+        if word.casefold() not in {item.casefold() for item in words}:
+            words.append(word)
+        if len(words) >= limit:
+            break
+    return " ".join(words)
+
+
+def _qualify(text: str, language: str) -> str:
+    parts = [text.strip()]
+    if language:
+        lang = language.strip()
+        parts.append(f'language:"{lang}"' if " " in lang else f"language:{lang}")
+    parts.append(f"stars:>={MIN_STARS}")
+    parts.append("fork:false")
+    return " ".join(part for part in parts if part)
 
 
 def keyword_queries(candidate: dict[str, Any]) -> list[str]:
-    """Two or three queries, in a fixed order, from the repository's own words."""
+    """Two or three GitHub queries: category words, topics, and a language qualifier.
 
+    A long README phrase is not used. Each query asks GitHub for starred, non-fork
+    repositories so a dotfile or an empty config repo does not lead the list.
+    """
+
+    language = str(candidate.get("primary_language") or candidate.get("language") or "").strip()
     found: list[str] = []
 
     def add(text: str) -> None:
-        words = [word for word in re.findall(r"[A-Za-z0-9]+", text) if len(word) > 2 and word.casefold() not in _STOP]
-        query = " ".join(words[:6]).strip()
-        if query and query.casefold() not in {item.casefold() for item in found}:
+        query = _qualify(text, language if len(found) == 0 else "")
+        if text.strip() and query.casefold() not in {item.casefold() for item in found}:
             found.append(query)
 
-    core = str(candidate.get("core_terms") or "").replace("|", " ")
-    if core.strip():
-        add(core)
-    add(str(candidate.get("description") or ""))
-    topics = candidate.get("topics") or ""
-    if isinstance(topics, str):
-        add(topics.replace("|", " "))
-    else:
-        add(" ".join(str(topic) for topic in topics))
+    phrase = _phrase(str(candidate.get("description") or ""))
+    if phrase:
+        add(phrase)
+    topics = _topics(candidate)
+    if topics:
+        add(" ".join(f"topic:{topic}" for topic in topics[:2]))
+    if len(found) < 2:
+        core = _phrase(str(candidate.get("core_terms") or "").replace("|", " "))
+        if core and core.casefold() != (phrase or "").casefold():
+            add(core)
+    name = str(candidate.get("repo_id") or "").split("/")[-1]
+    name_phrase = _phrase(name.replace("-", " ").replace("_", " "), limit=2)
+    if len(found) < 2 and name_phrase and name_phrase.casefold() != (phrase or "").casefold():
+        add(name_phrase)
     return found[:3]
+
+
+def is_junk_repo(full_name: str) -> bool:
+    repo = str(full_name or "").split("/")[-1]
+    if not repo or repo.startswith("."):
+        return True
+    return _JUNK_REPO.search(repo) is not None
 
 
 def rank_key(row: dict[str, Any]) -> tuple[int, str]:
@@ -58,6 +115,28 @@ def merge_ranked(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     merged = dedupe_alternatives([row for row in rows if isinstance(row, dict)])
     merged.sort(key=rank_key)
     return merged
+
+
+def merge_preserving_web(
+    web_rows: list[dict[str, Any]],
+    github_rows: list[dict[str, Any]],
+    *,
+    limit: int = 15,
+) -> list[dict[str, Any]]:
+    """Keep web hits even when their star count is still unknown.
+
+    GitHub search rows fill only the seats the web list did not take. A web hit
+    such as sindresorhus/got is not dropped to make room for an unrelated repo.
+    """
+
+    web = merge_ranked(web_rows)
+    taken = {canonical_alternative_key(row) for row in web}
+    github = [row for row in merge_ranked(github_rows) if canonical_alternative_key(row) not in taken]
+    chosen = web[:limit]
+    room = limit - len(chosen)
+    if room > 0:
+        chosen.extend(github[:room])
+    return merge_ranked(chosen)
 
 
 def _cache_file(directory: Path, repo_id: str, commit: str, query: str) -> Path:
@@ -163,7 +242,13 @@ def _rows(items: list[Any], query: str, repo_id: str) -> list[dict[str, Any]]:
         if not isinstance(item, dict):
             continue
         full_name = str(item.get("full_name") or "").strip()
-        if not full_name or full_name.casefold() == repo_id.casefold():
+        if not full_name or full_name.casefold() == repo_id.casefold() or is_junk_repo(full_name):
+            continue
+        try:
+            stars = int(item.get("stargazers_count"))
+        except (TypeError, ValueError):
+            stars = -1
+        if stars < MIN_STARS:
             continue
         licence = item.get("license") if isinstance(item.get("license"), dict) else {}
         rows.append({

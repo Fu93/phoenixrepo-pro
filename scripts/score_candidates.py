@@ -1076,6 +1076,7 @@ def _do_score_candidates(
         rescue_by_repo[repo_id] = rescue
         must_beat = []
         judgement_evidence = []
+        skipped_alts: list[dict[str, str]] = []
         trace.event(
             agent_name="orchestrator",
             action="RESCUE_POTENTIAL",
@@ -1243,7 +1244,7 @@ def _do_score_candidates(
                 try:
                     # Alternative relevance step
                     _alt_started = time.perf_counter()
-                    from app.agents.stable_search import merge_ranked, stable_github_candidates
+                    from app.agents.stable_search import stable_github_candidates
 
                     extra = []
                     if stable_getter is not None:
@@ -1260,9 +1261,11 @@ def _do_score_candidates(
                                 status="error",
                             )
                     if extra:
-                        merged = merge_ranked(list(search_results) + extra)
+                        from app.agents.stable_search import merge_preserving_web
+
+                        merged = merge_preserving_web(list(search_results), extra)
                         search_results.clear()
-                        search_results.extend(merged[:15])
+                        search_results.extend(merged)
                     from app.agents.github_metadata import attach_github_metadata
                     from app.agents.registry_maturity import attach_registry_metadata
 
@@ -1277,6 +1280,7 @@ def _do_score_candidates(
                         candidate=candidate,
                         skip_immature=True,
                     )
+                    skipped_alts = list(getattr(search_results, "skipped", []) or [])
                     trace.event(
                         agent_name="orchestrator",
                         action="ALTERNATIVES_VERIFIED",
@@ -1370,6 +1374,14 @@ def _do_score_candidates(
         if verdict == "CANDIDATE" and len(prior_for_repo) == 0:
             verdict = "NEEDS_PRIOR_ART"
             reason = "Zero alternatives checked in prior-art search."
+        if skipped_alts and len(prior_for_repo) == 0:
+            low = reason.casefold()
+            looked_empty = verdict in {"CANDIDATE", "NEEDS_PRIOR_ART"} or any(
+                phrase in low for phrase in ("zero alternative", "no prior art", "no competition")
+            )
+            if looked_empty:
+                verdict = "NEEDS_REVIEW"
+                reason = _skipped_reason(skipped_alts)
 
         if verdict not in {"ALREADY_EXISTS", "NEEDS_REVIEW"}:
             judgement_evidence = []
@@ -1998,6 +2010,12 @@ def _evidence_mode(explicit: str | None) -> str:
     if mode not in {"zetaris", "csv"}:
         raise ValueError("EVIDENCE_SOURCE must be zetaris or csv.")
     return mode
+
+
+def _skipped_reason(skipped: list[dict[str, str]]) -> str:
+    shown = "; ".join(f"{item['alternative']} ({item['reason']})" for item in skipped[:8])
+    more = f"; and {len(skipped) - 8} more" if len(skipped) > 8 else ""
+    return f"{len(skipped)} alternatives were checked and none could block. {shown}{more}."
 
 
 def _discovery_output(

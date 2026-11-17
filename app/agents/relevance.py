@@ -2034,10 +2034,15 @@ def judge_discovery(
     ]
     # A verified full-overlap alternative of any source (GitHub included) means an open-source or
     # commercial substitute exists; GitHub partial overlap only needs a human look.
-    full_overlap_rows = [
-        r for r in combined_priors
-        if r.get("same_problem") is True and str(r.get("overlap") or "") == "full"
-    ]
+    from app.agents.stable_search import rank_key
+
+    full_overlap_rows = sorted(
+        [
+            r for r in combined_priors
+            if r.get("same_problem") is True and str(r.get("overlap") or "") == "full"
+        ],
+        key=rank_key,
+    )
     github_partial_rows = [
         r for r in combined_priors
         if not _is_web_row(r) and r.get("same_problem") is True and str(r.get("overlap") or "") == "partial"
@@ -2104,7 +2109,7 @@ def judge_discovery(
     if obj is None:
         verdict = "NEEDS_REVIEW"
         reason = "unverified LLM quote: LLM response was not valid JSON"
-        return verdict, f"{reason}. Method: llm+verified quote (requested={req_m}, served={srv_m})."
+        return verdict, f"{reason}. Method: llm, quote not verified (requested={req_m}, served={srv_m})."
 
     raw_verdict = str(obj.get("verdict") or "NO_GO").strip().upper()
     reason = str(obj.get("reason") or "").strip()
@@ -2398,7 +2403,12 @@ def judge_discovery(
         coverage_override = True
 
     clean_reason = reason.rstrip().rstrip(".")
-    labeled_reason = f"{clean_reason}. Method: llm+verified quote (requested={req_m}, served={srv_m})."
+    low_reason = clean_reason.casefold()
+    quote_verified = not any(phrase in low_reason for phrase in ("unverified", "not found", "no quote"))
+    if raw_verdict == "NO_GO" and not (problem_quote and problem_quote.casefold() not in {"unknown", "none", "null", ""} and quote_in_text(problem_quote, cand_text)):
+        quote_verified = False
+    method = "llm+verified quote" if quote_verified else "llm, quote not verified"
+    labeled_reason = f"{clean_reason}. Method: {method} (requested={req_m}, served={srv_m})."
     show = _evidence_rows(picked) if verdict in {"ALREADY_EXISTS", "NEEDS_REVIEW"} else []
     blocked_names = {
         str(p.get("alternative_id") or p.get("alternative") or p.get("url") or "").casefold()
@@ -3808,9 +3818,14 @@ def filter_relevant_alternatives(
                 agent_name="orchestrator",
                 action="ALTERNATIVES_SKIPPED",
                 input_summary={"repo_id": candidate_repo_id, "count": len(skipped)},
-                output_summary={"skipped": skipped[:12]},
+                output_summary={"skipped": skipped},
                 status="ok",
+                summary_limit=20000,
             )
+            try:
+                search_results.skipped = skipped  # type: ignore[attr-defined]
+            except AttributeError:
+                pass
         rows = kept
         rows.sort(key=rank_key)
     identity = build_identity(candidate or {"repo_id": candidate_repo_id})
