@@ -83,6 +83,9 @@ class Settings(BaseSettings):
     nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
     nvidia_model: str = ""
     nvidia_timeout_seconds: float = 90
+    # Optional hosted fallback for PhoenixRepo Pro. Blank stays unset.
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
 
     llm_provider: str = "meterless"
     sample_mode: bool = True
@@ -109,7 +112,7 @@ class Settings(BaseSettings):
         chat = float(self.meterless_timeout_seconds)
         return min(chat, max(1.0, step - 1.0))
 
-    @field_validator("zetaris_api_key", "meterless_runtime_token", "nvidia_api_key", mode="before")
+    @field_validator("zetaris_api_key", "meterless_runtime_token", "nvidia_api_key", "gemini_api_key", mode="before")
     @classmethod
     def _drop_placeholder_secrets(cls, value: object) -> str | None:
         if value is None:
@@ -133,6 +136,7 @@ class Settings(BaseSettings):
             self.zetaris_api_key,
             self.meterless_runtime_token,
             self.nvidia_api_key,
+            self.gemini_api_key,
         ]
         return [value for value in values if value]
 

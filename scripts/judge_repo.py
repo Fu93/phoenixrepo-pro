@@ -134,7 +134,7 @@ def write_snapshot(row: dict[str, str], directory: Path) -> Path:
     return directory
 
 
-def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None) -> dict[str, Any]:
+def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None) -> dict[str, Any]:
     """Judge one repository. Returns {repo_id, verdict, reason, run_id, run_hash, report}."""
     full_name = parse_repo_url(url)
     collected_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
@@ -165,6 +165,8 @@ def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: s
             from app.agents.repo_facts import RepoFactsClient
 
             score_kwargs["facts_client"] = RepoFactsClient(cache_dir=snap / ".cache" / "repo_facts")
+            if relevance_client is not None:
+                score_kwargs["relevance_client"] = relevance_client
             results = score_candidates.score_all(**score_kwargs)
         else:
             results = scorer(**score_kwargs)
