@@ -69,7 +69,7 @@ def test_demo_mode_serves_examples_and_refuses_an_unknown_repo(tmp_path, monkeyp
     client = TestClient(app)
     cards = client.get("/pro/api/examples").json()["examples"]
     assert {card["id"] for card in cards} == {
-        "live-bower", "live-pspsps", "live-s3browser", "ex-selfdb", "ex-invoice", "ex-fichero",
+        "live-bower", "live-pspsps", "live-request", "live-s3browser", "ex-selfdb", "ex-invoice", "ex-fichero",
     }
     unknown = client.post("/pro/api/runs", json={"url": "https://github.com/example/not-an-example"})
     assert unknown.status_code == 200

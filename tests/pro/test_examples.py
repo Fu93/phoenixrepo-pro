@@ -9,17 +9,17 @@ from pro.examples import EXAMPLES_DIR, ExampleCatalog, recorded_label, recorded_
 from scripts.verify_trace import verify
 
 ROOT = Path(__file__).resolve().parents[2]
-LIVE = ["live-bower", "live-pspsps", "live-s3browser"]
+LIVE = ["live-bower", "live-pspsps", "live-request", "live-s3browser"]
 OLD = ["ex-fichero", "ex-invoice", "ex-selfdb"]
 
 
 def test_in_window_examples_are_listed_first_and_the_old_ones_stay():
     cards = ExampleCatalog().cards()
     ids = [card["id"] for card in cards]
-    assert ids[:3] == LIVE
-    assert sorted(ids[3:]) == OLD
-    assert all(card["recorded_label"] == "Recorded 17 Nov 2026, during SLAY HACKS" for card in cards[:3])
-    assert all(card["recorded_label"] == "Recorded 26 Oct 2026, before SLAY HACKS" for card in cards[3:])
+    assert ids[:4] == LIVE
+    assert sorted(ids[4:]) == OLD
+    assert all(card["recorded_label"] == "Recorded 17 Nov 2026, during SLAY HACKS" for card in cards[:4])
+    assert all(card["recorded_label"] == "Recorded 26 Oct 2026, before SLAY HACKS" for card in cards[4:])
 
 
 def test_recorded_label_handles_a_missing_or_bad_date():
@@ -54,4 +54,4 @@ def test_the_three_verdicts_are_the_ones_the_traces_show():
         example_id: json.loads((EXAMPLES_DIR / f"{example_id}.json").read_text(encoding="utf-8"))["verdict"]
         for example_id in LIVE
     }
-    assert verdicts == {"live-bower": "ALREADY_EXISTS", "live-pspsps": "CANDIDATE", "live-s3browser": "ALREADY_EXISTS"}
+    assert verdicts == {"live-bower": "ALREADY_EXISTS", "live-pspsps": "CANDIDATE", "live-request": "ALREADY_EXISTS", "live-s3browser": "ALREADY_EXISTS"}

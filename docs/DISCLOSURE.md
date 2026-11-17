@@ -54,6 +54,7 @@ Three examples were judged live on 17 Nov 2026 (builds `59c9bc7` and `867f5b0`) 
 | --- | --- | --- | --- | --- |
 | `live-bower` | `bower/bower` | ALREADY_EXISTS (`pnpm/pnpm`, verified quote), build `ba44ee7` | 3 | 102 s |
 | `live-pspsps` | `melissaboiko/pspsps` | CANDIDATE, with a model-written rescue plan | 10 | 190 s |
+| `live-request` | `request/request` | ALREADY_EXISTS (`sindresorhus/ky`, verified quote), build `1cd4b6b` | 3 | 86 s |
 | `live-s3browser` | `powdahound/s3browser` | ALREADY_EXISTS (`awslabs/aws-js-s3-explorer`, verified quote), build `10c84b8` | 8 | 142 s |
 
 Six judgements were run that day on build `59c9bc7`, one at a time. All six are listed here, including the three not packed:
@@ -77,4 +78,8 @@ Each repeated run used a fresh server and an empty cache. `s3browser`: ALREADY_E
 ### Build `ba44ee7` (starred GitHub search, skipping immature alternatives), eight runs, 17 Nov 2026
 
 Paired runs used a fresh server and an empty runtime dir each. `bower/bower`: ALREADY_EXISTS twice, both blocked by `pnpm/pnpm` with the same verified quote (102 s and 98 s, 3 calls each); the first is the packed `live-bower`. `powdahound/s3browser`: ALREADY_EXISTS twice (102 s and 74 s, 3 calls), but the blocking alternative differed (`qoomon/aws-s3-bucket-browser`, then `awslabs/aws-js-s3-explorer`), so it was not repacked. `request/request`: NO_GO three times (50, 61 and 74 s, 2–3 calls); every alternative was skipped as stale or immature and no verified quote was recorded, so it is not packed. `melissaboiko/myougiden`: NEEDS_PRIOR_ART (102 s, 2 calls), because all 15 alternatives were skipped. The GitHub candidate set was identical between paired runs.
+
+### Build `1cd4b6b` (maturity gate independent of the model verdict), eight runs, 17 Nov 2026
+
+Every run started a fresh server with an empty runtime dir, search cache included. `request/request`: ALREADY_EXISTS twice with the same blocker (`sindresorhus/ky`, verified quote; 86 s and 102 s, 3 calls each), and a third run that reused the first run's search cache gave the same verdict and blocker (94 s). The first run is the packed `live-request`. The candidate lists were not identical between runs (13 repositories each, 3 different), and `got` and `axios` were not among them. `powdahound/s3browser`: ALREADY_EXISTS (`qoomon/aws-s3-bucket-browser`, 98 s) and then NEEDS_REVIEW (110 s, all 15 skipped); `live-s3browser` was not changed. `bower/bower`: NEEDS_REVIEW (a model quote was not in the source, 94 s) and then ALREADY_EXISTS (`pnpm/pnpm`, 78 s); `live-bower` was not changed. `melissaboiko/myougiden`: NO_GO (86 s) because no clear user problem was found.
 
