@@ -55,3 +55,36 @@ def test_the_three_verdicts_are_the_ones_the_traces_show():
         for example_id in LIVE
     }
     assert verdicts == {"live-bower": "ALREADY_EXISTS", "live-pspsps": "CANDIDATE", "live-request": "ALREADY_EXISTS", "live-s3browser": "ALREADY_EXISTS"}
+
+
+SNAPSHOT_EXAMPLES = ["live-bower", "live-request", "live-s3browser"]
+
+
+@pytest.mark.parametrize("example_id", SNAPSHOT_EXAMPLES)
+def test_a_packed_example_serves_a_snapshot_that_verifies(example_id, tmp_path):
+    from fastapi.testclient import TestClient
+
+    from app.agents.search_snapshot import file_sha256
+    import pro.api as api
+    from api.run import app
+    from pro.service import ProService
+
+    row = json.loads((EXAMPLES_DIR / f"{example_id}.json").read_text(encoding="utf-8"))
+    snap = ROOT / row["snapshot_file"]
+    assert file_sha256(snap) == row["snapshot_sha256"]
+    from app.agents.search_snapshot import verify_snapshot
+
+    ok, detail = verify_snapshot(ROOT / row["trace_file"], snap)
+    assert ok, detail
+    api.SERVICE = ProService(tmp_path / "state", settings_fn=lambda: None, examples=ExampleCatalog())
+    served = TestClient(app).get(f"/pro/api/results/{example_id}/snapshot")
+    assert served.status_code == 200
+    assert served.content == snap.read_bytes()
+    tampered = bytearray(snap.read_bytes())
+    tampered[len(tampered) // 2] ^= 0x01
+    bad = ROOT / "pro" / "examples" / "_tamper_check.json"
+    try:
+        bad.write_bytes(bytes(tampered))
+        assert not verify_snapshot(ROOT / row["trace_file"], bad)[0]
+    finally:
+        bad.unlink(missing_ok=True)

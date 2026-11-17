@@ -3,673 +3,613 @@
   "repo_url": "https://github.com/powdahound/s3browser",
   "title": "s3browser — judged live on 17 Nov, ALREADY_EXISTS (aws-js-s3-explorer)",
   "verdict": "ALREADY_EXISTS",
-  "reason": "verified full-overlap alternative https://github.com/awslabs/aws-js-s3-explorer already solves the same problem (quote: 'make the contents of a public S3 bucket easy to browse via a web browser'). Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-a55b).",
-  "quote": "make the contents of a public S3 bucket easy to browse via a web browser",
+  "reason": "An existing maintained free alternative (AWS JavaScript S3 Explorer) already provides web-based S3 bucket browsing. Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-a55b).",
+  "quote": "AWS JavaScript S3 Explorer is a JavaScript application that uses AWS's JavaScript SDK and S3 APIs to make the contents of an S3 bucket easy to browse via a web browser.",
   "alternatives": [
     {
       "name": "awslabs/aws-js-s3-explorer",
       "url": "https://github.com/awslabs/aws-js-s3-explorer",
       "overlap": "full",
-      "quote": "make the contents of a public S3 bucket easy to browse via a web browser",
-      "reason": "verified full-overlap alternative https://github.com/awslabs/aws-js-s3-explorer already solves the same problem (quote: 'make the contents of a public S3 bucket easy to browse via a web browser')",
+      "quote": "AWS JavaScript S3 Explorer is a JavaScript application that uses AWS's JavaScript SDK and S3 APIs to make the contents of an S3 bucket easy to browse via a web browser.",
+      "reason": "An existing maintained free alternative (AWS JavaScript S3 Explorer) already provides web-based S3 bucket browsing.",
+      "rubric": {
+        "same_core_job": true,
+        "same_input_output": true,
+        "same_target_user": true,
+        "covers_main_features": true
+      },
       "quote_verified": true,
       "blocked": true,
       "state": "blocked"
-    },
-    {
-      "name": "https://github.com/rufuspollock/s3-bucket-listing",
-      "url": "https://github.com/rufuspollock/s3-bucket-listing",
-      "overlap": "full",
-      "quote": "Create nice directory listings for s3 buckets using only javascript and HTML.",
-      "reason": "did not block: candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "quote_verified": true,
-      "blocked": false,
-      "state": "did_not_block"
-    },
-    {
-      "name": "https://github.com/flightlesstux/S3-Directory-Listing",
-      "url": "https://github.com/flightlesstux/S3-Directory-Listing",
-      "overlap": "full",
-      "quote": "A lightweight, zero-dependency client-side UI that turns any AWS S3 bucket into a clean, navigable file browser.",
-      "reason": "did not block: not mature or official: stars=41, candidate_stars=127, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "quote_verified": true,
-      "blocked": false,
-      "state": "did_not_block"
-    },
-    {
-      "name": "https://github.com/josephabrahams/s3-directory-index",
-      "url": "https://github.com/josephabrahams/s3-directory-index",
-      "overlap": "full",
-      "quote": "This script exploits the error document functionality of S3 static websites to create an Apache-style directory index of your bucket.",
-      "reason": "did not block: no push or release date; not mature or official: stars=unknown, candidate_stars=127, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "quote_verified": true,
-      "blocked": false,
-      "state": "did_not_block"
-    },
-    {
-      "name": "https://github.com/dhedegaard/s3-index-listing",
-      "url": "https://github.com/dhedegaard/s3-index-listing",
-      "overlap": "full",
-      "quote": "Lists objects in an S3 as if it was a directory listing through Apache or nginx.",
-      "reason": "did not block: not mature or official: stars=1, candidate_stars=127, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "quote_verified": true,
-      "blocked": false,
-      "state": "did_not_block"
-    },
-    {
-      "name": "patbonecrusher/aws-s3-web-browser-file-listing",
-      "url": "https://github.com/patbonecrusher/aws-s3-web-browser-file-listing",
-      "overlap": "full",
-      "quote": "similar to a traditional \"Apache Directory Listing\"",
-      "reason": "did not block: not mature or official: stars=0, candidate_stars=127, official=False",
-      "quote_verified": true,
-      "blocked": false,
-      "state": "did_not_block"
-    },
-    {
-      "name": "menkveldj/s3-directory-index",
-      "url": "https://github.com/menkveldj/s3-directory-index",
-      "overlap": "full",
-      "quote": "Apache-style directory index of your S3 bucket",
-      "reason": "did not block: last update 2015-06-11 is 4177 days before 2026-11-17; not mature or official: stars=0, candidate_stars=127, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence",
-      "quote_verified": true,
-      "blocked": false,
-      "state": "did_not_block"
     }
   ],
-  "problem": "Developers and teams cannot easily browse and share S3 bucket contents through a simple web interface that mimics Apache-style directory indexes.",
-  "run_id": "run-cd78274ea6cf",
-  "run_hash": "f501ba9d10d2143b8b4ccdd507f1016ae1b21f19d9367178e9c4f2a503369d62",
+  "skipped": [
+    {
+      "alternative": "web:https://s3-viewer.com/",
+      "reason": "no push or release date"
+    },
+    {
+      "alternative": "web:https://github.com/rufuspollock/s3-bucket-listing",
+      "reason": "no permissive licence or free tier"
+    },
+    {
+      "alternative": "web:https://nubbo.app/articles/best-s3-file-browsers/",
+      "reason": "no push or release date"
+    },
+    {
+      "alternative": "web:https://github.com/flightlesstux/S3-Directory-Listing",
+      "reason": "not mature or official: stars=41, candidate_stars=127, official=False"
+    },
+    {
+      "alternative": "web:https://github.com/tlinhart/s3-browser/",
+      "reason": "not mature or official: stars=78, candidate_stars=127, official=False"
+    },
+    {
+      "alternative": "web:https://www.filestash.app/s3-browser.html",
+      "reason": "no push or release date"
+    },
+    {
+      "alternative": "web:https://bucketdesk.com/blog/s3-file-browser-for-business-teams-cyberduck-s3-browser-transmit",
+      "reason": "no push or release date"
+    },
+    {
+      "alternative": "web:https://www.clever.cloud/blog/features/2020/10/08/s3-directory-listing/",
+      "reason": "no push or release date"
+    },
+    {
+      "alternative": "patbonecrusher/aws-s3-web-browser-file-listing",
+      "reason": "not mature or official: stars=0, candidate_stars=127, official=False"
+    },
+    {
+      "alternative": "Sfedfcv/redesigned-pancake",
+      "reason": "last update 2021-05-16 is 2011 days before 2026-11-17"
+    },
+    {
+      "alternative": "kalcaddle/KodExplorer",
+      "reason": "no permissive licence or free tier"
+    },
+    {
+      "alternative": "Saturnremabtc64/supreme-octo-roboticeyx",
+      "reason": "last update 2021-08-04 is 1931 days before 2026-11-17"
+    },
+    {
+      "alternative": "caussourd/aws-s3-bucket-listing",
+      "reason": "last update 2015-10-20 is 4046 days before 2026-11-17"
+    }
+  ],
+  "problem": "Developers and teams cannot easily browse and share S3 bucket contents through a simple web interface like an Apache directory index.",
+  "run_id": "run-0fc62dec0ad7",
+  "run_hash": "edd738a56fce6ee7417e62852fbe5647ba771650b1deb1d365ae7728602e091a",
   "trace_file": "pro/examples/traces/live-s3browser.jsonl",
   "trace": [
     {
       "action": "evidence_source",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:28.224054+00:00",
+      "timestamp": "2026-11-17T18:27:59.162784+00:00",
       "prev_hash": "",
-      "line_hash": "7a846bb918599779fb10d434fb1b12f416eb45ab825055eeea1c5185408b8601",
-      "canonical": "{\"action\":\"evidence_source\",\"agent_name\":\"gate1\",\"confidence\":null,\"event\":\"evidence_source\",\"input_summary\":\"{\\\"evidence_source\\\": \\\"csv\\\"}\",\"output_summary\":\"{\\\"evidence_source\\\": \\\"csv\\\", \\\"candidate_rows\\\": 1, \\\"prior_rows\\\": 0, \\\"demand_rows\\\": 0}\",\"prev_hash\":\"\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:28.224054+00:00\"}",
+      "line_hash": "9343c2fb3201bb15e7f3ddf59be86626046ed2dc3e50de8f57ce41b6298e2224",
+      "canonical": "{\"action\":\"evidence_source\",\"agent_name\":\"gate1\",\"confidence\":null,\"event\":\"evidence_source\",\"input_summary\":\"{\\\"evidence_source\\\": \\\"csv\\\"}\",\"output_summary\":\"{\\\"evidence_source\\\": \\\"csv\\\", \\\"candidate_rows\\\": 1, \\\"prior_rows\\\": 0, \\\"demand_rows\\\": 0}\",\"prev_hash\":\"\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:59.162784+00:00\"}",
       "detail": "{\"evidence_source\": \"csv\", \"candidate_rows\": 1, \"prior_rows\": 0, \"demand_rows\": 0}"
     },
     {
       "action": "LLM_CALL",
       "step": "problem",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:47.011840+00:00",
-      "prev_hash": "7a846bb918599779fb10d434fb1b12f416eb45ab825055eeea1c5185408b8601",
-      "line_hash": "80e2fbd0a7b319067f87ed2a0f1a89babe66b106a53ae3ade5a353f10a5408fc",
-      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"problem\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"7a846bb918599779fb10d434fb1b12f416eb45ab825055eeea1c5185408b8601\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:47.011840+00:00\"}",
+      "timestamp": "2026-11-17T18:28:45.763991+00:00",
+      "prev_hash": "9343c2fb3201bb15e7f3ddf59be86626046ed2dc3e50de8f57ce41b6298e2224",
+      "line_hash": "635829216898bb826a46ca2282879343afce9fc6de5df0ac5a0f9c69c32f38cc",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"problem\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"9343c2fb3201bb15e7f3ddf59be86626046ed2dc3e50de8f57ce41b6298e2224\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:45.763991+00:00\"}",
       "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
     },
     {
       "action": "RESCUE_POTENTIAL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:47.012374+00:00",
-      "prev_hash": "80e2fbd0a7b319067f87ed2a0f1a89babe66b106a53ae3ade5a353f10a5408fc",
-      "line_hash": "90b79db9bd86fd08cbc5a1a37e45f0ad8fb7f720a8f7b048ec27c2dd5acc6792",
-      "canonical": "{\"action\":\"RESCUE_POTENTIAL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"RESCUE_POTENTIAL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"score\\\": 450.0, \\\"changes_verdict\\\": false, \\\"source\\\": \\\"github_api\\\", \\\"components\\\": {\\\"stars\\\": 127, \\\"forks\\\": 49, \\\"open_issues_count\\\": 3, \\\"external_breakage\\\": 1, \\\"staleness_days\\\": 2405, \\\"stars_vs_staleness\\\": 1.61, \\\"ci_state\\\": \\\"no_ci\\\", \\\"ci_date\\\": null, \\\"dependabot_open\\\": 0, \\\"renovate_open\\\": 0}}\",\"prev_hash\":\"80e2fbd0a7b319067f87ed2a0f1a89babe66b106a53ae3ade5a353f10a5408fc\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:47.012374+00:00\"}",
+      "timestamp": "2026-11-17T18:28:45.765059+00:00",
+      "prev_hash": "635829216898bb826a46ca2282879343afce9fc6de5df0ac5a0f9c69c32f38cc",
+      "line_hash": "eee8b1c24a01eefd97e78dc40dd1204045c9083c6a2def029f4a35ecb0717868",
+      "canonical": "{\"action\":\"RESCUE_POTENTIAL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"RESCUE_POTENTIAL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"score\\\": 450.0, \\\"changes_verdict\\\": false, \\\"source\\\": \\\"github_api\\\", \\\"components\\\": {\\\"stars\\\": 127, \\\"forks\\\": 49, \\\"open_issues_count\\\": 3, \\\"external_breakage\\\": 1, \\\"staleness_days\\\": 2405, \\\"stars_vs_staleness\\\": 1.61, \\\"ci_state\\\": \\\"no_ci\\\", \\\"ci_date\\\": null, \\\"dependabot_open\\\": 0, \\\"renovate_open\\\": 0}}\",\"prev_hash\":\"635829216898bb826a46ca2282879343afce9fc6de5df0ac5a0f9c69c32f38cc\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:45.765059+00:00\"}",
       "detail": "{\"score\": 450.0, \"changes_verdict\": false, \"source\": \"github_api\", \"components\": {\"stars\": 127, \"forks\": 49, \"open_issues_count\": 3, \"external_breakage\": 1, \"staleness_days\": 2405, \"stars_vs_staleness\": 1.61, \"ci_state\": \"no_ci\", \"ci_date\":"
     },
     {
       "action": "PROBLEM_STATEMENT",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:47.012494+00:00",
-      "prev_hash": "90b79db9bd86fd08cbc5a1a37e45f0ad8fb7f720a8f7b048ec27c2dd5acc6792",
-      "line_hash": "4384112c57ed13099e2a324da98e8818fee626a40118d1c49f3e29a47b775311",
-      "canonical": "{\"action\":\"PROBLEM_STATEMENT\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PROBLEM_STATEMENT\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"problem\\\": \\\"Developers and teams cannot easily browse and share S3 bucket contents through a simple web interface that mimics Apache-style directory indexes.\\\", \\\"target_user\\\": \\\"Developers, sysadmins, and teams who need a web-based file browser for S3 buckets.\\\", \\\"category\\\": \\\"developer-tools\\\", \\\"quotes\\\": [\\\"Web-based S3 bucket browsing tool. Similar to Apache-style indexes.\\\", \\\"Amazon S3 Directory Browser\\\"], \\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\"}\",\"prev_hash\":\"90b79db9bd86fd08cbc5a1a37e45f0ad8fb7f720a8f7b048ec27c2dd5acc6792\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:47.012494+00:00\"}",
-      "detail": "Developers and teams cannot easily browse and share S3 bucket contents through a simple web interface that mimics Apache-style directory indexes."
+      "timestamp": "2026-11-17T18:28:45.765182+00:00",
+      "prev_hash": "eee8b1c24a01eefd97e78dc40dd1204045c9083c6a2def029f4a35ecb0717868",
+      "line_hash": "a9041ca47f1dc933d5f1daf12e2906fd01bdd6f5b3ca57e4bd34cb29f0a5849c",
+      "canonical": "{\"action\":\"PROBLEM_STATEMENT\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PROBLEM_STATEMENT\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"problem\\\": \\\"Developers and teams cannot easily browse and share S3 bucket contents through a simple web interface like an Apache directory index.\\\", \\\"target_user\\\": \\\"Developers, sysadmins, and teams needing a web-based S3 bucket browser.\\\", \\\"category\\\": \\\"developer-tools\\\", \\\"quotes\\\": [\\\"Web-based S3 bucket browsing tool. Similar to Apache-style indexes.\\\", \\\"Amazon S3 Directory Browser\\\"], \\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\"}\",\"prev_hash\":\"eee8b1c24a01eefd97e78dc40dd1204045c9083c6a2def029f4a35ecb0717868\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:45.765182+00:00\"}",
+      "detail": "Developers and teams cannot easily browse and share S3 bucket contents through a simple web interface like an Apache directory index."
     },
     {
       "action": "QUERY_GENERATION",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:47.013380+00:00",
-      "prev_hash": "4384112c57ed13099e2a324da98e8818fee626a40118d1c49f3e29a47b775311",
-      "line_hash": "1983828c23953898047f5b74e0d67543f49519567e6c813ef9371ff7ed28517c",
-      "canonical": "{\"action\":\"QUERY_GENERATION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"QUERY_GENERATION\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"queries\\\": [\\\"s3 bucket web browser\\\", \\\"s3 directory listing web\\\", \\\"best s3 bucket web browser tools\\\", \\\"best s3 directory listing web tools\\\", \\\"web based s3 file browser\\\", \\\"s3 bucket web interface\\\", \\\"apache style s3 index\\\"]}\",\"prev_hash\":\"4384112c57ed13099e2a324da98e8818fee626a40118d1c49f3e29a47b775311\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:47.013380+00:00\"}",
-      "detail": "{\"queries\": [\"s3 bucket web browser\", \"s3 directory listing web\", \"best s3 bucket web browser tools\", \"best s3 directory listing web tools\", \"web based s3 file browser\", \"s3 bucket web interface\", \"apache style s3 index\"]}"
+      "timestamp": "2026-11-17T18:28:45.766115+00:00",
+      "prev_hash": "a9041ca47f1dc933d5f1daf12e2906fd01bdd6f5b3ca57e4bd34cb29f0a5849c",
+      "line_hash": "0f5634bb5942310ff8985d6e1b61a4c4763a4357aa8249b2569b601f781a5b3a",
+      "canonical": "{\"action\":\"QUERY_GENERATION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"QUERY_GENERATION\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"queries\\\": [\\\"S3 bucket browser web\\\", \\\"S3 directory listing web\\\", \\\"best S3 bucket browser web tools\\\", \\\"best S3 directory listing web tools\\\", \\\"web based S3 file browser\\\", \\\"S3 Apache index alternative\\\", \\\"host S3 browser Heroku\\\"]}\",\"prev_hash\":\"a9041ca47f1dc933d5f1daf12e2906fd01bdd6f5b3ca57e4bd34cb29f0a5849c\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:45.766115+00:00\"}",
+      "detail": "{\"queries\": [\"S3 bucket browser web\", \"S3 directory listing web\", \"best S3 bucket browser web tools\", \"best S3 directory listing web tools\", \"web based S3 file browser\", \"S3 Apache index alternative\", \"host S3 browser Heroku\"]}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
-      "timestamp": "2026-11-17T13:27:47.758126+00:00",
-      "prev_hash": "1983828c23953898047f5b74e0d67543f49519567e6c813ef9371ff7ed28517c",
-      "line_hash": "64905482db436f955b4170a646d0a9edd1d6fb08f5b274e6efe18dbd006c9bbe",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"pyproject.toml\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/pyproject.toml\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"1983828c23953898047f5b74e0d67543f49519567e6c813ef9371ff7ed28517c\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:47.758126+00:00\"}",
+      "timestamp": "2026-11-17T18:28:46.425605+00:00",
+      "prev_hash": "0f5634bb5942310ff8985d6e1b61a4c4763a4357aa8249b2569b601f781a5b3a",
+      "line_hash": "eda5594d4f168510eebcadab393f448d0b0b4136250d1f31d2ccd4ed25d614d8",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"pyproject.toml\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/pyproject.toml\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"0f5634bb5942310ff8985d6e1b61a4c4763a4357aa8249b2569b601f781a5b3a\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:46.425605+00:00\"}",
       "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/powdahound/s3"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
-      "timestamp": "2026-11-17T13:27:48.411676+00:00",
-      "prev_hash": "64905482db436f955b4170a646d0a9edd1d6fb08f5b274e6efe18dbd006c9bbe",
-      "line_hash": "fb1fd91e2271854d54689881960bc25472af8c47f384ce2c2b6dfe902d0f4fef",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"setup.py\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/setup.py\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"64905482db436f955b4170a646d0a9edd1d6fb08f5b274e6efe18dbd006c9bbe\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:48.411676+00:00\"}",
+      "timestamp": "2026-11-17T18:28:47.068216+00:00",
+      "prev_hash": "eda5594d4f168510eebcadab393f448d0b0b4136250d1f31d2ccd4ed25d614d8",
+      "line_hash": "46c013b4cb691be1d92d03d65e4a60f3d505f887ddb443eb20083838def2ee0d",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"setup.py\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/setup.py\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"eda5594d4f168510eebcadab393f448d0b0b4136250d1f31d2ccd4ed25d614d8\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:47.068216+00:00\"}",
       "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/powdahound/s3"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
-      "timestamp": "2026-11-17T13:27:49.148445+00:00",
-      "prev_hash": "fb1fd91e2271854d54689881960bc25472af8c47f384ce2c2b6dfe902d0f4fef",
-      "line_hash": "9e87069c005a8536b1f95527f104cf918d1946ee4c3067f45d377fcc8d1fbd44",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"setup.cfg\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/setup.cfg\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"fb1fd91e2271854d54689881960bc25472af8c47f384ce2c2b6dfe902d0f4fef\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:49.148445+00:00\"}",
+      "timestamp": "2026-11-17T18:28:47.746625+00:00",
+      "prev_hash": "46c013b4cb691be1d92d03d65e4a60f3d505f887ddb443eb20083838def2ee0d",
+      "line_hash": "2ebb9db3274df8a3b2115e783097caf73bd2470eade7fbdfaeae17af7ca47792",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"setup.cfg\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/setup.cfg\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"46c013b4cb691be1d92d03d65e4a60f3d505f887ddb443eb20083838def2ee0d\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:47.746625+00:00\"}",
       "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/powdahound/s3"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
-      "timestamp": "2026-11-17T13:27:49.907107+00:00",
-      "prev_hash": "9e87069c005a8536b1f95527f104cf918d1946ee4c3067f45d377fcc8d1fbd44",
-      "line_hash": "ef01bd48b5c63138f47b02a41ad55ab0b9fd3c55e3fe48f3a9293ef6eb30e277",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"package.json\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/package.json\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"9e87069c005a8536b1f95527f104cf918d1946ee4c3067f45d377fcc8d1fbd44\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:49.907107+00:00\"}",
+      "timestamp": "2026-11-17T18:28:48.541189+00:00",
+      "prev_hash": "2ebb9db3274df8a3b2115e783097caf73bd2470eade7fbdfaeae17af7ca47792",
+      "line_hash": "1863e1434d5eac5f99ab7455d645f073689d8e6f60b0898f4c05c6727f4be54c",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"package.json\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/package.json\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"2ebb9db3274df8a3b2115e783097caf73bd2470eade7fbdfaeae17af7ca47792\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:48.541189+00:00\"}",
       "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/powdahound/s3"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
-      "timestamp": "2026-11-17T13:27:50.567847+00:00",
-      "prev_hash": "ef01bd48b5c63138f47b02a41ad55ab0b9fd3c55e3fe48f3a9293ef6eb30e277",
-      "line_hash": "438bad0e65bcad45f17e8c3d6d93de9565b690acc1214af4f205717bd03c7634",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"Cargo.toml\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/Cargo.toml\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"ef01bd48b5c63138f47b02a41ad55ab0b9fd3c55e3fe48f3a9293ef6eb30e277\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:50.567847+00:00\"}",
+      "timestamp": "2026-11-17T18:28:49.257444+00:00",
+      "prev_hash": "1863e1434d5eac5f99ab7455d645f073689d8e6f60b0898f4c05c6727f4be54c",
+      "line_hash": "5fddf5b049e4f93aadace2a62d80d8cfe20174d8876b8a1df9ea4dcc6d5d0b04",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"powdahound/s3browser\\\", \\\"path\\\": \\\"Cargo.toml\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/powdahound/s3browser/contents/Cargo.toml\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"1863e1434d5eac5f99ab7455d645f073689d8e6f60b0898f4c05c6727f4be54c\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:49.257444+00:00\"}",
       "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/powdahound/s3"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:50.571362+00:00",
-      "prev_hash": "438bad0e65bcad45f17e8c3d6d93de9565b690acc1214af4f205717bd03c7634",
-      "line_hash": "d38fb6deb84b5f8db9b48d4a08caf7d4b307b5cc8b575df07a6a5a0593f19d9f",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"s3 directory listing web\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=s3+directory+listing+web\\\", \\\"sha256\\\": \\\"04299925e7bf229ce2806d8243b481915f55833f6b23acaab4da010b5075b031\\\"}\",\"prev_hash\":\"438bad0e65bcad45f17e8c3d6d93de9565b690acc1214af4f205717bd03c7634\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:50.571362+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=s3+directory+listing+web\", \"sha256\": \"04299925e7bf229ce2806d8243b481915f55833f6b23acaab4da010b5075b031\"}"
+      "timestamp": "2026-11-17T18:28:49.267296+00:00",
+      "prev_hash": "5fddf5b049e4f93aadace2a62d80d8cfe20174d8876b8a1df9ea4dcc6d5d0b04",
+      "line_hash": "4a0576eb12c76289d11461e8bc27b563be3ca1574a8498d3cf639e2ebbb992b1",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"best S3 directory listing web tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=best+S3+directory+listing+web+tools\\\", \\\"sha256\\\": \\\"f95c42839dc25c312a435c53341f1e511ba996e5ee8b9a36a91fa66115f3a5dd\\\"}\",\"prev_hash\":\"5fddf5b049e4f93aadace2a62d80d8cfe20174d8876b8a1df9ea4dcc6d5d0b04\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:49.267296+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=best+S3+directory+listing+web+tools\", \"sha256\": \"f95c42839dc25c312a435c53341f1e511ba996e5ee8b9a36a91fa66115f3a5dd\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:50.571648+00:00",
-      "prev_hash": "d38fb6deb84b5f8db9b48d4a08caf7d4b307b5cc8b575df07a6a5a0593f19d9f",
-      "line_hash": "2980f111fd7dc37ca5b6707785b71487736945a18739f4171aa4ff222c076697",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"best s3 bucket web browser tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=best+s3+bucket+web+browser+tools\\\", \\\"sha256\\\": \\\"e0c6daf23f95252641151c28af5ed00b10893ba4681ebcda7454f9ccb3d8eb1a\\\"}\",\"prev_hash\":\"d38fb6deb84b5f8db9b48d4a08caf7d4b307b5cc8b575df07a6a5a0593f19d9f\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:50.571648+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=best+s3+bucket+web+browser+tools\", \"sha256\": \"e0c6daf23f95252641151c28af5ed00b10893ba4681ebcda7454f9ccb3d8eb1a\"}"
+      "timestamp": "2026-11-17T18:28:49.267875+00:00",
+      "prev_hash": "4a0576eb12c76289d11461e8bc27b563be3ca1574a8498d3cf639e2ebbb992b1",
+      "line_hash": "e0be4336826641834350a2c007900c7ac635c2a499f65dd5d5428e2d358c7f05",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"S3 directory listing web\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=S3+directory+listing+web\\\", \\\"sha256\\\": \\\"04299925e7bf229ce2806d8243b481915f55833f6b23acaab4da010b5075b031\\\"}\",\"prev_hash\":\"4a0576eb12c76289d11461e8bc27b563be3ca1574a8498d3cf639e2ebbb992b1\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:49.267875+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=S3+directory+listing+web\", \"sha256\": \"04299925e7bf229ce2806d8243b481915f55833f6b23acaab4da010b5075b031\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:50.571907+00:00",
-      "prev_hash": "2980f111fd7dc37ca5b6707785b71487736945a18739f4171aa4ff222c076697",
-      "line_hash": "37f805e5bfe44d53ab95b1d79bc7d4b20ec081966ffcf183c6beec59086d5d0c",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"best s3 directory listing web tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=best+s3+directory+listing+web+tools\\\", \\\"sha256\\\": \\\"f95c42839dc25c312a435c53341f1e511ba996e5ee8b9a36a91fa66115f3a5dd\\\"}\",\"prev_hash\":\"2980f111fd7dc37ca5b6707785b71487736945a18739f4171aa4ff222c076697\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:50.571907+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=best+s3+directory+listing+web+tools\", \"sha256\": \"f95c42839dc25c312a435c53341f1e511ba996e5ee8b9a36a91fa66115f3a5dd\"}"
+      "timestamp": "2026-11-17T18:28:49.268231+00:00",
+      "prev_hash": "e0be4336826641834350a2c007900c7ac635c2a499f65dd5d5428e2d358c7f05",
+      "line_hash": "c1373d823e00ba294ec5b43ea0be4e5b8056d6f22ccb5ffaeecc99e94cd2b7bb",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"S3 bucket browser web\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=S3+bucket+browser+web\\\", \\\"sha256\\\": \\\"058f320de275e097c8ed9559b505af8691d0857d2c8b2f67bd66d6e4feb4bf03\\\"}\",\"prev_hash\":\"e0be4336826641834350a2c007900c7ac635c2a499f65dd5d5428e2d358c7f05\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:49.268231+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=S3+bucket+browser+web\", \"sha256\": \"058f320de275e097c8ed9559b505af8691d0857d2c8b2f67bd66d6e4feb4bf03\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:50.572175+00:00",
-      "prev_hash": "37f805e5bfe44d53ab95b1d79bc7d4b20ec081966ffcf183c6beec59086d5d0c",
-      "line_hash": "4f97d043eb3dbb139d64c234e92db7ededc305ed168cdd941148a75729070e56",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"s3 bucket web browser\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=s3+bucket+web+browser\\\", \\\"sha256\\\": \\\"8dd57b2f25dc424a68ddaf5cf2447128b231c0d5762512ecfc3a183be9d9ac2b\\\"}\",\"prev_hash\":\"37f805e5bfe44d53ab95b1d79bc7d4b20ec081966ffcf183c6beec59086d5d0c\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:50.572175+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=s3+bucket+web+browser\", \"sha256\": \"8dd57b2f25dc424a68ddaf5cf2447128b231c0d5762512ecfc3a183be9d9ac2b\"}"
+      "timestamp": "2026-11-17T18:28:49.268572+00:00",
+      "prev_hash": "c1373d823e00ba294ec5b43ea0be4e5b8056d6f22ccb5ffaeecc99e94cd2b7bb",
+      "line_hash": "729aa733c02bbfeb155b97aab9760585267107c0e55643f2ce199b912b507827",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"best S3 bucket browser web tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=best+S3+bucket+browser+web+tools\\\", \\\"sha256\\\": \\\"bb34a574c899ba97db54c5d8f6ff68d482f4bc1f1b8b227d484f386f7aa3b40e\\\"}\",\"prev_hash\":\"c1373d823e00ba294ec5b43ea0be4e5b8056d6f22ccb5ffaeecc99e94cd2b7bb\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:49.268572+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=best+S3+bucket+browser+web+tools\", \"sha256\": \"bb34a574c899ba97db54c5d8f6ff68d482f4bc1f1b8b227d484f386f7aa3b40e\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:50.573702+00:00",
-      "prev_hash": "4f97d043eb3dbb139d64c234e92db7ededc305ed168cdd941148a75729070e56",
-      "line_hash": "5fef0187a19d696b1b94dfb57033852b480cb25cdf873972f3382fa3bb2df67d",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"web based s3 file browser\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=web+based+s3+file+browser\\\", \\\"sha256\\\": \\\"cf395af2a495dd56be44acbf272e626f9bfe4ac4a39c68697575f39712e773c7\\\"}\",\"prev_hash\":\"4f97d043eb3dbb139d64c234e92db7ededc305ed168cdd941148a75729070e56\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:50.573702+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=web+based+s3+file+browser\", \"sha256\": \"cf395af2a495dd56be44acbf272e626f9bfe4ac4a39c68697575f39712e773c7\"}"
+      "timestamp": "2026-11-17T18:28:49.271005+00:00",
+      "prev_hash": "729aa733c02bbfeb155b97aab9760585267107c0e55643f2ce199b912b507827",
+      "line_hash": "52e1567ec0cff2948428feb448602585a2acfb71c6425987a8306b56b9164909",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"web based S3 file browser\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=web+based+S3+file+browser\\\", \\\"sha256\\\": \\\"cf395af2a495dd56be44acbf272e626f9bfe4ac4a39c68697575f39712e773c7\\\"}\",\"prev_hash\":\"729aa733c02bbfeb155b97aab9760585267107c0e55643f2ce199b912b507827\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:49.271005+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=web+based+S3+file+browser\", \"sha256\": \"cf395af2a495dd56be44acbf272e626f9bfe4ac4a39c68697575f39712e773c7\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:50.573783+00:00",
-      "prev_hash": "5fef0187a19d696b1b94dfb57033852b480cb25cdf873972f3382fa3bb2df67d",
-      "line_hash": "e6a6198ae413b3e1ed4c16ae01862134fbc36d8443ee9b8b76bb1a9885805b31",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"apache style s3 index\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=apache+style+s3+index\\\", \\\"sha256\\\": \\\"7c8323cc51b5175ff5639315cfc924ad38abdf2294a758192151d93780fac971\\\"}\",\"prev_hash\":\"5fef0187a19d696b1b94dfb57033852b480cb25cdf873972f3382fa3bb2df67d\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:50.573783+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=apache+style+s3+index\", \"sha256\": \"7c8323cc51b5175ff5639315cfc924ad38abdf2294a758192151d93780fac971\"}"
+      "timestamp": "2026-11-17T18:28:49.271182+00:00",
+      "prev_hash": "52e1567ec0cff2948428feb448602585a2acfb71c6425987a8306b56b9164909",
+      "line_hash": "e60165f51911758741670eccf73deccd59c0e755be35c6d0903199d85605ed8e",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"S3 Apache index alternative\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=S3+Apache+index+alternative\\\", \\\"sha256\\\": \\\"4b85976fefddcbea37cadd87ef246be03ab279f42f36863719d295c0ed7bf4a4\\\"}\",\"prev_hash\":\"52e1567ec0cff2948428feb448602585a2acfb71c6425987a8306b56b9164909\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:49.271182+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=S3+Apache+index+alternative\", \"sha256\": \"4b85976fefddcbea37cadd87ef246be03ab279f42f36863719d295c0ed7bf4a4\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:51.734262+00:00",
-      "prev_hash": "e6a6198ae413b3e1ed4c16ae01862134fbc36d8443ee9b8b76bb1a9885805b31",
-      "line_hash": "e6653b32fd52de074440da5e20583cd8a5fcb20d06218d518c9a023f53934158",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"s3 bucket web interface\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=s3+bucket+web+interface\\\", \\\"sha256\\\": \\\"191f984fc6035d5c3171f592b1b1c23023ccd77790f7ee30502ff75da3ecc68f\\\"}\",\"prev_hash\":\"e6a6198ae413b3e1ed4c16ae01862134fbc36d8443ee9b8b76bb1a9885805b31\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:51.734262+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=s3+bucket+web+interface\", \"sha256\": \"191f984fc6035d5c3171f592b1b1c23023ccd77790f7ee30502ff75da3ecc68f\"}"
+      "timestamp": "2026-11-17T18:28:49.271960+00:00",
+      "prev_hash": "e60165f51911758741670eccf73deccd59c0e755be35c6d0903199d85605ed8e",
+      "line_hash": "127fbc65216d302b5f879dde6124861169fc7202d9b4cd1b5a0091d21267f54c",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"host S3 browser Heroku\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=host+S3+browser+Heroku\\\", \\\"sha256\\\": \\\"ef8bc5289bda96db3af4a0cb4a172963122d043e1ef54498f54a91755bc974c5\\\"}\",\"prev_hash\":\"e60165f51911758741670eccf73deccd59c0e755be35c6d0903199d85605ed8e\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:49.271960+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=host+S3+browser+Heroku\", \"sha256\": \"ef8bc5289bda96db3af4a0cb4a172963122d043e1ef54498f54a91755bc974c5\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:52.924096+00:00",
-      "prev_hash": "e6653b32fd52de074440da5e20583cd8a5fcb20d06218d518c9a023f53934158",
-      "line_hash": "d14cacddde90189767297db926a974cae3790f60ea017e6164260702c2a55e36",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"s3 bucket web browser\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=s3+bucket+web+browser&per_page=5\\\", \\\"sha256\\\": \\\"ecb16199722033ab1732c814247b7b4257133e066b0aa1d6044b23975dca1783\\\"}\",\"prev_hash\":\"e6653b32fd52de074440da5e20583cd8a5fcb20d06218d518c9a023f53934158\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:52.924096+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=s3+bucket+web+browser&per_page=5\", \"sha256\": \"ecb16199722033ab1732c814247b7b4257133e066b0aa1d6044b23975dca1783\"}"
+      "timestamp": "2026-11-17T18:28:50.310642+00:00",
+      "prev_hash": "127fbc65216d302b5f879dde6124861169fc7202d9b4cd1b5a0091d21267f54c",
+      "line_hash": "42deb41e4b1170d93885e118a3f14cf0ba4a3b68556a36c2888e642e354fba42",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"S3 bucket browser web\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=S3+bucket+browser+web&per_page=5\\\", \\\"sha256\\\": \\\"ecb16199722033ab1732c814247b7b4257133e066b0aa1d6044b23975dca1783\\\"}\",\"prev_hash\":\"127fbc65216d302b5f879dde6124861169fc7202d9b4cd1b5a0091d21267f54c\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:50.310642+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=S3+bucket+browser+web&per_page=5\", \"sha256\": \"ecb16199722033ab1732c814247b7b4257133e066b0aa1d6044b23975dca1783\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:52.925601+00:00",
-      "prev_hash": "d14cacddde90189767297db926a974cae3790f60ea017e6164260702c2a55e36",
-      "line_hash": "c34e1fb8d4c955280a7ef8000ba25eeaa5884286f4a63905aad3c4638ebc2877",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"s3 bucket web browser\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=s3+bucket+web+browser\\\", \\\"sha256\\\": \\\"06a215baa5626e32ee3322d0d8db2fe9c3431490832807f9fd41956c53c44139\\\"}\",\"prev_hash\":\"d14cacddde90189767297db926a974cae3790f60ea017e6164260702c2a55e36\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:52.925601+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=s3+bucket+web+browser\", \"sha256\": \"06a215baa5626e32ee3322d0d8db2fe9c3431490832807f9fd41956c53c44139\"}"
+      "timestamp": "2026-11-17T18:28:50.312741+00:00",
+      "prev_hash": "42deb41e4b1170d93885e118a3f14cf0ba4a3b68556a36c2888e642e354fba42",
+      "line_hash": "7006cecedbec10768bc9a919ae4938f3cdf2189bab5ea5ca121563e671d79e1e",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"S3 bucket browser web\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=S3+bucket+browser+web\\\", \\\"sha256\\\": \\\"06a215baa5626e32ee3322d0d8db2fe9c3431490832807f9fd41956c53c44139\\\"}\",\"prev_hash\":\"42deb41e4b1170d93885e118a3f14cf0ba4a3b68556a36c2888e642e354fba42\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:50.312741+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=S3+bucket+browser+web\", \"sha256\": \"06a215baa5626e32ee3322d0d8db2fe9c3431490832807f9fd41956c53c44139\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:54.202849+00:00",
-      "prev_hash": "c34e1fb8d4c955280a7ef8000ba25eeaa5884286f4a63905aad3c4638ebc2877",
-      "line_hash": "3011162e7d7d56ef5b9807ad4040837a08e6cc90636511375b9aa77c0e9c8779",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"s3 directory listing web\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=s3+directory+listing+web&per_page=5\\\", \\\"sha256\\\": \\\"7d38917eee0c0c515525527dd04ed8a5377ff2c0791b0053e70c467f665d7ca8\\\"}\",\"prev_hash\":\"c34e1fb8d4c955280a7ef8000ba25eeaa5884286f4a63905aad3c4638ebc2877\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:54.202849+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=s3+directory+listing+web&per_page=5\", \"sha256\": \"7d38917eee0c0c515525527dd04ed8a5377ff2c0791b0053e70c467f665d7ca8\"}"
+      "timestamp": "2026-11-17T18:28:51.591878+00:00",
+      "prev_hash": "7006cecedbec10768bc9a919ae4938f3cdf2189bab5ea5ca121563e671d79e1e",
+      "line_hash": "b75b715377861cdab283838490f3ecddf75a5006369b1f2c67c368f7a7b1a8ac",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"S3 directory listing web\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=S3+directory+listing+web&per_page=5\\\", \\\"sha256\\\": \\\"7d38917eee0c0c515525527dd04ed8a5377ff2c0791b0053e70c467f665d7ca8\\\"}\",\"prev_hash\":\"7006cecedbec10768bc9a919ae4938f3cdf2189bab5ea5ca121563e671d79e1e\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:51.591878+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=S3+directory+listing+web&per_page=5\", \"sha256\": \"7d38917eee0c0c515525527dd04ed8a5377ff2c0791b0053e70c467f665d7ca8\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:54.240777+00:00",
-      "prev_hash": "3011162e7d7d56ef5b9807ad4040837a08e6cc90636511375b9aa77c0e9c8779",
-      "line_hash": "46ccb8d934b871d26f4933c85fd37afe52767ad8ad8a3e5a84103fd3434dffec",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"s3 directory listing web\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=s3+directory+listing+web\\\", \\\"sha256\\\": \\\"76929e647c614783f88cddb17dc29d74b01d5f5d0697a25b20350a2ac9fced0e\\\"}\",\"prev_hash\":\"3011162e7d7d56ef5b9807ad4040837a08e6cc90636511375b9aa77c0e9c8779\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:54.240777+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=s3+directory+listing+web\", \"sha256\": \"76929e647c614783f88cddb17dc29d74b01d5f5d0697a25b20350a2ac9fced0e\"}"
+      "timestamp": "2026-11-17T18:28:51.617418+00:00",
+      "prev_hash": "b75b715377861cdab283838490f3ecddf75a5006369b1f2c67c368f7a7b1a8ac",
+      "line_hash": "848bbe96707133b776b68db62c08694723de7ab546a4da45dcc5d8b107d261f6",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"S3 directory listing web\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=S3+directory+listing+web\\\", \\\"sha256\\\": \\\"76929e647c614783f88cddb17dc29d74b01d5f5d0697a25b20350a2ac9fced0e\\\"}\",\"prev_hash\":\"b75b715377861cdab283838490f3ecddf75a5006369b1f2c67c368f7a7b1a8ac\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:51.617418+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=S3+directory+listing+web\", \"sha256\": \"76929e647c614783f88cddb17dc29d74b01d5f5d0697a25b20350a2ac9fced0e\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:55.041058+00:00",
-      "prev_hash": "46ccb8d934b871d26f4933c85fd37afe52767ad8ad8a3e5a84103fd3434dffec",
-      "line_hash": "f2f6c71d469818194b1930a962fbee637f9be3d080fac07246f38ede98e29865",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"best s3 bucket web browser tools\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=best+s3+bucket+web+browser+tools&per_page=5\\\", \\\"sha256\\\": \\\"f3a6e0655028f9c56c17ea6962460f7a6d4ad9fa24a3ff98245afb95c6329975\\\"}\",\"prev_hash\":\"46ccb8d934b871d26f4933c85fd37afe52767ad8ad8a3e5a84103fd3434dffec\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:55.041058+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=best+s3+bucket+web+browser+tools&per_page=5\", \"sha256\": \"f3a6e0655028f9c56c17ea6962460f7a6d4ad9fa24a3ff98245afb95c6329975\"}"
+      "timestamp": "2026-11-17T18:28:52.436898+00:00",
+      "prev_hash": "848bbe96707133b776b68db62c08694723de7ab546a4da45dcc5d8b107d261f6",
+      "line_hash": "2b0b5536374a2711807d14da5f76ae6632082f3c350898f6076c837b341911a1",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"best S3 bucket browser web tools\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=best+S3+bucket+browser+web+tools&per_page=5\\\", \\\"sha256\\\": \\\"f3a6e0655028f9c56c17ea6962460f7a6d4ad9fa24a3ff98245afb95c6329975\\\"}\",\"prev_hash\":\"848bbe96707133b776b68db62c08694723de7ab546a4da45dcc5d8b107d261f6\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:52.436898+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=best+S3+bucket+browser+web+tools&per_page=5\", \"sha256\": \"f3a6e0655028f9c56c17ea6962460f7a6d4ad9fa24a3ff98245afb95c6329975\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:55.042944+00:00",
-      "prev_hash": "f2f6c71d469818194b1930a962fbee637f9be3d080fac07246f38ede98e29865",
-      "line_hash": "b0b7d2c7147f45222e93e2728edb163769d276270b4294c0fcfe87f9ad217ea1",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"best s3 bucket web browser tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=best+s3+bucket+web+browser+tools\\\", \\\"sha256\\\": \\\"6781be17bd7de630fe1d8f77faff8255c3e47d16af94bee41f0c967c1b992fee\\\"}\",\"prev_hash\":\"f2f6c71d469818194b1930a962fbee637f9be3d080fac07246f38ede98e29865\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:55.042944+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=best+s3+bucket+web+browser+tools\", \"sha256\": \"6781be17bd7de630fe1d8f77faff8255c3e47d16af94bee41f0c967c1b992fee\"}"
+      "timestamp": "2026-11-17T18:28:52.438759+00:00",
+      "prev_hash": "2b0b5536374a2711807d14da5f76ae6632082f3c350898f6076c837b341911a1",
+      "line_hash": "b5f30e54f9feb19655adfd2df0cbc4af869b2c7f8a9428ee9f0ed13be96e1e5d",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"best S3 bucket browser web tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=best+S3+bucket+browser+web+tools\\\", \\\"sha256\\\": \\\"6781be17bd7de630fe1d8f77faff8255c3e47d16af94bee41f0c967c1b992fee\\\"}\",\"prev_hash\":\"2b0b5536374a2711807d14da5f76ae6632082f3c350898f6076c837b341911a1\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:52.438759+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=best+S3+bucket+browser+web+tools\", \"sha256\": \"6781be17bd7de630fe1d8f77faff8255c3e47d16af94bee41f0c967c1b992fee\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:56.096080+00:00",
-      "prev_hash": "b0b7d2c7147f45222e93e2728edb163769d276270b4294c0fcfe87f9ad217ea1",
-      "line_hash": "232363b3b1857223a14c10f7aca891e4cc4b6577da92c17f29505b444844b10d",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"best s3 directory listing web tools\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=best+s3+directory+listing+web+tools&per_page=5\\\", \\\"sha256\\\": \\\"7d6e0c9138e172954c9b5ee2fc092f87763f1d0f0d7ae7ccf35f520cd5a1dabb\\\"}\",\"prev_hash\":\"b0b7d2c7147f45222e93e2728edb163769d276270b4294c0fcfe87f9ad217ea1\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:56.096080+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=best+s3+directory+listing+web+tools&per_page=5\", \"sha256\": \"7d6e0c9138e172954c9b5ee2fc092f87763f1d0f0d7ae7ccf35f520cd5a1dabb\"}"
+      "timestamp": "2026-11-17T18:28:53.425818+00:00",
+      "prev_hash": "b5f30e54f9feb19655adfd2df0cbc4af869b2c7f8a9428ee9f0ed13be96e1e5d",
+      "line_hash": "87063c9a4c213e739014ca18586e9749331f062d3d8d5ec7efc6026c15eeb46e",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"best S3 directory listing web tools\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=best+S3+directory+listing+web+tools&per_page=5\\\", \\\"sha256\\\": \\\"7d6e0c9138e172954c9b5ee2fc092f87763f1d0f0d7ae7ccf35f520cd5a1dabb\\\"}\",\"prev_hash\":\"b5f30e54f9feb19655adfd2df0cbc4af869b2c7f8a9428ee9f0ed13be96e1e5d\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:53.425818+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=best+S3+directory+listing+web+tools&per_page=5\", \"sha256\": \"7d6e0c9138e172954c9b5ee2fc092f87763f1d0f0d7ae7ccf35f520cd5a1dabb\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:57.119890+00:00",
-      "prev_hash": "232363b3b1857223a14c10f7aca891e4cc4b6577da92c17f29505b444844b10d",
-      "line_hash": "42fffafa89cae86865513d0cc3ca88177619d401d6906a20e83bde5d868ec042",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"web based s3 file browser\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=web+based+s3+file+browser&per_page=5\\\", \\\"sha256\\\": \\\"36605e3ece06741cab0fa8961f6c30c8e42ae0e065db99194a52ca0812577a52\\\"}\",\"prev_hash\":\"232363b3b1857223a14c10f7aca891e4cc4b6577da92c17f29505b444844b10d\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:57.119890+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=web+based+s3+file+browser&per_page=5\", \"sha256\": \"36605e3ece06741cab0fa8961f6c30c8e42ae0e065db99194a52ca0812577a52\"}"
+      "timestamp": "2026-11-17T18:28:54.540213+00:00",
+      "prev_hash": "87063c9a4c213e739014ca18586e9749331f062d3d8d5ec7efc6026c15eeb46e",
+      "line_hash": "310af9495271f68e09d8ef81ba617b5cd583b7b89c24260f2dd5abc97f765f9b",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"web based S3 file browser\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=web+based+S3+file+browser&per_page=5\\\", \\\"sha256\\\": \\\"f682b72b30fa601a713ab161a637a7a8b0466eeeaf4a128c781e9c669a4586d6\\\"}\",\"prev_hash\":\"87063c9a4c213e739014ca18586e9749331f062d3d8d5ec7efc6026c15eeb46e\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:54.540213+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=web+based+S3+file+browser&per_page=5\", \"sha256\": \"f682b72b30fa601a713ab161a637a7a8b0466eeeaf4a128c781e9c669a4586d6\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:58.373943+00:00",
-      "prev_hash": "42fffafa89cae86865513d0cc3ca88177619d401d6906a20e83bde5d868ec042",
-      "line_hash": "819dcddf0b9dd7c6b7cb463202912de1b2aba2a82d5d0e315fd24625a5550dcf",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"s3 bucket web interface\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=s3+bucket+web+interface&per_page=5\\\", \\\"sha256\\\": \\\"d9e9f543088b60650657002c3016247c436ed8f603b6bfef3545539c170c29bb\\\"}\",\"prev_hash\":\"42fffafa89cae86865513d0cc3ca88177619d401d6906a20e83bde5d868ec042\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:58.373943+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=s3+bucket+web+interface&per_page=5\", \"sha256\": \"d9e9f543088b60650657002c3016247c436ed8f603b6bfef3545539c170c29bb\"}"
+      "timestamp": "2026-11-17T18:28:55.433673+00:00",
+      "prev_hash": "310af9495271f68e09d8ef81ba617b5cd583b7b89c24260f2dd5abc97f765f9b",
+      "line_hash": "7ca21f24b42088e3cbe270124158c010f3e9c73ac8949d7529ea44a1a691da74",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"S3 Apache index alternative\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=S3+Apache+index+alternative&per_page=5\\\", \\\"sha256\\\": \\\"20905c58f07cdb8b5886750dd9ca9e32b7f1bb95e09b28b510ba1e2d5bbe14b1\\\"}\",\"prev_hash\":\"310af9495271f68e09d8ef81ba617b5cd583b7b89c24260f2dd5abc97f765f9b\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:55.433673+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=S3+Apache+index+alternative&per_page=5\", \"sha256\": \"20905c58f07cdb8b5886750dd9ca9e32b7f1bb95e09b28b510ba1e2d5bbe14b1\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:27:59.284656+00:00",
-      "prev_hash": "819dcddf0b9dd7c6b7cb463202912de1b2aba2a82d5d0e315fd24625a5550dcf",
-      "line_hash": "edcbdd7602040e12467b10f1bbbc576b870e50f069a3df372c1725ec8a18a34c",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"apache style s3 index\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=apache+style+s3+index&per_page=5\\\", \\\"sha256\\\": \\\"122be7c14658255065f8ea2221e9cacd288b9adb3c8a5e70ca88082a0d06c405\\\"}\",\"prev_hash\":\"819dcddf0b9dd7c6b7cb463202912de1b2aba2a82d5d0e315fd24625a5550dcf\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:27:59.284656+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=apache+style+s3+index&per_page=5\", \"sha256\": \"122be7c14658255065f8ea2221e9cacd288b9adb3c8a5e70ca88082a0d06c405\"}"
+      "timestamp": "2026-11-17T18:28:56.338898+00:00",
+      "prev_hash": "7ca21f24b42088e3cbe270124158c010f3e9c73ac8949d7529ea44a1a691da74",
+      "line_hash": "428cf82d5c222db72ff5dd270b98fb693193dbf5feb0243814364b2063098112",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"host S3 browser Heroku\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=host+S3+browser+Heroku&per_page=5\\\", \\\"sha256\\\": \\\"f3a6e0655028f9c56c17ea6962460f7a6d4ad9fa24a3ff98245afb95c6329975\\\"}\",\"prev_hash\":\"7ca21f24b42088e3cbe270124158c010f3e9c73ac8949d7529ea44a1a691da74\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:56.338898+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=host+S3+browser+Heroku&per_page=5\", \"sha256\": \"f3a6e0655028f9c56c17ea6962460f7a6d4ad9fa24a3ff98245afb95c6329975\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:28:00.103806+00:00",
-      "prev_hash": "edcbdd7602040e12467b10f1bbbc576b870e50f069a3df372c1725ec8a18a34c",
-      "line_hash": "b14b76730d3f3eac34bcfc067d5376568cac2b6df135072b612b1a56366ea5f5",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"awslabs/aws-js-s3-explorer\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/awslabs/aws-js-s3-explorer/readme\\\", \\\"sha256\\\": \\\"f6cd0f17d908dd186fb087170f6ed00ae8913d882c3beeb47f81a13a48b7f645\\\"}\",\"prev_hash\":\"edcbdd7602040e12467b10f1bbbc576b870e50f069a3df372c1725ec8a18a34c\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:00.103806+00:00\"}",
+      "timestamp": "2026-11-17T18:28:57.162056+00:00",
+      "prev_hash": "428cf82d5c222db72ff5dd270b98fb693193dbf5feb0243814364b2063098112",
+      "line_hash": "7dc02ac161d2cefc263f7977d6b3efa9aee8d76790affdd0c9c32fff628f7ce8",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"awslabs/aws-js-s3-explorer\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/awslabs/aws-js-s3-explorer/readme\\\", \\\"sha256\\\": \\\"f6cd0f17d908dd186fb087170f6ed00ae8913d882c3beeb47f81a13a48b7f645\\\"}\",\"prev_hash\":\"428cf82d5c222db72ff5dd270b98fb693193dbf5feb0243814364b2063098112\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:57.162056+00:00\"}",
       "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/awslabs/aws-js-s3-explorer/readme\", \"sha256\": \"f6cd0f17d908dd186fb087170f6ed00ae8913d882c3beeb47f81a13a48b7f645\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:28:01.107063+00:00",
-      "prev_hash": "b14b76730d3f3eac34bcfc067d5376568cac2b6df135072b612b1a56366ea5f5",
-      "line_hash": "5e63cf8ef1b0e62f3f30c764e3eaa3d7c8ac56b043a1b7e9ad80630cc33f1471",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"patbonecrusher/aws-s3-web-browser-file-listing\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/patbonecrusher/aws-s3-web-browser-file-listing/readme\\\", \\\"sha256\\\": \\\"f3b4394b36905db66090a0e53fce7c04f754335fd33230043a9b4e5d19a1812e\\\"}\",\"prev_hash\":\"b14b76730d3f3eac34bcfc067d5376568cac2b6df135072b612b1a56366ea5f5\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:01.107063+00:00\"}",
+      "timestamp": "2026-11-17T18:28:57.948433+00:00",
+      "prev_hash": "7dc02ac161d2cefc263f7977d6b3efa9aee8d76790affdd0c9c32fff628f7ce8",
+      "line_hash": "de2626bb22f576c80b67a522c30c0bdc0206d40dcc58f34377a766b9b7c11f17",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"patbonecrusher/aws-s3-web-browser-file-listing\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/patbonecrusher/aws-s3-web-browser-file-listing/readme\\\", \\\"sha256\\\": \\\"f3b4394b36905db66090a0e53fce7c04f754335fd33230043a9b4e5d19a1812e\\\"}\",\"prev_hash\":\"7dc02ac161d2cefc263f7977d6b3efa9aee8d76790affdd0c9c32fff628f7ce8\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:57.948433+00:00\"}",
       "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/patbonecrusher/aws-s3-web-browser-file-listing/readme\", \"sha256\": \"f3b4394b36905db66090a0e53fce7c04f754335fd33230043a9b4e5d19a1812e\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\",\"status\":\"404\"}",
-      "timestamp": "2026-11-17T13:28:01.829612+00:00",
-      "prev_hash": "5e63cf8ef1b0e62f3f30c764e3eaa3d7c8ac56b043a1b7e9ad80630cc33f1471",
-      "line_hash": "1bff1b7b9476bedadce9b88d077cbf5744439a13f68cc06e9bc2b1ad2301a3e1",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"Sfedfcv/redesigned-pancake\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/Sfedfcv/redesigned-pancake/readme\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"5e63cf8ef1b0e62f3f30c764e3eaa3d7c8ac56b043a1b7e9ad80630cc33f1471\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:01.829612+00:00\"}",
+      "timestamp": "2026-11-17T18:28:58.739373+00:00",
+      "prev_hash": "de2626bb22f576c80b67a522c30c0bdc0206d40dcc58f34377a766b9b7c11f17",
+      "line_hash": "e3b589f71ba8a033ca810f67d685dc8c951092d28d7eda0b57dc2d0f629f322a",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"Sfedfcv/redesigned-pancake\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/Sfedfcv/redesigned-pancake/readme\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"de2626bb22f576c80b67a522c30c0bdc0206d40dcc58f34377a766b9b7c11f17\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:58.739373+00:00\"}",
       "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/Sfedfcv/rede"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:28:02.610336+00:00",
-      "prev_hash": "1bff1b7b9476bedadce9b88d077cbf5744439a13f68cc06e9bc2b1ad2301a3e1",
-      "line_hash": "a0ba136239c9f04320ae47e30727aa875690eafe7190a727c756f188e4205ec6",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"kalcaddle/KodExplorer\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/kalcaddle/KodExplorer/readme\\\", \\\"sha256\\\": \\\"f941d8681d870f9e278f58429e3242db457406c228ea1d075671c5508470845c\\\"}\",\"prev_hash\":\"1bff1b7b9476bedadce9b88d077cbf5744439a13f68cc06e9bc2b1ad2301a3e1\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:02.610336+00:00\"}",
+      "timestamp": "2026-11-17T18:28:59.480040+00:00",
+      "prev_hash": "e3b589f71ba8a033ca810f67d685dc8c951092d28d7eda0b57dc2d0f629f322a",
+      "line_hash": "c2502bf962208935105bbd77d4ab0bf567683f1fec848179ce151a58742bb703",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"kalcaddle/KodExplorer\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/kalcaddle/KodExplorer/readme\\\", \\\"sha256\\\": \\\"f941d8681d870f9e278f58429e3242db457406c228ea1d075671c5508470845c\\\"}\",\"prev_hash\":\"e3b589f71ba8a033ca810f67d685dc8c951092d28d7eda0b57dc2d0f629f322a\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:28:59.480040+00:00\"}",
       "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/kalcaddle/KodExplorer/readme\", \"sha256\": \"f941d8681d870f9e278f58429e3242db457406c228ea1d075671c5508470845c\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:28:03.653509+00:00",
-      "prev_hash": "a0ba136239c9f04320ae47e30727aa875690eafe7190a727c756f188e4205ec6",
-      "line_hash": "69ca4be55fda7bfa9674f898dcac7dee9ba5f9b4cdcb49050bbf2668ff31df8c",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"mathisve/golang-s3-upload\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/mathisve/golang-s3-upload/readme\\\", \\\"sha256\\\": \\\"3484d23d2b70c4443f5b9c73db08d0dc4fb37007ac537a3533951ed80865423a\\\"}\",\"prev_hash\":\"a0ba136239c9f04320ae47e30727aa875690eafe7190a727c756f188e4205ec6\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:03.653509+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/mathisve/golang-s3-upload/readme\", \"sha256\": \"3484d23d2b70c4443f5b9c73db08d0dc4fb37007ac537a3533951ed80865423a\"}"
+      "timestamp": "2026-11-17T18:29:00.695364+00:00",
+      "prev_hash": "c2502bf962208935105bbd77d4ab0bf567683f1fec848179ce151a58742bb703",
+      "line_hash": "2abcaff40c8e3d466ea258c0e59ecee6a194a0cba9bc45d9e52320df7a8a5427",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"Saturnremabtc64/supreme-octo-roboticeyx\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/Saturnremabtc64/supreme-octo-roboticeyx/readme\\\", \\\"sha256\\\": \\\"2d81373a4337214cd8b059ecf4dec066bc452caf7b42037e41034fe7b8cb4261\\\"}\",\"prev_hash\":\"c2502bf962208935105bbd77d4ab0bf567683f1fec848179ce151a58742bb703\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:00.695364+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/Saturnremabtc64/supreme-octo-roboticeyx/readme\", \"sha256\": \"2d81373a4337214cd8b059ecf4dec066bc452caf7b42037e41034fe7b8cb4261\"}"
     },
     {
       "action": "TOOL_CALL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:28:04.375579+00:00",
-      "prev_hash": "69ca4be55fda7bfa9674f898dcac7dee9ba5f9b4cdcb49050bbf2668ff31df8c",
-      "line_hash": "bda7d123d64d7acc2e1420bf78ed6d5158e333f2b0d396f87da03cfbaca16a19",
-      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"menkveldj/s3-directory-index\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/menkveldj/s3-directory-index/readme\\\", \\\"sha256\\\": \\\"a05e973e7632768ae0ed9dcc627148371fe4158ca950e00cc43ad7cb0d1e4aaa\\\"}\",\"prev_hash\":\"69ca4be55fda7bfa9674f898dcac7dee9ba5f9b4cdcb49050bbf2668ff31df8c\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:04.375579+00:00\"}",
-      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/menkveldj/s3-directory-index/readme\", \"sha256\": \"a05e973e7632768ae0ed9dcc627148371fe4158ca950e00cc43ad7cb0d1e4aaa\"}"
+      "timestamp": "2026-11-17T18:29:01.623881+00:00",
+      "prev_hash": "2abcaff40c8e3d466ea258c0e59ecee6a194a0cba9bc45d9e52320df7a8a5427",
+      "line_hash": "a8bef836bbfabd73fcd8829928cb1d67b3f1fc1ecd1d0d31c89d5293776b17b4",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"caussourd/aws-s3-bucket-listing\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/caussourd/aws-s3-bucket-listing/readme\\\", \\\"sha256\\\": \\\"b7398e0509f87c1b2dbdff726c05858f00d30358c5be2788ac07b599dda23861\\\"}\",\"prev_hash\":\"2abcaff40c8e3d466ea258c0e59ecee6a194a0cba9bc45d9e52320df7a8a5427\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:01.623881+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/caussourd/aws-s3-bucket-listing/readme\", \"sha256\": \"b7398e0509f87c1b2dbdff726c05858f00d30358c5be2788ac07b599dda23861\"}"
     },
     {
       "action": "PRIOR_ART_SEARCH",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:28:04.376022+00:00",
-      "prev_hash": "bda7d123d64d7acc2e1420bf78ed6d5158e333f2b0d396f87da03cfbaca16a19",
-      "line_hash": "2e57a411aef6167a898bd399e20ec4bdcf0315befd268ae288ccd4762b5e8ac0",
-      "canonical": "{\"action\":\"PRIOR_ART_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PRIOR_ART_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"queries\\\": [\\\"s3 bucket web browser\\\", \\\"s3 directory listing web\\\", \\\"best s3 bucket web browser tools\\\", \\\"best s3 directory listing web tools\\\", \\\"web based s3 file browser\\\", \\\"s3 bucket web interface\\\", \\\"apache style s3 index\\\"]}\",\"output_summary\":\"{\\\"total_results\\\": 15, \\\"source_counts\\\": {\\\"github\\\": 6, \\\"npm\\\": 0, \\\"pypi\\\": 0, \\\"web\\\": 9}, \\\"source_status\\\": {\\\"github\\\": \\\"ok\\\", \\\"npm\\\": \\\"ok\\\", \\\"web\\\": \\\"ok\\\"}}\",\"prev_hash\":\"bda7d123d64d7acc2e1420bf78ed6d5158e333f2b0d396f87da03cfbaca16a19\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:04.376022+00:00\"}",
+      "timestamp": "2026-11-17T18:29:01.624631+00:00",
+      "prev_hash": "a8bef836bbfabd73fcd8829928cb1d67b3f1fc1ecd1d0d31c89d5293776b17b4",
+      "line_hash": "95e89c587bba6122aa6514da5f5a7a12388062e8fbd6c2ecbd4fde0d65e0ad5e",
+      "canonical": "{\"action\":\"PRIOR_ART_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PRIOR_ART_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"queries\\\": [\\\"S3 bucket browser web\\\", \\\"S3 directory listing web\\\", \\\"best S3 bucket browser web tools\\\", \\\"best S3 directory listing web tools\\\", \\\"web based S3 file browser\\\", \\\"S3 Apache index alternative\\\", \\\"host S3 browser Heroku\\\"]}\",\"output_summary\":\"{\\\"total_results\\\": 15, \\\"source_counts\\\": {\\\"github\\\": 6, \\\"npm\\\": 0, \\\"pypi\\\": 0, \\\"web\\\": 9}, \\\"source_status\\\": {\\\"github\\\": \\\"ok\\\", \\\"npm\\\": \\\"ok\\\", \\\"web\\\": \\\"ok\\\"}}\",\"prev_hash\":\"a8bef836bbfabd73fcd8829928cb1d67b3f1fc1ecd1d0d31c89d5293776b17b4\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:01.624631+00:00\"}",
       "detail": "{\"total_results\": 15, \"source_counts\": {\"github\": 6, \"npm\": 0, \"pypi\": 0, \"web\": 9}, \"source_status\": {\"github\": \"ok\", \"npm\": \"ok\", \"web\": \"ok\"}}"
     },
     {
       "action": "own_identity",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:28:04.376296+00:00",
-      "prev_hash": "2e57a411aef6167a898bd399e20ec4bdcf0315befd268ae288ccd4762b5e8ac0",
-      "line_hash": "fec9df223544861d279af1ae4d87473aca03638aadbb4dc3fcc97bce5d982396",
-      "canonical": "{\"action\":\"own_identity\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"own_identity\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"own_identity\\\": [{\\\"alternative\\\": \\\"powdahound/s3browser\\\", \\\"url\\\": \\\"https://api.github.com/repos/powdahound/s3browser\\\", \\\"reason\\\": \\\"same repository\\\"}, {\\\"alternative\\\": \\\"powdahound/s3browser\\\", \\\"url\\\": \\\"https://api.github.com/repos/powdahound/s3browser\\\", \\\"reason\\\": \\\"same repository\\\"}], \\\"identities\\\": {\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"owner\\\": \\\"powdahound\\\", \\\"name\\\": \\\"s3browser\\\", \\\"packages\\\": [\\\"s3browser\\\"], \\\"urls\\\": [\\\"github.com/powdahound/s3browser\\\", \\\"powdahound.github.io/s3browser\\\"]}}\",\"prev_hash\":\"2e57a411aef6167a898bd399e20ec4bdcf0315befd268ae288ccd4762b5e8ac0\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:04.376296+00:00\"}",
-      "detail": "{\"own_identity\": [{\"alternative\": \"powdahound/s3browser\", \"url\": \"https://api.github.com/repos/powdahound/s3browser\", \"reason\": \"same repository\"}, {\"alternative\": \"powdahound/s3browser\", \"url\": \"https://api.github.com/repos/powdahound/s3br"
+      "timestamp": "2026-11-17T18:29:01.624854+00:00",
+      "prev_hash": "95e89c587bba6122aa6514da5f5a7a12388062e8fbd6c2ecbd4fde0d65e0ad5e",
+      "line_hash": "9279894c4ddd3ce17570f22761f31cda7fb2825395d3cf8c91204118cfe7c2a7",
+      "canonical": "{\"action\":\"own_identity\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"own_identity\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"own_identity\\\": [{\\\"alternative\\\": \\\"powdahound/s3browser\\\", \\\"url\\\": \\\"https://api.github.com/repos/powdahound/s3browser\\\", \\\"reason\\\": \\\"same repository\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/powdahound/s3browser/\\\", \\\"url\\\": \\\"https://github.com/powdahound/s3browser/\\\", \\\"reason\\\": \\\"own homepage, docs, or repository URL\\\"}], \\\"identities\\\": {\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"owner\\\": \\\"powdahound\\\", \\\"name\\\": \\\"s3browser\\\", \\\"packages\\\": [\\\"s3browser\\\"], \\\"urls\\\": [\\\"github.com/powdahound/s3browser\\\", \\\"powdahound.gith...\",\"prev_hash\":\"95e89c587bba6122aa6514da5f5a7a12388062e8fbd6c2ecbd4fde0d65e0ad5e\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:01.624854+00:00\"}",
+      "detail": "{\"own_identity\": [{\"alternative\": \"powdahound/s3browser\", \"url\": \"https://api.github.com/repos/powdahound/s3browser\", \"reason\": \"same repository\"}, {\"alternative\": \"web:https://github.com/powdahound/s3browser/\", \"url\": \"https://github.com/p"
     },
     {
-      "action": "LLM_CALL",
-      "step": "alternative_batch",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:28:22.035191+00:00",
-      "prev_hash": "fec9df223544861d279af1ae4d87473aca03638aadbb4dc3fcc97bce5d982396",
-      "line_hash": "7fba9bd1b27e5984ea78256a7653a552e154cccf220db18d8276f37a73b57bef",
-      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"alternative_batch\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"fec9df223544861d279af1ae4d87473aca03638aadbb4dc3fcc97bce5d982396\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:22.035191+00:00\"}",
-      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
+      "action": "STABLE_SEARCH",
+      "step": "",
+      "status": "error",
+      "timestamp": "2026-11-17T18:29:33.645244+00:00",
+      "prev_hash": "9279894c4ddd3ce17570f22761f31cda7fb2825395d3cf8c91204118cfe7c2a7",
+      "line_hash": "72d7be9933c1cced76e797d23360ce0c95f583ebc8c3d2e86670ac4eb1bbb6f8",
+      "canonical": "{\"action\":\"STABLE_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STABLE_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"query\\\": \\\"Web-based bucket browsing Similar Apache-style indexes\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"metadata unavailable\\\", \\\"error\\\": \\\"could not reach GitHub: <urlopen error [Errno 32] Broken pipe>\\\"}\",\"prev_hash\":\"9279894c4ddd3ce17570f22761f31cda7fb2825395d3cf8c91204118cfe7c2a7\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"error\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:33.645244+00:00\"}",
+      "detail": "{\"status\": \"metadata unavailable\", \"error\": \"could not reach GitHub: <urlopen error [Errno 32] Broken pipe>\"}"
     },
     {
-      "action": "ALTERNATIVE_BATCH_CALL",
+      "action": "STABLE_SEARCH",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:28:22.036366+00:00",
-      "prev_hash": "7fba9bd1b27e5984ea78256a7653a552e154cccf220db18d8276f37a73b57bef",
-      "line_hash": "bd4d6314e2c1492d9c38754e5d4f60578eb28223895e01ccc2d03fb6af6bdc56",
-      "canonical": "{\"action\":\"ALTERNATIVE_BATCH_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVE_BATCH_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"indexes\\\": [0, 1, 2, 3], \\\"alternative\\\": null, \\\"chunk_index\\\": 2}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"parsed_indexes\\\": [0, 1, 2, 3], \\\"reason\\\": null, \\\"chunk_index\\\": 2}\",\"prev_hash\":\"7fba9bd1b27e5984ea78256a7653a552e154cccf220db18d8276f37a73b57bef\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:22.036366+00:00\"}",
-      "detail": "{\"requested_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"served_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"parsed_indexes\": [0, 1, 2, 3], \"reason\": null, \"chunk_index\": 2}"
-    },
-    {
-      "action": "LLM_CALL",
-      "step": "alternative_batch",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:28:29.286754+00:00",
-      "prev_hash": "bd4d6314e2c1492d9c38754e5d4f60578eb28223895e01ccc2d03fb6af6bdc56",
-      "line_hash": "a8c2d4a399a1b463f8af65b41e2a705ba48516229936d312a8639704378d657d",
-      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"alternative_batch\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"bd4d6314e2c1492d9c38754e5d4f60578eb28223895e01ccc2d03fb6af6bdc56\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:29.286754+00:00\"}",
-      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
-    },
-    {
-      "action": "ALTERNATIVE_BATCH_CALL",
-      "step": "",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:28:29.287062+00:00",
-      "prev_hash": "a8c2d4a399a1b463f8af65b41e2a705ba48516229936d312a8639704378d657d",
-      "line_hash": "e5e349edb9c84a4e3a1eb8c88534e8afa958a68ed7d21bf6fd854df8f4e066a4",
-      "canonical": "{\"action\":\"ALTERNATIVE_BATCH_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVE_BATCH_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"indexes\\\": [0, 1, 2], \\\"alternative\\\": null, \\\"chunk_index\\\": 3}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"parsed_indexes\\\": [0, 1, 2], \\\"reason\\\": null, \\\"chunk_index\\\": 3}\",\"prev_hash\":\"a8c2d4a399a1b463f8af65b41e2a705ba48516229936d312a8639704378d657d\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:28:29.287062+00:00\"}",
-      "detail": "{\"requested_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"served_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"parsed_indexes\": [0, 1, 2], \"reason\": null, \"chunk_index\": 3}"
-    },
-    {
-      "action": "LLM_CALL",
-      "step": "alternative_batch",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:29:02.619012+00:00",
-      "prev_hash": "e5e349edb9c84a4e3a1eb8c88534e8afa958a68ed7d21bf6fd854df8f4e066a4",
-      "line_hash": "0a81a046fbccdd118a410be290651ebb2dcd12158bae00ff70b7a201e084912c",
-      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"alternative_batch\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"e5e349edb9c84a4e3a1eb8c88534e8afa958a68ed7d21bf6fd854df8f4e066a4\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:02.619012+00:00\"}",
-      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
-    },
-    {
-      "action": "ALTERNATIVE_BATCH_CALL",
-      "step": "",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:29:02.619224+00:00",
-      "prev_hash": "0a81a046fbccdd118a410be290651ebb2dcd12158bae00ff70b7a201e084912c",
-      "line_hash": "24182b8c949d00a7ba529fa9232a03dd799fb49320ead0ab1c551fec9186d75a",
-      "canonical": "{\"action\":\"ALTERNATIVE_BATCH_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVE_BATCH_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"indexes\\\": [0, 1, 2, 3], \\\"alternative\\\": null, \\\"chunk_index\\\": 0}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"parsed_indexes\\\": [0, 1, 2, 3], \\\"reason\\\": null, \\\"chunk_index\\\": 0}\",\"prev_hash\":\"0a81a046fbccdd118a410be290651ebb2dcd12158bae00ff70b7a201e084912c\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:02.619224+00:00\"}",
-      "detail": "{\"requested_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"served_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"parsed_indexes\": [0, 1, 2, 3], \"reason\": null, \"chunk_index\": 0}"
-    },
-    {
-      "action": "LLM_CALL",
-      "step": "alternative_reread",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:29:10.958427+00:00",
-      "prev_hash": "24182b8c949d00a7ba529fa9232a03dd799fb49320ead0ab1c551fec9186d75a",
-      "line_hash": "b99ea9994875305bac1474f9d4ab8fb2e80b290b8419cc91d76e857b043bf2f0",
-      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"alternative_reread\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"24182b8c949d00a7ba529fa9232a03dd799fb49320ead0ab1c551fec9186d75a\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:10.958427+00:00\"}",
-      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
-    },
-    {
-      "action": "OVERLAP_RUBRIC",
-      "step": "",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:29:10.958592+00:00",
-      "prev_hash": "b99ea9994875305bac1474f9d4ab8fb2e80b290b8419cc91d76e857b043bf2f0",
-      "line_hash": "349530ff1a00e14721e3c48b0ed22d241afa750255cba1bb59f4f63f79cf438d",
-      "canonical": "{\"action\":\"OVERLAP_RUBRIC\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"OVERLAP_RUBRIC\",\"input_summary\":\"{\\\"alternative\\\": \\\"web:https://s3-viewer.com/\\\"}\",\"output_summary\":\"{\\\"first\\\": {\\\"same_core_job\\\": true, \\\"same_input_output\\\": true, \\\"same_target_user\\\": true, \\\"covers_main_features\\\": false}, \\\"second\\\": {\\\"same_core_job\\\": true, \\\"same_input_output\\\": true, \\\"same_target_user\\\": true, \\\"covers_main_features\\\": true}, \\\"first_overlap\\\": \\\"partial\\\", \\\"second_overlap\\\": \\\"full\\\", \\\"result\\\": \\\"disagree\\\"}\",\"prev_hash\":\"b99ea9994875305bac1474f9d4ab8fb2e80b290b8419cc91d76e857b043bf2f0\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:10.958592+00:00\"}",
-      "detail": "{\"first\": {\"same_core_job\": true, \"same_input_output\": true, \"same_target_user\": true, \"covers_main_features\": false}, \"second\": {\"same_core_job\": true, \"same_input_output\": true, \"same_target_user\": true, \"covers_main_features\": true}, \"fi"
-    },
-    {
-      "action": "LLM_CALL",
-      "step": "alternative_batch",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:29:16.431601+00:00",
-      "prev_hash": "349530ff1a00e14721e3c48b0ed22d241afa750255cba1bb59f4f63f79cf438d",
-      "line_hash": "368608c72785235192dcd216d50960641c837e4d5df025524b1538e91e08e6c2",
-      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"alternative_batch\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"349530ff1a00e14721e3c48b0ed22d241afa750255cba1bb59f4f63f79cf438d\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:16.431601+00:00\"}",
-      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
-    },
-    {
-      "action": "ALTERNATIVE_BATCH_CALL",
-      "step": "",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:29:16.431781+00:00",
-      "prev_hash": "368608c72785235192dcd216d50960641c837e4d5df025524b1538e91e08e6c2",
-      "line_hash": "ce1d5077c53b493219a9959f209b3fb4e1f150a38f1515a1d93e33124a02e608",
-      "canonical": "{\"action\":\"ALTERNATIVE_BATCH_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVE_BATCH_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"indexes\\\": [0, 1, 2, 3], \\\"alternative\\\": null, \\\"chunk_index\\\": 1}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"parsed_indexes\\\": [0, 1, 2, 3], \\\"reason\\\": null, \\\"chunk_index\\\": 1}\",\"prev_hash\":\"368608c72785235192dcd216d50960641c837e4d5df025524b1538e91e08e6c2\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:16.431781+00:00\"}",
-      "detail": "{\"requested_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"served_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"parsed_indexes\": [0, 1, 2, 3], \"reason\": null, \"chunk_index\": 1}"
-    },
-    {
-      "action": "LLM_CALL",
-      "step": "alternative_reread",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:29:28.341351+00:00",
-      "prev_hash": "ce1d5077c53b493219a9959f209b3fb4e1f150a38f1515a1d93e33124a02e608",
-      "line_hash": "0e812f7f3a85e4184288c3500c0f44ef0ba463a245d1c0a0175d78ed0f1524c8",
-      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"alternative_reread\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"ce1d5077c53b493219a9959f209b3fb4e1f150a38f1515a1d93e33124a02e608\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:28.341351+00:00\"}",
-      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
-    },
-    {
-      "action": "OVERLAP_RUBRIC",
-      "step": "",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:29:28.341516+00:00",
-      "prev_hash": "0e812f7f3a85e4184288c3500c0f44ef0ba463a245d1c0a0175d78ed0f1524c8",
-      "line_hash": "9a9603988c57533e5ee9e899f3a57702913495e89fdd0aa4819dc5d909df9dfa",
-      "canonical": "{\"action\":\"OVERLAP_RUBRIC\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"OVERLAP_RUBRIC\",\"input_summary\":\"{\\\"alternative\\\": \\\"web:https://www.filestash.app/s3-browser.html\\\"}\",\"output_summary\":\"{\\\"first\\\": {\\\"same_core_job\\\": true, \\\"same_input_output\\\": true, \\\"same_target_user\\\": true, \\\"covers_main_features\\\": false}, \\\"second\\\": {\\\"same_core_job\\\": true, \\\"same_input_output\\\": true, \\\"same_target_user\\\": true, \\\"covers_main_features\\\": true}, \\\"first_overlap\\\": \\\"partial\\\", \\\"second_overlap\\\": \\\"full\\\", \\\"result\\\": \\\"disagree\\\"}\",\"prev_hash\":\"0e812f7f3a85e4184288c3500c0f44ef0ba463a245d1c0a0175d78ed0f1524c8\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:28.341516+00:00\"}",
-      "detail": "{\"first\": {\"same_core_job\": true, \"same_input_output\": true, \"same_target_user\": true, \"covers_main_features\": false}, \"second\": {\"same_core_job\": true, \"same_input_output\": true, \"same_target_user\": true, \"covers_main_features\": true}, \"fi"
-    },
-    {
-      "action": "ALTERNATIVES_VERIFIED",
-      "step": "",
-      "status": "ok",
-      "timestamp": "2026-11-17T13:29:28.343782+00:00",
-      "prev_hash": "9a9603988c57533e5ee9e899f3a57702913495e89fdd0aa4819dc5d909df9dfa",
-      "line_hash": "b561a9f1ff3aaaf577588ea5da4ed77f94c9be58cba762230f054cb2f31a6057",
-      "canonical": "{\"action\":\"ALTERNATIVES_VERIFIED\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVES_VERIFIED\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"searched\\\": 15}\",\"output_summary\":\"{\\\"alternatives\\\": [{\\\"alternative_id\\\": \\\"web:https://s3-viewer.com/\\\", \\\"url\\\": \\\"https://s3-viewer.com/\\\", \\\"source\\\": \\\"web\\\", \\\"overlap\\\": \\\"unresolved\\\", \\\"reason\\\": \\\"overlap judged differently on two reads\\\", \\\"quotes\\\": [\\\"Browse every S3-compatible bucket in one place\\\", \\\"An S3 client that works like a file browser\\\", \\\"Navigate your buckets with the familiar file explorer interface you already know — folders, search, drag and drop.\\\"]}, {\\\"alternative_id\\\": \\\"web:https://github.com/rufuspollock/s3-bucket-listing\\\", \\\"url\\\": \\\"https://github.com/rufuspollock/s3-bucket-listing\\\", \\\"source\\\": \\\"web\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"This tool creates Apache-style directory listings for S3 buckets using only JavaScript and HTML, deployable directly into a bucket.\\\", \\\"quotes\\\": [\\\"Create nice directory listings for s3 buckets using only javascript and HTML.\\\", \\\"The listing can be deployed on any site and can also be deployed into a bucket.\\\"]}, {\\\"alternative_id\\\": \\\"web:https://github.com/flightlesstux/S3-Directory-Listing\\\", \\\"url\\\": \\\"https://github.com/flightlesstux/S3-Directory-Listing\\\", \\\"source\\\": \\\"web\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"A lightweight, zero-dependency client-side UI that turns any AWS S3 bucket into a clean, navigable file browser by dropping four files into the bucket.\\\", \\\"quotes\\\": [\\\"A lightweight, zero-dependency client-side UI that turns any AWS S3 bucket into a clean, navigable file browser.\\\", \\\"Drop four files into your bucket and you're done.\\\", \\\"Deep linking — share or bookmark any subfolder via ?prefix= URL\\\"]}, {\\\"alternative_id\\\": \\\"web:https://github.com/josephabrahams/s3-directory-index\\\", \\\"url\\\": \\\"https://github.com/josephabrahams/s3-directory-index\\\", \\\"source\\\": \\\"web\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"This script creates an Apache-style directory index for an S3 bucket using static website hosting, directly matching the candidate's core problem.\\\", \\\"quotes\\\": [\\\"This script exploits the error document functionality of S3 static websites to create an Apache-style directory index of your bucket.\\\"]}, {\\\"alternative_id\\\": \\\"web:https://www.filestash.app/s3-browser.html\\\", \\\"url\\\": \\\"https://www.filestash.app/s3-browser.html\\\", \\\"source\\\": \\\"web\\\", \\\"overlap\\\": \\\"unresolved\\\", \\\"reason\\\": \\\"overlap judged differently on two reads\\\", \\\"quotes\\\": [\\\"An S3 client that turns your S3 buckets into an online file browser\\\", \\\"Our web client makes it easy to browse, explore, upload files into your bucket but also downloads files, rename or delete them or just act as an S3 viewer, all from the web interface!\\\"]}, {\\\"alternative_id\\\": \\\"web:https://github.com/dhedegaard/s3-index-listing\\\", \\\"url\\\": \\\"https://github.com/dhedegaard/s3-index-listing\\\", \\\"source\\\": \\\"web\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"Provides Apache/nginx-style directory listings for S3 buckets via a web interface, directly matching the candidate's core job.\\\", \\\"quotes\\\": [\\\"Lists objects in an S3 as if it was a directory listing through Apache or nginx.\\\"]}, {\\\"alternative_id\\\": \\\"awslabs/aws-js-s3-explorer\\\", \\\"url\\\": \\\"https://github.com/awslabs/aws-js-s3-explorer\\\", \\\"source\\\": \\\"github\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"Enables web-based browsing of S3 bucket contents, though focused on public buckets and client-side JavaScript.\\\", \\\"quotes\\\": [\\\"make the contents of a public S3 bucket easy to browse via a web browser\\\"]}, {\\\"alternative_id\\\": \\\"patbonecrusher/aws-s3-web-browser-file-listing\\\", \\\"url\\\": \\\"https://github.com/patbonecrusher/aws-s3-web-browser-file-listing\\\", \\\"source\\\": \\\"github\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"Explicitly creates Apache-style directory listings for S3 buckets via CloudFront and Lambda@Edge, matching the candidate's core job.\\\", \\\"quotes\\\": [\\\"similar to a traditional \\\\\\\"Apache Directory Listing\\\\\\\"\\\"]}, {\\\"alternative_id\\\": \\\"menkveldj/s3-directory-index\\\", \\\"url\\\": \\\"https://github.com/menkveldj/s3-directory-index\\\", \\\"source\\\": \\\"github\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"s3-directory-index directly creates an Apache-style directory index for an S3 bucket using S3 static website hosting, solving the exact same core problem for the same users.\\\", \\\"quotes\\\": [\\\"Apache-style directory index of your S3 bucket\\\", \\\"This script exploits the error document functionality of S3 static websites to create an Apache-style directory index of your bucket.\\\"]}]}\",\"prev_hash\":\"9a9603988c57533e5ee9e899f3a57702913495e89fdd0aa4819dc5d909df9dfa\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:28.343782+00:00\"}",
-      "detail": "{\"alternatives\": [{\"alternative_id\": \"web:https://s3-viewer.com/\", \"url\": \"https://s3-viewer.com/\", \"source\": \"web\", \"overlap\": \"unresolved\", \"reason\": \"overlap judged differently on two reads\", \"quotes\": [\"Browse every S3-compatible bucket"
+      "timestamp": "2026-11-17T18:29:34.456486+00:00",
+      "prev_hash": "72d7be9933c1cced76e797d23360ce0c95f583ebc8c3d2e86670ac4eb1bbb6f8",
+      "line_hash": "c5a970e6b3d9f66907eaca0b80abf744a67675c21434d671610ed105bf8247e2",
+      "canonical": "{\"action\":\"STABLE_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STABLE_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"query\\\": \\\"Web-based bucket browsing stars:>=50 fork:false\\\", \\\"commit\\\": \\\"253fde7864baa84cc95950ca0c6b099d245ba54c\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"count\\\": 0, \\\"repos\\\": []}\",\"prev_hash\":\"72d7be9933c1cced76e797d23360ce0c95f583ebc8c3d2e86670ac4eb1bbb6f8\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:34.456486+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"count\": 0, \"repos\": []}"
     },
     {
       "action": "GITHUB_METADATA",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:29.030783+00:00",
-      "prev_hash": "b561a9f1ff3aaaf577588ea5da4ed77f94c9be58cba762230f054cb2f31a6057",
-      "line_hash": "a1056b25f175e6f74886bce6bb1c576bc1229a6c59af789925ac0ef2329683ab",
-      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"rufuspollock/s3-bucket-listing\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 709, \\\"pushed_at\\\": \\\"2026-02-04T15:55:42Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"b561a9f1ff3aaaf577588ea5da4ed77f94c9be58cba762230f054cb2f31a6057\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:29.030783+00:00\"}",
+      "timestamp": "2026-11-17T18:29:35.119617+00:00",
+      "prev_hash": "c5a970e6b3d9f66907eaca0b80abf744a67675c21434d671610ed105bf8247e2",
+      "line_hash": "2a33f747938043466e558445a87da54c8bc8c0d428fa8d0784d23eca332a18c2",
+      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"rufuspollock/s3-bucket-listing\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 709, \\\"pushed_at\\\": \\\"2026-02-04T15:55:42Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"c5a970e6b3d9f66907eaca0b80abf744a67675c21434d671610ed105bf8247e2\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:35.119617+00:00\"}",
       "detail": "{\"status\": \"ok\", \"stars\": 709, \"pushed_at\": \"2026-02-04T15:55:42Z\", \"archived\": false}"
     },
     {
       "action": "GITHUB_METADATA",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:29.740254+00:00",
-      "prev_hash": "a1056b25f175e6f74886bce6bb1c576bc1229a6c59af789925ac0ef2329683ab",
-      "line_hash": "f62e2bd6ad080d95cab1fe599d0a004b337e970096467f0cef41583722ef1c87",
-      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"flightlesstux/S3-Directory-Listing\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 41, \\\"pushed_at\\\": \\\"2026-03-16T13:09:24Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"a1056b25f175e6f74886bce6bb1c576bc1229a6c59af789925ac0ef2329683ab\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:29.740254+00:00\"}",
+      "timestamp": "2026-11-17T18:29:35.961256+00:00",
+      "prev_hash": "2a33f747938043466e558445a87da54c8bc8c0d428fa8d0784d23eca332a18c2",
+      "line_hash": "ba565952970f68c4ad49c3445ee04cfd915e47a178b1175a88f5b2f6ccf07bca",
+      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"flightlesstux/S3-Directory-Listing\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 41, \\\"pushed_at\\\": \\\"2026-03-16T13:09:24Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"2a33f747938043466e558445a87da54c8bc8c0d428fa8d0784d23eca332a18c2\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:35.961256+00:00\"}",
       "detail": "{\"status\": \"ok\", \"stars\": 41, \"pushed_at\": \"2026-03-16T13:09:24Z\", \"archived\": false}"
     },
     {
       "action": "GITHUB_METADATA",
       "step": "",
-      "status": "error",
-      "timestamp": "2026-11-17T13:29:30.364160+00:00",
-      "prev_hash": "f62e2bd6ad080d95cab1fe599d0a004b337e970096467f0cef41583722ef1c87",
-      "line_hash": "b01f610ca90a6646dffafeeb1cc41ad083157f449a00e1a3abf418a21dfc010a",
-      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"josephabrahams/s3-directory-index\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"metadata unavailable\\\", \\\"error\\\": \\\"repository not found\\\"}\",\"prev_hash\":\"f62e2bd6ad080d95cab1fe599d0a004b337e970096467f0cef41583722ef1c87\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"error\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:30.364160+00:00\"}",
-      "detail": "{\"status\": \"metadata unavailable\", \"error\": \"repository not found\"}"
+      "status": "ok",
+      "timestamp": "2026-11-17T18:29:36.784068+00:00",
+      "prev_hash": "ba565952970f68c4ad49c3445ee04cfd915e47a178b1175a88f5b2f6ccf07bca",
+      "line_hash": "c5a7ca221b05b0567ad47d1a1946d6d51d9c0dd4818acb4817e9ab96d58ec808",
+      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"gordonmurray/firnflow\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 479, \\\"pushed_at\\\": \\\"2026-09-04T19:48:01Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"ba565952970f68c4ad49c3445ee04cfd915e47a178b1175a88f5b2f6ccf07bca\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:36.784068+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"stars\": 479, \"pushed_at\": \"2026-09-04T19:48:01Z\", \"archived\": false}"
     },
     {
       "action": "GITHUB_METADATA",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:31.147227+00:00",
-      "prev_hash": "b01f610ca90a6646dffafeeb1cc41ad083157f449a00e1a3abf418a21dfc010a",
-      "line_hash": "e9ef290bf5a6f668e7ee2e31fa5ed60dd7263c0f4341825f82df8e3adbbb702d",
-      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"dhedegaard/s3-index-listing\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 1, \\\"pushed_at\\\": \\\"2026-11-07T22:00:35Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"b01f610ca90a6646dffafeeb1cc41ad083157f449a00e1a3abf418a21dfc010a\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:31.147227+00:00\"}",
-      "detail": "{\"status\": \"ok\", \"stars\": 1, \"pushed_at\": \"2026-11-07T22:00:35Z\", \"archived\": false}"
+      "timestamp": "2026-11-17T18:29:37.553172+00:00",
+      "prev_hash": "c5a7ca221b05b0567ad47d1a1946d6d51d9c0dd4818acb4817e9ab96d58ec808",
+      "line_hash": "64617870cf7f306074ab53961101fc08d25f4e3dda052ae4e58bf1168c5b4f2a",
+      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"tlinhart/s3-browser\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 78, \\\"pushed_at\\\": \\\"2026-11-17T17:56:54Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"c5a7ca221b05b0567ad47d1a1946d6d51d9c0dd4818acb4817e9ab96d58ec808\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:37.553172+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"stars\": 78, \"pushed_at\": \"2026-11-17T17:56:54Z\", \"archived\": false}"
+    },
+    {
+      "action": "ALTERNATIVES_SKIPPED",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:29:37.559071+00:00",
+      "prev_hash": "64617870cf7f306074ab53961101fc08d25f4e3dda052ae4e58bf1168c5b4f2a",
+      "line_hash": "2c46b7e3081e914d1b8fd60a6724eeb7a2b523d1e677c913276b272e5ff130cc",
+      "canonical": "{\"action\":\"ALTERNATIVES_SKIPPED\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVES_SKIPPED\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"count\\\": 13}\",\"output_summary\":\"{\\\"skipped\\\": [{\\\"alternative\\\": \\\"web:https://s3-viewer.com/\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/rufuspollock/s3-bucket-listing\\\", \\\"reason\\\": \\\"no permissive licence or free tier\\\"}, {\\\"alternative\\\": \\\"web:https://nubbo.app/articles/best-s3-file-browsers/\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/flightlesstux/S3-Directory-Listing\\\", \\\"reason\\\": \\\"not mature or official: stars=41, candidate_stars=127, official=False\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/tlinhart/s3-browser/\\\", \\\"reason\\\": \\\"not mature or official: stars=78, candidate_stars=127, official=False\\\"}, {\\\"alternative\\\": \\\"web:https://www.filestash.app/s3-browser.html\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"web:https://bucketdesk.com/blog/s3-file-browser-for-business-teams-cyberduck-s3-browser-transmit\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"web:https://www.clever.cloud/blog/features/2020/10/08/s3-directory-listing/\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"patbonecrusher/aws-s3-web-browser-file-listing\\\", \\\"reason\\\": \\\"not mature or official: stars=0, candidate_stars=127, official=False\\\"}, {\\\"alternative\\\": \\\"Sfedfcv/redesigned-pancake\\\", \\\"reason\\\": \\\"last update 2021-05-16 is 2011 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"kalcaddle/KodExplorer\\\", \\\"reason\\\": \\\"no permissive licence or free tier\\\"}, {\\\"alternative\\\": \\\"Saturnremabtc64/supreme-octo-roboticeyx\\\", \\\"reason\\\": \\\"last update 2021-08-04 is 1931 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"caussourd/aws-s3-bucket-listing\\\", \\\"reason\\\": \\\"last update 2015-10-20 is 4046 days before 2026-11-17\\\"}]}\",\"prev_hash\":\"64617870cf7f306074ab53961101fc08d25f4e3dda052ae4e58bf1168c5b4f2a\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:29:37.559071+00:00\"}",
+      "detail": "{\"skipped\": [{\"alternative\": \"web:https://s3-viewer.com/\", \"reason\": \"no push or release date\"}, {\"alternative\": \"web:https://github.com/rufuspollock/s3-bucket-listing\", \"reason\": \"no permissive licence or free tier\"}, {\"alternative\": \"web:"
+    },
+    {
+      "action": "LLM_CALL",
+      "step": "alternative_batch",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:30:05.680250+00:00",
+      "prev_hash": "2c46b7e3081e914d1b8fd60a6724eeb7a2b523d1e677c913276b272e5ff130cc",
+      "line_hash": "3c1518b7fdcda21819616b0ac41faeafac64b82579352088e9e9f4e9c16e6f6f",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"alternative_batch\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"2c46b7e3081e914d1b8fd60a6724eeb7a2b523d1e677c913276b272e5ff130cc\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:05.680250+00:00\"}",
+      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
+    },
+    {
+      "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:30:05.680653+00:00",
+      "prev_hash": "3c1518b7fdcda21819616b0ac41faeafac64b82579352088e9e9f4e9c16e6f6f",
+      "line_hash": "0c614d433372e14135d95ae24a506a45ae55b42fef5ac1674efc9641383c3836",
+      "canonical": "{\"action\":\"ALTERNATIVE_BATCH_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVE_BATCH_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"indexes\\\": [0, 1], \\\"alternative\\\": null, \\\"chunk_index\\\": 0}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"parsed_indexes\\\": [0, 1], \\\"reason\\\": null, \\\"chunk_index\\\": 0}\",\"prev_hash\":\"3c1518b7fdcda21819616b0ac41faeafac64b82579352088e9e9f4e9c16e6f6f\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:05.680653+00:00\"}",
+      "detail": "{\"requested_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"served_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"parsed_indexes\": [0, 1], \"reason\": null, \"chunk_index\": 0}"
+    },
+    {
+      "action": "ALTERNATIVES_VERIFIED",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:30:05.681713+00:00",
+      "prev_hash": "0c614d433372e14135d95ae24a506a45ae55b42fef5ac1674efc9641383c3836",
+      "line_hash": "73edbd2b594a3701dbd47b9692a61eec69ba3eb4a76a7172b3c04d1265dc0332",
+      "canonical": "{\"action\":\"ALTERNATIVES_VERIFIED\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVES_VERIFIED\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"searched\\\": 15}\",\"output_summary\":\"{\\\"alternatives\\\": [{\\\"alternative_id\\\": \\\"awslabs/aws-js-s3-explorer\\\", \\\"url\\\": \\\"https://github.com/awslabs/aws-js-s3-explorer\\\", \\\"source\\\": \\\"github\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"AWS JavaScript S3 Explorer is a web-based application that lets users browse the contents of a public S3 bucket directly in a browser, matching the core job of providing a simple web interface for S3 bucket browsing and sharing.\\\", \\\"quotes\\\": [\\\"AWS JavaScript S3 Explorer is a JavaScript application that uses AWS's JavaScript SDK and S3 APIs to make the contents of a public S3 bucket easy to browse via a web browser.\\\"]}]}\",\"prev_hash\":\"0c614d433372e14135d95ae24a506a45ae55b42fef5ac1674efc9641383c3836\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:05.681713+00:00\"}",
+      "detail": "{\"alternatives\": [{\"alternative_id\": \"awslabs/aws-js-s3-explorer\", \"url\": \"https://github.com/awslabs/aws-js-s3-explorer\", \"source\": \"github\", \"overlap\": \"full\", \"reason\": \"AWS JavaScript S3 Explorer is a web-based application that lets use"
     },
     {
       "action": "LLM_CALL",
       "step": "discovery",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:43.227125+00:00",
-      "prev_hash": "e9ef290bf5a6f668e7ee2e31fa5ed60dd7263c0f4341825f82df8e3adbbb702d",
-      "line_hash": "f2d983e866997f74cbc8af34619a33728edc5d94e5e2b5e9c771d73b69feeea3",
-      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"discovery\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"e9ef290bf5a6f668e7ee2e31fa5ed60dd7263c0f4341825f82df8e3adbbb702d\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:43.227125+00:00\"}",
+      "timestamp": "2026-11-17T18:30:27.920756+00:00",
+      "prev_hash": "73edbd2b594a3701dbd47b9692a61eec69ba3eb4a76a7172b3c04d1265dc0332",
+      "line_hash": "659a8d4555180f1290c8ac90ebb0530025de01855a79c2194a32e911f8382b89",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"step\\\": \\\"discovery\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"73edbd2b594a3701dbd47b9692a61eec69ba3eb4a76a7172b3c04d1265dc0332\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:27.920756+00:00\"}",
       "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
     },
     {
       "action": "GATE_DECISION",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:43.229445+00:00",
-      "prev_hash": "f2d983e866997f74cbc8af34619a33728edc5d94e5e2b5e9c771d73b69feeea3",
-      "line_hash": "9f853385475280ca196b8e8706fb361971abb8f1f18513f9e2d51dfe79b7783f",
-      "canonical": "{\"action\":\"GATE_DECISION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GATE_DECISION\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"raw_verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"named_alternative\\\": {\\\"id\\\": \\\"menkveldj/s3-directory-index\\\", \\\"url\\\": \\\"https://github.com/menkveldj/s3-directory-index\\\", \\\"title\\\": \\\"\\\"}, \\\"gate_alternative\\\": {\\\"id\\\": \\\"awslabs/aws-js-s3-explorer\\\", \\\"url\\\": \\\"https://github.com/awslabs/aws-js-s3-explorer\\\", \\\"title\\\": \\\"\\\"}, \\\"gate\\\": {\\\"applied\\\": true, \\\"outcome\\\": \\\"passed\\\", \\\"checks\\\": {\\\"A\\\": \\\"pass\\\", \\\"B\\\": \\\"pass\\\", \\\"C\\\": \\\"pass\\\", \\\"D\\\": \\\"pass\\\", \\\"E\\\": \\\"pass\\\"}, \\\"failed\\\": [], \\\"fail_reasons\\\": {}, \\\"shortcut\\\": null, \\\"role\\\": \\\"block\\\", \\\"blocks\\\": true}, \\\"final_verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"path\\\": \\\"BF\\\", \\\"coverage_override\\\": false}\",\"prev_hash\":\"f2d983e866997f74cbc8af34619a33728edc5d94e5e2b5e9c771d73b69feeea3\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:43.229445+00:00\"}",
-      "detail": "{\"repo_id\": \"powdahound/s3browser\", \"raw_verdict\": \"ALREADY_EXISTS\", \"named_alternative\": {\"id\": \"menkveldj/s3-directory-index\", \"url\": \"https://github.com/menkveldj/s3-directory-index\", \"title\": \"\"}, \"gate_alternative\": {\"id\": \"awslabs/aws"
+      "timestamp": "2026-11-17T18:30:27.921265+00:00",
+      "prev_hash": "659a8d4555180f1290c8ac90ebb0530025de01855a79c2194a32e911f8382b89",
+      "line_hash": "8d425bbe9108cf4f032e2c44bb167215fc35b35d1d406655b77564d548224ba7",
+      "canonical": "{\"action\":\"GATE_DECISION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GATE_DECISION\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"raw_verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"named_alternative\\\": {\\\"id\\\": \\\"awslabs/aws-js-s3-explorer\\\", \\\"url\\\": \\\"https://github.com/awslabs/aws-js-s3-explorer\\\", \\\"title\\\": \\\"\\\"}, \\\"gate_alternative\\\": {\\\"id\\\": \\\"awslabs/aws-js-s3-explorer\\\", \\\"url\\\": \\\"https://github.com/awslabs/aws-js-s3-explorer\\\", \\\"title\\\": \\\"\\\"}, \\\"gate\\\": {\\\"applied\\\": true, \\\"outcome\\\": \\\"passed\\\", \\\"checks\\\": {\\\"A\\\": \\\"pass\\\", \\\"B\\\": \\\"pass\\\", \\\"C\\\": \\\"pass\\\", \\\"D\\\": \\\"pass\\\", \\\"E\\\": \\\"pass\\\"}, \\\"failed\\\": [], \\\"fail_reasons\\\": {}, \\\"shortcut\\\": null, \\\"role\\\": \\\"block\\\", \\\"blocks\\\": true}, \\\"final_verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"path\\\": \\\"gate-pass\\\", \\\"coverage_override\\\": false}\",\"prev_hash\":\"659a8d4555180f1290c8ac90ebb0530025de01855a79c2194a32e911f8382b89\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:27.921265+00:00\"}",
+      "detail": "{\"repo_id\": \"powdahound/s3browser\", \"raw_verdict\": \"ALREADY_EXISTS\", \"named_alternative\": {\"id\": \"awslabs/aws-js-s3-explorer\", \"url\": \"https://github.com/awslabs/aws-js-s3-explorer\", \"title\": \"\"}, \"gate_alternative\": {\"id\": \"awslabs/aws-js-"
     },
     {
       "action": "DISCOVERY_FILTER",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:43.229633+00:00",
-      "prev_hash": "9f853385475280ca196b8e8706fb361971abb8f1f18513f9e2d51dfe79b7783f",
-      "line_hash": "e7a4d97344c7ab2346c997d7a514d7816d3f7b8099a86445efd63aa29513c93f",
-      "canonical": "{\"action\":\"DISCOVERY_FILTER\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"DISCOVERY_FILTER\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"reason\\\": \\\"verified full-overlap alternative https://github.com/awslabs/aws-js-s3-explorer already solves the same problem (quote: 'make the contents of a public S3 bucket easy to browse via a web browser'). Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-a55b).\\\", \\\"evidence_source\\\": \\\"csv\\\", \\\"evidence\\\": [{\\\"alternative\\\": \\\"awslabs/aws-js-s3-explorer\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"make the contents of a public S3 bucket easy to browse via a web browser\\\", \\\"reason\\\": \\\"verified full-overlap alternative https://github.com/awslabs/aws-js-s3-explorer already solves the same problem (quote: 'make the contents of a public S3 bucket easy to browse via a web browser')\\\"}], \\\"must_beat\\\": [{\\\"alternative\\\": \\\"web:https://github.com/rufuspollock/s3-bucket-listing\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"Create nice directory listings for s3 buckets using only javascript and HTML.\\\", \\\"reason\\\": \\\"did not block: candidate is free and self-hostable; the alternative has no free tier or permissive licence\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/flightlesstux/S3-Directory-Listing\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"A lightweight, zero-dependency client-side UI that turns any AWS S3 bucket into a clean, navigable file browser.\\\", \\\"reason\\\": \\\"did not block: not mature or official: stars=41, candidate_stars=127, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/josephabrahams/s3-directory-index\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"This script exploits the error document functionality of S3 static websites to create an Apache-style directory index of your bucket.\\\", \\\"reason\\\": \\\"did not block: no push or release date; not mature or official: stars=unknown, candidate_stars=127, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/dhedegaard/s3-index-listing\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"Lists objects in an S3 as if it was a directory listing through Apache or nginx.\\\", \\\"reason\\\": \\\"did not block: not mature or official: stars=1, candidate_stars=127, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence\\\"}, {\\\"alternative\\\": \\\"patbonecrusher/aws-s3-web-browser-file-listing\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"similar to a traditional \\\\\\\"Apache Directory Listing\\\\\\\"\\\", \\\"reason\\\": \\\"did not block: not mature or official: stars=0, candidate_stars=127, official=False\\\"}, {\\\"alternative\\\": \\\"menkveldj/s3-directory-index\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"Apache-style directory index of your S3 bucket\\\", \\\"reason\\\": \\\"did not block: last update 2015-06-11 is 4177 days before 2026-11-17; not mature or official: stars=0, candidate_stars=127, official=False; candidate is free and self-hostable; the alternative has no free tier or permissive licence\\\"}]}\",\"prev_hash\":\"9f853385475280ca196b8e8706fb361971abb8f1f18513f9e2d51dfe79b7783f\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:43.229633+00:00\"}",
-      "detail": "ALREADY_EXISTS verified full-overlap alternative https://github.com/awslabs/aws-js-s3-explorer already solves the same problem (quote: 'make the contents of a public S3 bucket easy to browse via a web browser'). Method: llm+verified quote ("
+      "timestamp": "2026-11-17T18:30:27.921430+00:00",
+      "prev_hash": "8d425bbe9108cf4f032e2c44bb167215fc35b35d1d406655b77564d548224ba7",
+      "line_hash": "916b62786bd143473bebe1d00475dd88eb0a155067723d7ee1971b7deb5f00db",
+      "canonical": "{\"action\":\"DISCOVERY_FILTER\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"DISCOVERY_FILTER\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"reason\\\": \\\"An existing maintained free alternative (AWS JavaScript S3 Explorer) already provides web-based S3 bucket browsing. Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-a55b).\\\", \\\"evidence_source\\\": \\\"csv\\\", \\\"evidence\\\": [{\\\"alternative\\\": \\\"awslabs/aws-js-s3-explorer\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"AWS JavaScript S3 Explorer is a JavaScript application that uses AWS's JavaScript SDK and S3 APIs to make the contents of an S3 bucket easy to browse via a web browser.\\\", \\\"reason\\\": \\\"An existing maintained free alternative (AWS JavaScript S3 Explorer) already provides web-based S3 bucket browsing.\\\", \\\"rubric\\\": {\\\"same_core_job\\\": true, \\\"same_input_output\\\": true, \\\"same_target_user\\\": true, \\\"covers_main_features\\\": true}}], \\\"must_beat\\\": [], \\\"skipped\\\": [{\\\"alternative\\\": \\\"web:https://s3-viewer.com/\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/rufuspollock/s3-bucket-listing\\\", \\\"reason\\\": \\\"no permissive licence or free tier\\\"}, {\\\"alternative\\\": \\\"web:https://nubbo.app/articles/best-s3-file-browsers/\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/flightlesstux/S3-Directory-Listing\\\", \\\"reason\\\": \\\"not mature or official: stars=41, candidate_stars=127, official=False\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/tlinhart/s3-browser/\\\", \\\"reason\\\": \\\"not mature or official: stars=78, candidate_stars=127, official=False\\\"}, {\\\"alternative\\\": \\\"web:https://www.filestash.app/s3-browser.html\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"web:https://bucketdesk.com/blog/s3-file-browser-for-business-teams-cyberduck-s3-browser-transmit\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"web:https://www.clever.cloud/blog/features/2020/10/08/s3-directory-listing/\\\", \\\"reason\\\": \\\"no push or release date\\\"}, {\\\"alternative\\\": \\\"patbonecrusher/aws-s3-web-browser-file-listing\\\", \\\"reason\\\": \\\"not mature or official: stars=0, candidate_stars=127, official=False\\\"}, {\\\"alternative\\\": \\\"Sfedfcv/redesigned-pancake\\\", \\\"reason\\\": \\\"last update 2021-05-16 is 2011 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"kalcaddle/KodExplorer\\\", \\\"reason\\\": \\\"no permissive licence or free tier\\\"}, {\\\"alternative\\\": \\\"Saturnremabtc64/supreme-octo-roboticeyx\\\", \\\"reason\\\": \\\"last update 2021-08-04 is 1931 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"caussourd/aws-s3-bucket-listing\\\", \\\"reason\\\": \\\"last update 2015-10-20 is 4046 days before 2026-11-17\\\"}]}\",\"prev_hash\":\"8d425bbe9108cf4f032e2c44bb167215fc35b35d1d406655b77564d548224ba7\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:27.921430+00:00\"}",
+      "detail": "ALREADY_EXISTS An existing maintained free alternative (AWS JavaScript S3 Explorer) already provides web-based S3 bucket browsing. Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-"
     },
     {
       "action": "PROTAGONIST_SELECTION",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:43.229845+00:00",
-      "prev_hash": "e7a4d97344c7ab2346c997d7a514d7816d3f7b8099a86445efd63aa29513c93f",
-      "line_hash": "25638a50021c00a4d8dff0f8c95ab12e86835855d0d6c19c6d1f7934eccaef1d",
-      "canonical": "{\"action\":\"PROTAGONIST_SELECTION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PROTAGONIST_SELECTION\",\"input_summary\":\"{\\\"candidate_count\\\": 0}\",\"output_summary\":\"{\\\"repo_id\\\": null, \\\"total\\\": 0.0, \\\"feasibility\\\": 0, \\\"reason\\\": \\\"No candidates provided.\\\"}\",\"prev_hash\":\"e7a4d97344c7ab2346c997d7a514d7816d3f7b8099a86445efd63aa29513c93f\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:43.229845+00:00\"}",
+      "timestamp": "2026-11-17T18:30:27.921656+00:00",
+      "prev_hash": "916b62786bd143473bebe1d00475dd88eb0a155067723d7ee1971b7deb5f00db",
+      "line_hash": "fa0e82b7a59edc9e402ef2c611f9f54e97ed1a9bf3c3f3eac0dc806eb3d34b0a",
+      "canonical": "{\"action\":\"PROTAGONIST_SELECTION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PROTAGONIST_SELECTION\",\"input_summary\":\"{\\\"candidate_count\\\": 0}\",\"output_summary\":\"{\\\"repo_id\\\": null, \\\"total\\\": 0.0, \\\"feasibility\\\": 0, \\\"reason\\\": \\\"No candidates provided.\\\"}\",\"prev_hash\":\"916b62786bd143473bebe1d00475dd88eb0a155067723d7ee1971b7deb5f00db\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:27.921656+00:00\"}",
       "detail": "{\"repo_id\": null, \"total\": 0.0, \"feasibility\": 0, \"reason\": \"No candidates provided.\"}"
     },
     {
       "action": "HMEM_VERDICT_MEMORY",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:43.234769+00:00",
-      "prev_hash": "25638a50021c00a4d8dff0f8c95ab12e86835855d0d6c19c6d1f7934eccaef1d",
-      "line_hash": "c3003e4405ff71d1dcfa0d2c1de9993ac8ae5f970c823f3bc2237abb82761398",
-      "canonical": "{\"action\":\"HMEM_VERDICT_MEMORY\",\"agent_name\":\"hmem\",\"confidence\":null,\"event\":\"HMEM_VERDICT_MEMORY\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"memory_id\\\": \\\"mem-c8d9ea789aa3\\\", \\\"remembered_before\\\": [], \\\"verdict_changed\\\": false, \\\"note\\\": \\\"First verdict H-MEM holds for this repository.\\\"}\",\"prev_hash\":\"25638a50021c00a4d8dff0f8c95ab12e86835855d0d6c19c6d1f7934eccaef1d\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:43.234769+00:00\"}",
-      "detail": "{\"repo_id\": \"powdahound/s3browser\", \"verdict\": \"ALREADY_EXISTS\", \"memory_id\": \"mem-c8d9ea789aa3\", \"remembered_before\": [], \"verdict_changed\": false, \"note\": \"First verdict H-MEM holds for this repository.\"}"
+      "timestamp": "2026-11-17T18:30:27.929032+00:00",
+      "prev_hash": "fa0e82b7a59edc9e402ef2c611f9f54e97ed1a9bf3c3f3eac0dc806eb3d34b0a",
+      "line_hash": "6d9866d499b89b3c111d1f9209eee9402dd51e77d477896f7831cf93a70cbd45",
+      "canonical": "{\"action\":\"HMEM_VERDICT_MEMORY\",\"agent_name\":\"hmem\",\"confidence\":null,\"event\":\"HMEM_VERDICT_MEMORY\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\"}\",\"output_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"memory_id\\\": \\\"mem-6af666ab74ad\\\", \\\"remembered_before\\\": [], \\\"verdict_changed\\\": false, \\\"note\\\": \\\"First verdict H-MEM holds for this repository.\\\"}\",\"prev_hash\":\"fa0e82b7a59edc9e402ef2c611f9f54e97ed1a9bf3c3f3eac0dc806eb3d34b0a\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:27.929032+00:00\"}",
+      "detail": "{\"repo_id\": \"powdahound/s3browser\", \"verdict\": \"ALREADY_EXISTS\", \"memory_id\": \"mem-6af666ab74ad\", \"remembered_before\": [], \"verdict_changed\": false, \"note\": \"First verdict H-MEM holds for this repository.\"}"
     },
     {
       "action": "STAGE_TIME",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:43.234897+00:00",
-      "prev_hash": "c3003e4405ff71d1dcfa0d2c1de9993ac8ae5f970c823f3bc2237abb82761398",
-      "line_hash": "ca56a9dcff95ca571c74e604365e09ac433c537e59930c6b2c846df78c156ae7",
-      "canonical": "{\"action\":\"STAGE_TIME\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STAGE_TIME\",\"input_summary\":\"{\\\"stages\\\": [\\\"problem\\\", \\\"search\\\"]}\",\"output_summary\":\"{\\\"problem_seconds\\\": 18.75, \\\"search_seconds\\\": 13.81, \\\"alternatives_seconds\\\": 83.97, \\\"discovery_seconds\\\": 12.08}\",\"prev_hash\":\"c3003e4405ff71d1dcfa0d2c1de9993ac8ae5f970c823f3bc2237abb82761398\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:43.234897+00:00\"}",
-      "detail": "problem 18.75s, search 13.81s, alternatives 83.97s, discovery 12.08s"
+      "timestamp": "2026-11-17T18:30:27.929225+00:00",
+      "prev_hash": "6d9866d499b89b3c111d1f9209eee9402dd51e77d477896f7831cf93a70cbd45",
+      "line_hash": "da24a7b8f7ddee6b3fb229899d21c86a73d89aa38679b1401408b8ea81d35ee2",
+      "canonical": "{\"action\":\"STAGE_TIME\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STAGE_TIME\",\"input_summary\":\"{\\\"stages\\\": [\\\"problem\\\", \\\"search\\\"]}\",\"output_summary\":\"{\\\"problem_seconds\\\": 46.57, \\\"search_seconds\\\": 12.37, \\\"alternatives_seconds\\\": 64.05, \\\"discovery_seconds\\\": 22.24, \\\"model_retries\\\": 0}\",\"prev_hash\":\"6d9866d499b89b3c111d1f9209eee9402dd51e77d477896f7831cf93a70cbd45\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:27.929225+00:00\"}",
+      "detail": "problem 46.57s, search 12.37s, alternatives 64.05s, discovery 22.24s"
+    },
+    {
+      "action": "SEARCH_SNAPSHOT",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:30:28.186696+00:00",
+      "prev_hash": "da24a7b8f7ddee6b3fb229899d21c86a73d89aa38679b1401408b8ea81d35ee2",
+      "line_hash": "2f360284bc5087ace3c38fca99b733c0bdbd921025fcc9e077d244354dccc4de",
+      "canonical": "{\"action\":\"SEARCH_SNAPSHOT\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"SEARCH_SNAPSHOT\",\"input_summary\":\"{\\\"repo_id\\\": \\\"powdahound/s3browser\\\", \\\"commit\\\": \\\"253fde7864baa84cc95950ca0c6b099d245ba54c\\\"}\",\"output_summary\":\"{\\\"snapshot_sha256\\\": \\\"654afa028554cde78035b6e0f9427adccc69c8f542f8bb43f57f82dab1161e14\\\", \\\"refreshed\\\": false, \\\"records\\\": 36, \\\"model_calls\\\": 3}\",\"prev_hash\":\"da24a7b8f7ddee6b3fb229899d21c86a73d89aa38679b1401408b8ea81d35ee2\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:28.186696+00:00\"}",
+      "detail": "{\"snapshot_sha256\": \"654afa028554cde78035b6e0f9427adccc69c8f542f8bb43f57f82dab1161e14\", \"refreshed\": false, \"records\": 36, \"model_calls\": 3}"
     },
     {
       "action": "RUN_SEAL",
       "step": "",
       "status": "ok",
-      "timestamp": "2026-11-17T13:29:43.253374+00:00",
-      "prev_hash": "ca56a9dcff95ca571c74e604365e09ac433c537e59930c6b2c846df78c156ae7",
-      "line_hash": "f501ba9d10d2143b8b4ccdd507f1016ae1b21f19d9367178e9c4f2a503369d62",
-      "canonical": "{\"action\":\"RUN_SEAL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"RUN_SEAL\",\"input_summary\":\"{\\\"prev_hash\\\": \\\"ca56a9dcff95ca571c74e604365e09ac433c537e59930c6b2c846df78c156ae7\\\"}\",\"output_summary\":\"Final run hash is this line's line_hash.\",\"prev_hash\":\"ca56a9dcff95ca571c74e604365e09ac433c537e59930c6b2c846df78c156ae7\",\"retry_count\":0,\"run_id\":\"run-cd78274ea6cf\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T13:29:43.253374+00:00\"}",
+      "timestamp": "2026-11-17T18:30:28.187399+00:00",
+      "prev_hash": "2f360284bc5087ace3c38fca99b733c0bdbd921025fcc9e077d244354dccc4de",
+      "line_hash": "edd738a56fce6ee7417e62852fbe5647ba771650b1deb1d365ae7728602e091a",
+      "canonical": "{\"action\":\"RUN_SEAL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"RUN_SEAL\",\"input_summary\":\"{\\\"prev_hash\\\": \\\"2f360284bc5087ace3c38fca99b733c0bdbd921025fcc9e077d244354dccc4de\\\"}\",\"output_summary\":\"Final run hash is this line's line_hash.\",\"prev_hash\":\"2f360284bc5087ace3c38fca99b733c0bdbd921025fcc9e077d244354dccc4de\",\"retry_count\":0,\"run_id\":\"run-0fc62dec0ad7\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:30:28.187399+00:00\"}",
       "detail": "Run seal. The line hash is the run hash."
     }
   ],
@@ -683,9 +623,12 @@
   },
   "provider": "nvidia",
   "source": "recorded-live-judge",
-  "source_note": "Judged live on 2026-11-17 on build 10c84b8, hosted NVIDIA path. A second run on a fresh cache gave the same verdict and the same blocking alternative. Packed with scripts/pro_add_live_example.py.",
+  "source_note": "Judged live on 2026-11-17 on build 9763a0d, hosted NVIDIA path, cold run. A replay from the sealed snapshot gave the same verdict, blocker, candidate list and rescue text. The snapshot is stored with this example. Packed with scripts/pro_add_live_example.py --snapshot.",
   "demo": true,
-  "model_calls": 8,
+  "model_calls": 3,
+  "commit": "253fde7864baa84cc95950ca0c6b099d245ba54c",
+  "snapshot_sha256": "654afa028554cde78035b6e0f9427adccc69c8f542f8bb43f57f82dab1161e14",
+  "snapshot_refreshed": false,
   "human_label": {},
   "osv": [],
   "plain_reason": "A maintained alternative already does this job. The quote was found in that alternative's own text.",
@@ -722,11 +665,11 @@
       "Tamper edits a copy of one line in the browser. The committed file is not written.",
       "From a checkout: python scripts/verify_trace.py TRACE --expected-run-hash HASH"
     ],
-    "run_hash": "f501ba9d10d2143b8b4ccdd507f1016ae1b21f19d9367178e9c4f2a503369d62",
+    "run_hash": "edd738a56fce6ee7417e62852fbe5647ba771650b1deb1d365ae7728602e091a",
     "trace_file": "pro/examples/traces/live-s3browser.jsonl"
   },
-  "commit": "253fde7864baa84cc95950ca0c6b099d245ba54c",
   "id": "live-s3browser",
   "cached": true,
-  "recorded_on": "2026-11-17"
+  "recorded_on": "2026-11-17",
+  "snapshot_file": "pro/examples/snapshots/live-s3browser.snapshot.json"
 }
