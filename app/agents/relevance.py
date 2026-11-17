@@ -849,6 +849,22 @@ class RelevanceClient:
         sampling: dict[str, Any] = {"model": model, "temperature": 0, "stream": False, "max_tokens": int(self.max_tokens)}
         sampling.update(body_extra)
         inference_sha = inference_settings_sha256(sampling)
+        from app.agents.search_snapshot import current_session
+
+        snapshot = current_session()
+        temperature = float(sampling.get("temperature") or 0)
+        prompt_key = hashlib.sha256(f"{system_prompt}\n{prompt}".encode("utf-8")).hexdigest()
+        if snapshot is not None:
+            stored = snapshot.model_get(prompt_key, model, temperature)
+            if stored is not None:
+                served = str(stored.get("served_model") or model)
+                requested = str(stored.get("requested_model") or model)
+                self._observe(requested, served, repo_id, step, cache_hit=True, tier=tier_label)
+                self.last_cache_hit = True
+                return str(stored.get("response_text") or ""), requested, served
+            if snapshot.replaying:
+                snapshot.blocked += 1
+                return "", model, ""
         settings_sha = request_settings_sha256(sent_request_settings(sampling))
         cache_key = hashlib.sha256(
             f"{model}\n---\n{prompt_hash}\n---\n{input_hash}\n---\n{inference_sha}".encode("utf-8")
@@ -925,6 +941,8 @@ class RelevanceClient:
             self.last_cache_hit = False
             self.last_cache_file = cache_file
             self._log_served(repo_id, step, served, time.monotonic() - call_start, cache_hit=False)
+            if snapshot is not None:
+                snapshot.model_put(prompt_key, model, temperature, text, model, served)
             return text, model, served
 
         if self.mock_handler is not None:
@@ -1945,6 +1963,38 @@ def _emit_gate_decision(
     )
 
 
+_NOT_A_NAME = {"", "none", "null", "n/a", "na", "unknown", "nil", "undefined"}
+
+
+def _listed_alternative(name: str | None, rows: list[dict[str, Any]]) -> bool:
+    """True when the model named a repository that is actually in the candidate list."""
+
+    from app.agents.alt_key import canonical_alternative_key, github_owner_repo
+
+    text = str(name or "").strip()
+    if text.casefold() in _NOT_A_NAME:
+        return False
+    wanted = github_owner_repo(text)
+    wanted_key = "github.com/" + wanted.casefold() if wanted else ""
+    folded = text.casefold().rstrip("/")
+    for row in rows:
+        alt_id = str(row.get("alternative_id") or "").strip()
+        url = str(row.get("url") or "").strip().rstrip("/")
+        if folded == alt_id.casefold().rstrip("/") or (url and folded == url.casefold()):
+            return True
+        if alt_id.casefold().startswith("web:") and folded == alt_id[4:].casefold().rstrip("/"):
+            return True
+        key = canonical_alternative_key(row)
+        if wanted_key and key == wanted_key:
+            return True
+        repo_name = alt_id.split("/")[-1]
+        if "/" not in text and text.casefold() == repo_name.casefold() and len(text) > 2:
+            return True
+        if wanted and f"github.com/{wanted}".casefold() in url.casefold():
+            return True
+    return False
+
+
 def judge_discovery(
     candidate: dict[str, Any],
     prior_rows: list[dict[str, Any]],
@@ -2034,14 +2084,14 @@ def judge_discovery(
     ]
     # A verified full-overlap alternative of any source (GitHub included) means an open-source or
     # commercial substitute exists; GitHub partial overlap only needs a human look.
-    from app.agents.stable_search import rank_key
+    from app.agents.stable_search import blocker_rank
 
     full_overlap_rows = sorted(
         [
             r for r in combined_priors
             if r.get("same_problem") is True and str(r.get("overlap") or "") == "full"
         ],
-        key=rank_key,
+        key=blocker_rank(candidate),
     )
     github_partial_rows = [
         r for r in combined_priors
@@ -2128,14 +2178,13 @@ def judge_discovery(
 
     # Deterministic verification. `picked` is what the report shows for a refusal or a review.
     picked: list[dict[str, Any]] = []
-    from datetime import date as _date
-
     from app.agents.blocker import evaluate_blocker
+    from app.agents.search_snapshot import as_of_date
 
     must_beat: list[dict[str, str]] = []
 
     def _blocker(row: dict[str, Any]) -> dict[str, Any]:
-        return evaluate_blocker(candidate, row, as_of=_date.today())
+        return evaluate_blocker(candidate, row, as_of=as_of_date())
 
     def _must(row: dict[str, Any], decision: dict[str, Any]) -> dict[str, str]:
         quotes = [str(q).strip() for q in (row.get("quotes") or []) if str(q).strip()]
@@ -2250,7 +2299,11 @@ def judge_discovery(
         path_label = "own-identity"
         gate_shortcut = "own-identity"
     elif raw_verdict == "ALREADY_EXISTS":
-        # Check alternative repo matches one in combined_priors
+        # A name that is not one of the checked alternatives is no name. "None"
+        # is that case. It must not become a quote-not-in-source review.
+        if not _listed_alternative(alt_repo, combined_priors):
+            alt_repo = None
+            alt_quote = None
         matched_row = None
         if alt_repo:
             for r in combined_priors:
@@ -2268,10 +2321,18 @@ def judge_discovery(
                 ):
                     matched_row = r
                     break
-        if matched_row is None:
+        if matched_row is None and alt_repo:
             verdict = "NEEDS_REVIEW"
             reason = f"unverified LLM quote: alternative_repo '{alt_repo}' not found in candidate prior-art"
             path_label = "unmatched"
+        elif matched_row is None:
+            if problem_quote and quote_in_text(problem_quote, cand_text):
+                verdict = "CANDIDATE"
+                reason = "the model named no alternative from the candidate list"
+            else:
+                verdict = "NEEDS_REVIEW"
+                reason = "the model named no alternative from the candidate list"
+            path_label = "unnamed"
         else:
             alt_text = f"{matched_row.get('excerpt', '')} {matched_row.get('description', '')} {matched_row.get('text', '')} {matched_row.get('readme', '')}"
             if not alt_quote or not quote_in_text(alt_quote, alt_text):
@@ -2531,14 +2592,17 @@ def extract_problem_statement(
         }
 
     if obj is None:
-        return None, {
-            "requested_model": req_m,
-            "served_model": srv_m,
-            "fallback": True,
-            "error": "LLM output invalid JSON",
-        }
-
-    verified, rejected = _problem_quotes(obj.get("quotes"), cand_text)
+        retried = _retry_problem_from_section(client, prompt_record.text, repo_id, desc, readme, cand_text)
+        if retried is None:
+            return None, {
+                "requested_model": req_m,
+                "served_model": srv_m,
+                "fallback": True,
+                "error": "LLM output invalid JSON",
+            }
+        obj, verified, req_m, srv_m = retried
+    else:
+        verified, rejected = _problem_quotes(obj.get("quotes"), cand_text)
     if not verified:
         retried = _retry_problem_statement(
             client, prompt_record.text, repo_id, desc, readme, prob, rejected, cand_text,
@@ -2546,14 +2610,18 @@ def extract_problem_statement(
         if retried is not None:
             obj, verified, req_m, srv_m = retried
         else:
-            detail = rejected or "no quotes provided in problem statement"
-            return None, {
-                "error": f"unverified LLM quote: problem quote '{detail}' not found in candidate README or description",
-                "unverified_quote": rejected,
-                "requested_model": req_m,
-                "served_model": srv_m,
-                "fallback": False,
-            }
+            retried = _retry_problem_from_section(client, prompt_record.text, repo_id, desc, readme, cand_text)
+            if retried is not None:
+                obj, verified, req_m, srv_m = retried
+            else:
+                detail = rejected or "no quotes provided in problem statement"
+                return None, {
+                    "error": f"unverified LLM quote: problem quote '{detail}' not found in candidate README or description",
+                    "unverified_quote": rejected,
+                    "requested_model": req_m,
+                    "served_model": srv_m,
+                    "fallback": False,
+                }
 
     raw_queries = obj.get("search_queries") or []
     search_queries = [str(sq).strip() for sq in raw_queries if str(sq).strip()]
@@ -2632,6 +2700,43 @@ def _retry_verified_quote(client, repo_id: str, source_text: str, rejected: str)
         if quote_in_text(quote, source_text):
             return quote
     return ""
+
+
+def _readme_first_section(readme: str) -> str:
+    text = str(readme or "").strip()
+    if not text:
+        return ""
+    parts = [part.strip() for part in re.split(r"\n\s*\n", text) if part.strip()]
+    return "\n\n".join(parts[:2])[:2000]
+
+
+def _retry_problem_from_section(client, system_prompt: str, repo_id: str, desc: str, readme: str, cand_text: str):
+    """One more extraction, using the description and the first section of the README."""
+
+    section = _readme_first_section(readme)
+    if client is None or not (desc or section):
+        return None
+    prompt = (
+        f"Candidate Repository: {repo_id}\n"
+        "The previous extraction did not produce a quote from the source. "
+        "Use only the description and the README first section below.\n"
+        f"Description: {desc}\n"
+        f"README first section:\n```\n{section}\n```\n"
+        "Return strict JSON with problem, target_user, category, search_queries, and quotes. "
+        "Each quote must be copied from the description or the README first section."
+    )
+    try:
+        obj, _text, req_m, srv_m = _complete_json(client, prompt, system_prompt, repo_id, "problem")
+    except Exception:
+        return None
+    if obj is None:
+        return None
+    verified, _rejected = _problem_quotes(obj.get("quotes"), cand_text)
+    if not verified:
+        return None
+    obj = dict(obj)
+    obj["quotes"] = verified
+    return obj, verified, req_m, srv_m
 
 
 def _retry_problem_statement(client, system_prompt: str, repo_id: str, desc: str, readme: str, prob: str, rejected: str, cand_text: str):
@@ -3902,13 +4007,12 @@ def filter_relevant_alternatives(
 
     rows = dedupe_alternatives(list(search_results))
     if skip_immature and candidate is not None:
-        from datetime import date as _date
-
         from app.agents.blocker import block_obstacle
+        from app.agents.search_snapshot import as_of_date
 
         kept: list[dict[str, Any]] = []
         skipped: list[dict[str, str]] = []
-        when = _date.today()
+        when = as_of_date()
         for row in rows:
             why = block_obstacle(candidate, row, as_of=when)
             if why:

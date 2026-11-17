@@ -153,13 +153,26 @@ def write_snapshot(row: dict[str, str], directory: Path) -> Path:
     return directory
 
 
-def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None, plan_rescue: bool = False, commit: str = "") -> dict[str, Any]:
+def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None, plan_rescue: bool = False, commit: str = "", refresh_search: bool = False) -> dict[str, Any]:
     """Judge one repository. Returns {repo_id, verdict, reason, run_id, run_hash, report}."""
+    from app.agents.search_snapshot import bind, open_snapshot, reset, wrap_github
+
     full_name = parse_repo_url(url)
+    session = open_snapshot(full_name, commit, refresh=refresh_search) if commit else None
+    snap_token = bind(session)
+    if session is not None:
+        getter = wrap_github(session, getter)
     cache_token = _github_cache.set({})
     try:
-        return _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue, commit)
+        judged = _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue, commit)
+        if session is not None and session.sealed_hash:
+            judged["snapshot_sha256"] = session.sealed_hash
+            judged["snapshot_refreshed"] = session.refreshed
+        return judged
     finally:
+        if session is not None:
+            session.close()
+        reset(snap_token)
         _github_cache.reset(cache_token)
 
 
@@ -265,9 +278,14 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--no-llm", action="store_true", help="Plumbing test only: skip the LLM judgement.")
     ap.add_argument("--run-id", default=None)
+    ap.add_argument("--commit", default="", help="Head commit. With this set, search is sealed and replayed.")
+    ap.add_argument("--refresh-search", action="store_true", help="Record a new search snapshot for this commit.")
     args = ap.parse_args()
     try:
-        res = judge(args.url, out_dir=args.out, use_llm=not args.no_llm, run_id=args.run_id)
+        res = judge(
+            args.url, out_dir=args.out, use_llm=not args.no_llm, run_id=args.run_id,
+            commit=args.commit, refresh_search=args.refresh_search,
+        )
     except JudgeError as exc:
         sys.stderr.write(f"cannot judge: {exc}\n")
         return 2

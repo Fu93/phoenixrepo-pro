@@ -117,7 +117,9 @@ def attach_registry_metadata(
 
     if getter is None:
         getter = _http_get_json
-    clock = now or datetime.now(timezone.utc)
+    from app.agents.search_snapshot import as_of_datetime
+
+    clock = now or as_of_datetime()
     chosen: list[tuple[dict[str, Any], str, str]] = []
     for row in rows:
         if len(chosen) >= limit:

@@ -26,6 +26,7 @@ SERVICE: ProService | None = None
 class RunBody(BaseModel):
     url: str
     prefer_live: bool = False
+    refresh_search: bool = False
 
 
 def state_dir() -> Path:
@@ -173,7 +174,8 @@ def pro_result(example_id: str):
 @router.post("/pro/api/runs")
 def pro_start(body: RunBody, request: Request):
     try:
-        return get_service().submit(body.url, client_ip(request), prefer_live=body.prefer_live)
+        refresh = body.refresh_search or request.query_params.get("refresh_search", "") in {"1", "true", "yes"}
+        return get_service().submit(body.url, client_ip(request), prefer_live=body.prefer_live, refresh_search=refresh)
     except ProError as exc:
         return _error(exc)
 
@@ -211,6 +213,14 @@ def injection_demo():
         "pipeline": checked,
         "attacks": attack_table(),
     }
+
+
+@router.get("/pro/api/results/{result_id}/snapshot")
+def search_snapshot(result_id: str):
+    path = get_service().snapshot_file(result_id)
+    if not path.is_file():
+        return JSONResponse(status_code=404, content={"error": {"type": "NotFound", "message": "No search snapshot for this run."}})
+    return FileResponse(path, media_type="application/json", filename=f"{result_id}-search-snapshot.json")
 
 
 @router.get("/pro/api/results/{result_id}/rescue.md")

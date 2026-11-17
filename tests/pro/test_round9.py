@@ -46,7 +46,8 @@ def test_queries_use_category_words_and_drop_dotfile_junk():
         "topics": ["http-client"],
     }
     queries = keyword_queries(candidate)
-    assert len(queries) <= 3
+    assert len(queries) <= 4
+    assert any(query.casefold().endswith("library") for query in queries)
     assert queries == keyword_queries(candidate)
     assert queries[0] == "Simplified HTTP request client"
     assert any("stars:>=50" in query and "language:JavaScript" in query for query in queries)

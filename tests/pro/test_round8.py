@@ -53,7 +53,7 @@ def test_search_cache_reuses_the_same_candidate_set(tmp_path):
     candidate = {"repo_id": "request/request", "description": "Simplified HTTP request client", "core_terms": "http|request"}
     queries = keyword_queries(candidate)
     assert queries == keyword_queries(candidate)
-    assert len(queries) <= 3
+    assert len(queries) <= 4
     first = cached_github_search("request/request", "abc", queries[0], getter, cache_dir=tmp_path)
     second = cached_github_search("request/request", "abc", queries[0], getter, cache_dir=tmp_path)
     assert calls["n"] == 1

@@ -96,7 +96,10 @@ def keyword_queries(candidate: dict[str, Any]) -> list[str]:
     name_phrase = _phrase(name.replace("-", " ").replace("_", " "), limit=2)
     if len(found) < 2 and name_phrase and name_phrase.casefold() != (phrase or "").casefold():
         add(name_phrase)
-    return found[:3]
+    library = library_query(candidate)
+    if library and library.casefold() not in {item.casefold() for item in found}:
+        found.append(library)
+    return found[:4]
 
 
 def is_junk_repo(full_name: str) -> bool:
@@ -131,6 +134,52 @@ def ecosystem_query(candidate: dict[str, Any]) -> str:
         if len(words) >= 6:
             break
     return " ".join(words)
+
+
+def library_query(candidate: dict[str, Any]) -> str:
+    """``<language> <category> library``, from the category or the registry-style description words.
+
+    This is the query that keeps HTTP libraries such as got and axios in the set for request.
+    """
+
+    language = str(candidate.get("primary_language") or candidate.get("language") or "").strip()
+    category = str(candidate.get("category") or candidate.get("_category") or "")
+    words = _phrase(category, limit=2).split() if category else []
+    if not words:
+        words = _phrase(str(candidate.get("description") or ""), limit=2).split()
+    if not language or not words:
+        return ""
+    return f"{language} {' '.join(words)} library"
+
+
+def same_ecosystem(candidate: dict[str, Any], row: dict[str, Any]) -> bool:
+    """Same language, or the registry that language publishes to."""
+
+    cand = str(candidate.get("primary_language") or candidate.get("language") or "").casefold()
+    other = str(row.get("language") or row.get("primary_language") or "").casefold()
+    if cand and other and cand == other:
+        return True
+    registry = str(row.get("registry") or row.get("source") or "").casefold()
+    package = str(row.get("registry_package") or "")
+    if cand in {"javascript", "typescript"} and (registry == "npm" or package):
+        if registry == "npm" or "npm" in str(row.get("url") or ""):
+            return True
+    if cand == "python" and (registry == "pypi" or "pypi.org" in str(row.get("url") or "")):
+        return True
+    return False
+
+
+def blocker_rank(candidate: dict[str, Any]):
+    """Same language first, then stars, then the repository key."""
+
+    def key(row: dict[str, Any]) -> tuple[int, int, str]:
+        try:
+            stars = int(row.get("stars"))
+        except (TypeError, ValueError):
+            stars = -1
+        return (0 if same_ecosystem(candidate, row) else 1, -stars, canonical_alternative_key(row))
+
+    return key
 
 
 def rank_key(row: dict[str, Any]) -> tuple[int, str]:
@@ -310,6 +359,7 @@ def _rows(items: list[Any], query: str, repo_id: str) -> list[dict[str, Any]]:
             "archived": bool(item.get("archived")),
             "licence_spdx": str((licence or {}).get("spdx_id") or ""),
             "source": "github",
+            "language": str(item.get("language") or ""),
             "query": query,
             "fork": bool(item.get("fork")),
         })

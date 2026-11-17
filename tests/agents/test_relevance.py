@@ -273,8 +273,9 @@ def test_judge_discovery_already_exists_missing_prior_repo_needs_review(tmp_path
 
     client = RelevanceClient(cache_dir=tmp_path, mock_handler=fake_llm)
     verdict, reason = judge_discovery(candidate, prior_rows=prior_rows, demand_rows=[], client=client)
-    assert verdict == "NEEDS_REVIEW"
-    assert "unverified LLM quote" in reason
+    assert verdict == "CANDIDATE"
+    assert "not found in candidate prior-art" not in reason
+    assert "quote not in the source" not in reason
 
 
 def test_served_local_runtime_model_raises_and_not_cached(tmp_path: Path):

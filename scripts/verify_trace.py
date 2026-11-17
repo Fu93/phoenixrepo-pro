@@ -164,12 +164,25 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Also fail unless every model answer the run used was served by nvidia/nemotron-*.",
     )
+    parser.add_argument(
+        "--snapshot",
+        default="",
+        help="Also fail unless SEARCH_SNAPSHOT matches the sha256 of this stored snapshot.",
+    )
     args = parser.parse_args(argv)
     ok, detail = verify(Path(args.trace), expected_run_hash=args.expected_run_hash or None)
     if not ok:
         print(detail)
         return 1
     print(detail)
+    if args.snapshot:
+        from app.agents.search_snapshot import verify_snapshot
+
+        snap_ok, snap_detail = verify_snapshot(Path(args.trace), Path(args.snapshot))
+        if not snap_ok:
+            print(snap_detail)
+            return 1
+        print(f"snapshot {snap_detail}")
     print(request_settings_report(Path(args.trace)))
     if args.require_nemotron:
         report = nemotron_report(Path(args.trace))

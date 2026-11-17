@@ -505,6 +505,8 @@
         el("a", { href: "/pro/r/" + result.id + "/rescue" }, ["Rescue plan"]),
         " · ",
         el("a", { href: "/pro/r/" + result.id + "/trace" }, ["Trace"]),
+        result.snapshot_sha256 ? " · " : "",
+        result.snapshot_sha256 ? el("a", { href: "/pro/api/results/" + encodeURIComponent(result.id) + "/snapshot" }, ["Search snapshot"]) : "",
         " · ",
         el("button", { class: "btn secondary", type: "button", onclick: () => navigator.clipboard.writeText(location.origin + "/pro/r/" + result.id) }, ["Copy permalink"]),
       ]);
@@ -650,13 +652,16 @@
           el("div", { class: "hash muted" }, [(event.line_hash || "").slice(0, 16)]),
         ]));
       });
-      const verify = el("button", { class: "btn", type: "button", onclick: () => checkChain(result.trace || [], out, false) }, ["Verify SHA-256"]);
-      const tamper = el("button", { class: "btn secondary", type: "button", onclick: () => checkChain(result.trace || [], out, true) }, ["Tamper one line"]);
+      const verify = el("button", { class: "btn", type: "button", onclick: () => checkChain(result.trace || [], out, false, result) }, ["Verify SHA-256"]);
+      const tamper = el("button", { class: "btn secondary", type: "button", onclick: () => checkChain(result.trace || [], out, true, result) }, ["Tamper one line"]);
+      const snapshot = result.snapshot_sha256
+        ? el("a", { href: "/pro/api/results/" + encodeURIComponent(result.id) + "/snapshot" }, ["Download search snapshot"])
+        : el("span");
       return el("article", { class: "stack" }, [
         el("p", {}, [el("a", { href: "/pro/r/" + result.id }, ["Back to the verdict"])]),
         el("h1", {}, ["Trace"]),
         el("p", {}, ["Each line hash is SHA-256 of the canonical JSON, with line_hash itself left out. The next line’s prev_hash has to equal it. Tamper changes a copy in this browser."]),
-        el("div", { class: "chips" }, [verify, tamper]),
+        el("div", { class: "chips" }, [verify, tamper, snapshot]),
         out,
         el("section", { class: "panel" }, [list]),
       ]);
@@ -755,7 +760,46 @@
       return [...new Uint8Array(digest)].map((part) => part.toString(16).padStart(2, "0")).join("");
     }
 
-    async function checkChain(events, out, tamper) {
+    function canonicalJson(value) {
+      if (value === null || typeof value !== "object") return JSON.stringify(value);
+      if (Array.isArray(value)) return "[" + value.map(canonicalJson).join(",") + "]";
+      const keys = Object.keys(value).sort();
+      return "{" + keys.map((key) => JSON.stringify(key) + ":" + canonicalJson(value[key])).join(",") + "}";
+    }
+
+    async function snapshotNote(result) {
+      if (!result || !result.snapshot_sha256 || !result.id) return "";
+      const response = await fetch("/pro/api/results/" + encodeURIComponent(result.id) + "/snapshot");
+      if (!response.ok) return " Search snapshot file is missing.";
+      const doc = await response.json();
+      const records = (doc.records || []).slice().sort((left, right) => {
+        const a = String(left.kind || "") + "\0" + String(left.key || "");
+        const b = String(right.kind || "") + "\0" + String(right.key || "");
+        return a < b ? -1 : a > b ? 1 : 0;
+      });
+      const body = {
+        commit: doc.commit || "",
+        fetched_at: doc.fetched_at || "",
+        records: records,
+        refreshed: !!doc.refreshed,
+        repo_id: doc.repo_id || "",
+      };
+      const digest = await sha256(canonicalJson(body));
+      const sealed = result.snapshot_sha256;
+      let traced = sealed;
+      (result.trace || []).forEach((event) => {
+        if (event.action !== "SEARCH_SNAPSHOT" || !event.canonical) return;
+        try {
+          const record = JSON.parse(event.canonical);
+          const summary = typeof record.output_summary === "string" ? JSON.parse(record.output_summary) : record.output_summary;
+          if (summary && summary.snapshot_sha256) traced = summary.snapshot_sha256;
+        } catch (error) { /* the chain check already reported a bad line */ }
+      });
+      if (digest !== traced) return " Stored snapshot does not match the sealed SEARCH_SNAPSHOT hash.";
+      return " Search snapshot matches the sealed hash.";
+    }
+
+    async function checkChain(events, out, tamper, result) {
       const copy = events.map((event) => ({ ...event }));
       if (tamper && copy.length) {
         const index = Math.min(1, copy.length - 1);
@@ -777,10 +821,12 @@
         previous = event.line_hash;
       }
       if (!copy.length) broken = "This result has no trace lines.";
-      out.className = broken ? "bad" : "ok";
+      let extra = "";
+      if (!broken && !tamper) extra = await snapshotNote(result);
+      out.className = broken || extra.includes("does not match") || extra.includes("missing") ? "bad" : "ok";
       out.textContent = broken
         ? (tamper ? "Tamper detected, as it should be. " : "Chain failed. ") + broken
-        : "Chain matches. Run hash " + previous + ".";
+        : "Chain matches. Run hash " + previous + "." + extra;
     }
 
     function responsibleBlock(result) {

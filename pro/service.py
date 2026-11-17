@@ -104,7 +104,7 @@ class ProService:
             "examples": self.examples.cards(),
         }
 
-    def submit(self, url: str, ip: str, *, prefer_live: bool = False) -> dict[str, Any]:
+    def submit(self, url: str, ip: str, *, prefer_live: bool = False, refresh_search: bool = False) -> dict[str, Any]:
         from pro.hosted import provider_mode
         from scripts.judge_repo import JudgeError, parse_repo_url
 
@@ -133,7 +133,7 @@ class ProService:
             if exc.status in {404, 429} or exc.kind in {"NotFound", "RateLimit"}:
                 raise
             commit = ""
-        if commit:
+        if commit and not refresh_search:
             cached = self.cache.get(repo_id, commit)
             if cached:
                 cached = _without_server_paths(cached)
@@ -171,6 +171,7 @@ class ProService:
             job.charged = True
             job.admitted = can_start
             job.commit = commit
+            job.refresh_search = refresh_search
             job.events.append({
                 "type": "stage",
                 "step": "queued",
@@ -224,6 +225,9 @@ class ProService:
                 }
                 return
             time.sleep(0.05)
+
+    def snapshot_file(self, result_id: str) -> Path:
+        return self.results / f"{_safe_id(result_id)}.snapshot.json"
 
     def get_result(self, result_id: str) -> dict[str, Any]:
         example = self.examples.get(result_id)
@@ -514,6 +518,7 @@ class ProService:
                 relevance_client=client,
                 plan_rescue=True,
                 commit=job.commit,
+                refresh_search=bool(getattr(job, "refresh_search", False)),
             )
         except JudgeError as exc:
             raise ProError(str(exc), status=422, kind="CannotJudge") from exc
@@ -568,6 +573,9 @@ class ProService:
                 "source_note": "Judged in this process with the hosted provider.",
                 "demo": False,
                 "model_calls": int(getattr(client, "_http_calls", 0)),
+                "commit": job.commit,
+                "snapshot_sha256": str(judged.get("snapshot_sha256") or ""),
+                "snapshot_refreshed": bool(judged.get("snapshot_refreshed")),
                 "human_label": {},
                 "osv": _osv(job.repo_id),
             }
@@ -583,6 +591,7 @@ class ProService:
         path = self.results / f"{ident}.json"
         payload = json.dumps(result, indent=2, ensure_ascii=False) + "\n"
         path.write_text(payload, encoding="utf-8")
+        self._copy_snapshot(result, ident)
         store = (os.environ.get("PHOENIX_PRO_STORE") or "").strip()
         if store and not store.startswith("https://"):
             mirror = Path(store)
@@ -592,6 +601,19 @@ class ProService:
             except OSError:
                 pass
         return result
+
+    def _copy_snapshot(self, result: dict[str, Any], ident: str) -> None:
+        from app.agents.search_snapshot import load_snapshot
+
+        doc = load_snapshot(str(result.get("repo_id") or ""), str(result.get("commit") or ""))
+        if not doc:
+            return
+        try:
+            (self.results / f"{ident}.snapshot.json").write_text(
+                json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8",
+            )
+        except OSError:
+            pass
 
     def _event(self, job: Job, event: dict) -> None:
         with self._lock:

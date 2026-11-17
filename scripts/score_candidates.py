@@ -1012,6 +1012,11 @@ def _do_score_candidates(
     )
     if custom_toolbox is not None and custom_toolbox.trace is None:
         custom_toolbox.trace = trace
+    from app.agents.search_snapshot import SnapshotToolbox, current_session
+
+    search_session = current_session()
+    if search_session is not None and not isinstance(toolbox, SnapshotToolbox):
+        toolbox = SnapshotToolbox(toolbox, search_session)
 
     eligible_candidates: list[dict[str, Any]] = []
     ineligible_repos: list[dict[str, Any]] = []
@@ -1098,6 +1103,8 @@ def _do_score_candidates(
                 else:
                     verdict = "NEEDS_REVIEW"
                     reason = f"PROBLEM_EXTRACTION_FAILED: {err}. Prior-art search was not run. Method: llm+verified quote (requested={meta_prob.get('requested_model')}, served={meta_prob.get('served_model')})."
+                if search_session is not None:
+                    search_session.seal(trace)
                 trace.event(
                     agent_name="orchestrator",
                     action="DISCOVERY_FILTER",
@@ -1248,6 +1255,8 @@ def _do_score_candidates(
                     from app.agents.stable_search import stable_github_candidates
 
                     extra = []
+                    if problem_stmt.get("category"):
+                        candidate["_category"] = str(problem_stmt.get("category") or "")
                     if stable_getter is not None:
                         try:
                             extra = stable_github_candidates(
@@ -1268,10 +1277,27 @@ def _do_score_candidates(
                         search_results.clear()
                         search_results.extend(merged)
                     from app.agents.github_metadata import attach_github_metadata
-                    from app.agents.registry_maturity import attach_registry_metadata
+                    from app.agents.registry_maturity import _http_get_json, attach_registry_metadata
+                    from app.agents.search_snapshot import wrap_registry
 
-                    attach_registry_metadata(list(search_results), trace=trace, limit=5)
-                    attach_github_metadata(list(search_results), trace=trace, limit=5)
+                    if search_session is not None:
+                        github_getter = stable_getter
+                        if github_getter is None:
+                            from app.agents.search_snapshot import wrap_github
+                            from scripts.judge_repo import _get
+
+                            github_getter = wrap_github(search_session, _get)
+                        attach_registry_metadata(
+                            list(search_results), trace=trace, limit=5,
+                            getter=wrap_registry(search_session, _http_get_json),
+                        )
+                        attach_github_metadata(
+                            list(search_results), trace=trace, limit=5, getter=github_getter,
+                        )
+                        search_session.seal(trace)
+                    else:
+                        attach_registry_metadata(list(search_results), trace=trace, limit=5)
+                        attach_github_metadata(list(search_results), trace=trace, limit=5)
                     problem_alternatives = filter_relevant_alternatives(
                         problem_statement=problem_stmt,
                         candidate_repo_id=repo_id,

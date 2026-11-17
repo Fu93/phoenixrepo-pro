@@ -65,7 +65,7 @@ def test_problem_extraction_still_rejects_a_quote_that_is_not_in_the_source(tmp_
         client=client,
     )
     assert data is None
-    assert calls["n"] == 2
+    assert calls["n"] == 3
     assert meta["fallback"] is False
     assert "this sentence is not in the readme" in meta["error"]
 
