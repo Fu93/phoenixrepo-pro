@@ -153,7 +153,7 @@ def write_snapshot(row: dict[str, str], directory: Path) -> Path:
     return directory
 
 
-def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None, plan_rescue: bool = False, commit: str = "", refresh_search: bool = False) -> dict[str, Any]:
+def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None, plan_rescue: bool = False, commit: str = "", refresh_search: bool = False, toolbox=None) -> dict[str, Any]:
     """Judge one repository. Returns {repo_id, verdict, reason, run_id, run_hash, report}."""
     from app.agents.search_snapshot import bind, open_snapshot, reset, wrap_github
 
@@ -164,7 +164,7 @@ def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: s
         getter = wrap_github(session, getter)
     cache_token = _github_cache.set({})
     try:
-        judged = _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue, commit)
+        judged = _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue, commit, toolbox)
         if session is not None and session.sealed_hash:
             judged["snapshot_sha256"] = session.sealed_hash
             judged["snapshot_refreshed"] = session.refreshed
@@ -176,8 +176,16 @@ def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: s
         _github_cache.reset(cache_token)
 
 
-def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue=False, commit=""):
-    collected_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue=False, commit="", toolbox=None):
+    from app.agents.search_snapshot import current_session
+
+    session = current_session()
+    if session is not None and session.replaying and session.collected_at:
+        collected_at = session.collected_at
+    else:
+        collected_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        if session is not None:
+            session.collected_at = collected_at
     fetched = fetch_repo(full_name, getter=getter)
     row = build_row(fetched, collected_at)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
@@ -205,6 +213,8 @@ def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, score
         if scorer is None:
             score_kwargs["head_commit"] = commit
             score_kwargs["stable_getter"] = getter
+            if toolbox is not None:
+                score_kwargs["custom_toolbox"] = toolbox
             from app.agents.repo_facts import RepoFactsClient
 
             score_kwargs["facts_client"] = RepoFactsClient(cache_dir=snap / ".cache" / "repo_facts")

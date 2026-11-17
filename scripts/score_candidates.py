@@ -1068,16 +1068,29 @@ def _do_score_candidates(
 
         from concurrent.futures import ThreadPoolExecutor
 
-        with ThreadPoolExecutor(max_workers=1) as _rescue_pool:
-            _rescue_future = _rescue_pool.submit(_compute_rescue)
-            problem_stmt = None
-            meta_prob = None
-            _problem_started = time.perf_counter()
+        def _load_problem():
+            if search_session is not None and search_session.ready():
+                return search_session.problem, {}
+            if search_session is not None and search_session.replaying:
+                return None, {"error": f"search snapshot for {repo_id}@{head_commit} is missing or incomplete"}
             if is_client_configured(relevance_client):
-                problem_stmt, meta_prob = extract_problem_statement(candidate, client=relevance_client)
-            _problem_seconds = round(time.perf_counter() - _problem_started, 2)
-            _stage_times["problem_seconds"] = _problem_seconds
-            rescue = _rescue_future.result()
+                return extract_problem_statement(candidate, client=relevance_client)
+            return None, None
+
+        if search_session is not None and search_session.replaying and search_session.rescue is not None:
+            rescue = search_session.rescue
+            _problem_started = time.perf_counter()
+            problem_stmt, meta_prob = _load_problem()
+            _stage_times["problem_seconds"] = round(time.perf_counter() - _problem_started, 2)
+        else:
+            with ThreadPoolExecutor(max_workers=1) as _rescue_pool:
+                _rescue_future = _rescue_pool.submit(_compute_rescue)
+                _problem_started = time.perf_counter()
+                problem_stmt, meta_prob = _load_problem()
+                _stage_times["problem_seconds"] = round(time.perf_counter() - _problem_started, 2)
+                rescue = _rescue_future.result()
+            if search_session is not None and not search_session.replaying:
+                search_session.rescue = json.loads(json.dumps(rescue, default=str))
         rescue_by_repo[repo_id] = rescue
         must_beat = []
         judgement_evidence = []
@@ -1102,9 +1115,12 @@ def _do_score_candidates(
                     reason = f"UNJUDGED (PROBLEM_EXTRACTION_FAILED): {err}. No judgment was made and prior-art search was not run; rerun this repo."
                 else:
                     verdict = "NEEDS_REVIEW"
-                    reason = f"PROBLEM_EXTRACTION_FAILED: {err}. Prior-art search was not run. Method: llm+verified quote (requested={meta_prob.get('requested_model')}, served={meta_prob.get('served_model')})."
-                if search_session is not None:
-                    search_session.seal(trace)
+                    if search_session is not None and search_session.replaying and not search_session.captured:
+                        reason = f"search snapshot for {repo_id}@{head_commit} is missing or incomplete. Prior-art search was not run again."
+                    else:
+                        reason = f"PROBLEM_EXTRACTION_FAILED: {err}. Prior-art search was not run. Method: llm+verified quote (requested={meta_prob.get('requested_model')}, served={meta_prob.get('served_model')})."
+                if search_session is not None and not search_session.replaying:
+                    search_session.capture(problem=None, queries=[], results=[])
                 trace.event(
                     agent_name="orchestrator",
                     action="DISCOVERY_FILTER",
@@ -1141,41 +1157,69 @@ def _do_score_candidates(
                 queries = build_search_queries(candidate, problem_stmt)
                 queries_tried = list(queries)
 
-                trace.event(
-                    agent_name="orchestrator",
-                    action="QUERY_GENERATION",
-                    input_summary={"repo_id": repo_id},
-                    output_summary={"queries": queries},
-                    status="ok",
-                )
+                from app.agents.search_snapshot import note_search_event
 
-                candidate["_manifest_texts"] = load_manifests(toolbox, repo_id)
-                _search_started = time.perf_counter()
-                candidate["_head_commit"] = head_commit
-                search_results = search_prior_art(
-                    candidate=candidate,
-                    queries=queries,
-                    toolbox=toolbox,
-                    language=candidate.get("primary_language"),
-                    parallel_web=bool(getattr(relevance_client, "parallel_batches", False)),
-                )
-                _search_seconds = round(time.perf_counter() - _search_started, 2)
-                _stage_times["search_seconds"] = _search_seconds
+                if search_session is not None and search_session.ready():
+                    queries = list(search_session.queries) or queries
+                    queries_tried = list(queries)
+                    for saved in search_session.search_events:
+                        trace.event(
+                            agent_name="orchestrator",
+                            action=saved["action"],
+                            input_summary=saved["input_summary"],
+                            output_summary=saved["output_summary"],
+                            summary_limit=max(500, len(saved["output_summary"]) + 8, len(saved["input_summary"]) + 8),
+                            status="ok",
+                        )
+                    from app.agents.relevance import SearchResultsList
 
-                trace.event(
-                    agent_name="orchestrator",
-                    action="PRIOR_ART_SEARCH",
-                    input_summary={"repo_id": repo_id, "queries": queries},
-                    output_summary={
-                        "total_results": len(search_results),
-                        "source_counts": getattr(search_results, "source_counts", {}),
-                        "source_status": getattr(search_results, "source_status", {}),
-                    },
-                    status="ok",
-                )
+                    search_results = SearchResultsList(
+                        list(search_session.search_results),
+                        source_counts=dict(search_session.source_counts),
+                        source_status=dict(search_session.source_status),
+                        insufficient_coverage=any(
+                            status != "ok" for status in search_session.source_status.values()
+                        ),
+                    )
+                    _search_seconds = 0.0
+                    _stage_times["search_seconds"] = 0.0
+                else:
+                    note_search_event(trace.event(
+                        agent_name="orchestrator",
+                        action="QUERY_GENERATION",
+                        input_summary={"repo_id": repo_id},
+                        output_summary={"queries": queries},
+                        status="ok",
+                    ))
+
+                if not (search_session is not None and search_session.ready()):
+                    candidate["_manifest_texts"] = load_manifests(toolbox, repo_id)
+                    _search_started = time.perf_counter()
+                    candidate["_head_commit"] = head_commit
+                    search_results = search_prior_art(
+                        candidate=candidate,
+                        queries=queries,
+                        toolbox=toolbox,
+                        language=candidate.get("primary_language"),
+                        parallel_web=bool(getattr(relevance_client, "parallel_batches", False)),
+                    )
+                    _search_seconds = round(time.perf_counter() - _search_started, 2)
+                    _stage_times["search_seconds"] = _search_seconds
+
+                    note_search_event(trace.event(
+                        agent_name="orchestrator",
+                        action="PRIOR_ART_SEARCH",
+                        input_summary={"repo_id": repo_id, "queries": queries},
+                        output_summary={
+                            "total_results": len(search_results),
+                            "source_counts": getattr(search_results, "source_counts", {}),
+                            "source_status": getattr(search_results, "source_status", {}),
+                        },
+                        status="ok",
+                    ))
 
                 # Retry once with broader queries if search yields 0 results
-                if len(search_results) == 0:
+                if not (search_session is not None and search_session.ready()) and len(search_results) == 0:
                     broader = broaden_queries(
                         queries=queries,
                         category=str(problem_stmt.get("category") or ""),
@@ -1183,13 +1227,13 @@ def _do_score_candidates(
                     )
                     if broader:
                         queries_tried.extend(broader)
-                        trace.event(
+                        note_search_event(trace.event(
                             agent_name="orchestrator",
                             action="QUERY_GENERATION",
                             input_summary={"repo_id": repo_id, "retry": True},
                             output_summary={"queries": broader},
                             status="ok",
-                        )
+                        ))
                         broader_results = search_prior_art(
                             candidate=candidate,
                             queries=broader,
@@ -1200,7 +1244,7 @@ def _do_score_candidates(
                         search_results.own_filtered = list(getattr(search_results, "own_filtered", []) or []) + list(
                             getattr(broader_results, "own_filtered", []) or []
                         )
-                        trace.event(
+                        note_search_event(trace.event(
                             agent_name="orchestrator",
                             action="PRIOR_ART_SEARCH",
                             input_summary={"repo_id": repo_id, "queries": broader, "retry": True},
@@ -1210,7 +1254,7 @@ def _do_score_candidates(
                                 "source_status": getattr(broader_results, "source_status", {}),
                             },
                             status="ok",
-                        )
+                        ))
 
                 own_filtered = list(getattr(search_results, "own_filtered", []) or [])
                 identity = build_identity(candidate)
@@ -1226,9 +1270,23 @@ def _do_score_candidates(
                     )
 
                 # If after retry search_results is still 0 and no prior_for_repo from CSV:
+                if search_session is not None and not search_session.replaying and not search_session.captured:
+                    search_session.capture(
+                        problem=problem_stmt,
+                        queries=queries_tried,
+                        results=list(search_results),
+                        source_counts=getattr(search_results, "source_counts", {}),
+                        source_status=getattr(search_results, "source_status", {}),
+                    )
                 if len(search_results) == 0 and len(prior_for_repo) == 0:
-                    verdict = "NEEDS_PRIOR_ART"
-                    reason = f"Zero alternatives checked in prior-art search. Queries tried: {', '.join(queries_tried[:3])}."
+                    if search_session is not None and search_session.replaying and (
+                        search_session.incomplete or not search_session.captured
+                    ):
+                        verdict = "NEEDS_REVIEW"
+                        reason = f"search snapshot for {repo_id}@{head_commit} is missing or incomplete"
+                    else:
+                        verdict = "NEEDS_PRIOR_ART"
+                        reason = f"Zero alternatives checked in prior-art search. Queries tried: {', '.join(queries_tried[:3])}."
                     trace.event(
                         agent_name="orchestrator",
                         action="DISCOVERY_FILTER",
@@ -1257,20 +1315,21 @@ def _do_score_candidates(
                     extra = []
                     if problem_stmt.get("category"):
                         candidate["_category"] = str(problem_stmt.get("category") or "")
-                    if stable_getter is not None:
+                    replaying = search_session is not None and search_session.ready()
+                    if stable_getter is not None and not replaying:
                         try:
                             extra = stable_github_candidates(
                                 candidate, getter=stable_getter, commit=head_commit, trace=trace,
                             )
                         except Exception as exc:  # noqa: BLE001 — web results still stand
-                            trace.event(
+                            note_search_event(trace.event(
                                 agent_name="orchestrator",
                                 action="STABLE_SEARCH",
                                 input_summary={"repo_id": repo_id},
                                 output_summary={"status": "metadata unavailable", "error": str(exc)[:180]},
                                 status="error",
-                            )
-                    if extra:
+                            ))
+                    if extra and not replaying:
                         from app.agents.stable_search import merge_preserving_web
 
                         merged = merge_preserving_web(list(search_results), extra)
@@ -1280,24 +1339,32 @@ def _do_score_candidates(
                     from app.agents.registry_maturity import _http_get_json, attach_registry_metadata
                     from app.agents.search_snapshot import wrap_registry
 
-                    if search_session is not None:
-                        github_getter = stable_getter
-                        if github_getter is None:
-                            from app.agents.search_snapshot import wrap_github
-                            from scripts.judge_repo import _get
+                    if not replaying:
+                        if search_session is not None:
+                            github_getter = stable_getter
+                            if github_getter is None:
+                                from app.agents.search_snapshot import wrap_github
+                                from scripts.judge_repo import _get
 
-                            github_getter = wrap_github(search_session, _get)
-                        attach_registry_metadata(
-                            list(search_results), trace=trace, limit=5,
-                            getter=wrap_registry(search_session, _http_get_json),
-                        )
-                        attach_github_metadata(
-                            list(search_results), trace=trace, limit=5, getter=github_getter,
-                        )
-                        search_session.seal(trace)
-                    else:
-                        attach_registry_metadata(list(search_results), trace=trace, limit=5)
-                        attach_github_metadata(list(search_results), trace=trace, limit=5)
+                                github_getter = wrap_github(search_session, _get)
+                            attach_registry_metadata(
+                                list(search_results), trace=trace, limit=5,
+                                getter=wrap_registry(search_session, _http_get_json),
+                            )
+                            attach_github_metadata(
+                                list(search_results), trace=trace, limit=5, getter=github_getter,
+                            )
+                        else:
+                            attach_registry_metadata(list(search_results), trace=trace, limit=5)
+                            attach_github_metadata(list(search_results), trace=trace, limit=5)
+                        if search_session is not None:
+                            search_session.capture(
+                                problem=problem_stmt,
+                                queries=queries_tried,
+                                results=list(search_results),
+                                source_counts=getattr(search_results, "source_counts", {}),
+                                source_status=getattr(search_results, "source_status", {}),
+                            )
                     problem_alternatives = filter_relevant_alternatives(
                         problem_statement=problem_stmt,
                         candidate_repo_id=repo_id,
@@ -1815,6 +1882,9 @@ def _do_score_candidates(
         # Rescue and any other post-verdict lines have to land before RUN_SEAL.
         # A line after the seal breaks verify_trace.py.
         before_seal(trace, candidates_output, ineligible_repos)
+
+    if search_session is not None:
+        search_session.finish(trace)
 
     # 6. Seal trace
     run_hash = trace.seal()

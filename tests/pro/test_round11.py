@@ -105,7 +105,6 @@ def test_the_same_snapshot_replays_the_candidate_list_verdict_and_search_hash(tm
             ["http client"],
             SnapshotToolbox(_box(calls), session),
         )
-        session.seal(trace_one)
         client = RelevanceClient(
             cache_dir=tmp_path / "model-a",
             mock_handler=lambda _p, _s: json.dumps({
@@ -126,6 +125,7 @@ def test_the_same_snapshot_replays_the_candidate_list_verdict_and_search_hash(tm
             [],
             client=client,
         )
+        session.finish(trace_one)
     finally:
         session.close()
         reset(token)
@@ -277,3 +277,175 @@ def test_problem_extraction_retries_with_the_readme_first_section(tmp_path):
     assert data is not None
     assert meta["fallback"] is False
     assert data["quotes"] == ["Look up Japanese words from the command line."]
+
+
+def test_python_and_node_hash_the_same_snapshot_bytes(tmp_path):
+    import hashlib
+    import subprocess
+
+    raw = b'{"commit":"abc","records":[{"kind":"tool","key":"q"}],"repo_id":"acme/widget"}'
+    path = tmp_path / "search-snapshot.json"
+    path.write_bytes(raw)
+    python_hash = hashlib.sha256(raw).hexdigest()
+    script = (
+        "const fs=require('fs'); const crypto=require('crypto');"
+        "const bytes=fs.readFileSync(process.argv[1]);"
+        "process.stdout.write(crypto.createHash('sha256').update(bytes).digest('hex'));"
+    )
+    node_hash = subprocess.check_output(["node", "-e", script, str(path)], text=True)
+    assert node_hash == python_hash
+    page = __import__("pathlib").Path("pro/ui/index.html").read_text(encoding="utf-8")
+    assert "arrayBuffer" in page
+    assert "canonicalJson(body)" not in page
+
+
+def test_full_pipeline_replay_does_not_call_providers(tmp_path, monkeypatch):
+    monkeypatch.setenv("PHOENIX_PRO_DIR", str(tmp_path / "runtime"))
+    calls = {"github": 0, "tool": 0, "model": 0}
+    readme = "Lists objects in a bucket for developers.\n\n- Browse a bucket from the browser today.\n"
+
+    def getter(url, token="", accept=""):
+        calls["github"] += 1
+        if calls.get("replay"):
+            raise AssertionError("live github " + url)
+        if "sindresorhus/got" in str(url):
+            return {
+                "full_name": "sindresorhus/got",
+                "stargazers_count": 14000,
+                "pushed_at": RECENT,
+                "archived": False,
+                "description": "HTTP request library for developers.",
+                "license": {"spdx_id": "MIT"},
+            }
+        if str(url).endswith("/readme"):
+            return readme
+        if "/git/trees/" in str(url):
+            return {"tree": [
+                {"path": "src/main.js", "type": "blob"},
+                {"path": "src/list.js", "type": "blob"},
+            ]}
+        return {
+            "full_name": "acme/widget",
+            "name": "widget",
+            "description": "Lists objects in a bucket for developers.",
+            "html_url": "https://github.com/acme/widget",
+            "default_branch": "main",
+            "pushed_at": "2026-11-01T00:00:00Z",
+            "created_at": "2020-01-01T00:00:00Z",
+            "stargazers_count": 12,
+            "forks_count": 1,
+            "open_issues_count": 0,
+            "license": {"spdx_id": "MIT"},
+            "language": "JavaScript",
+        }
+
+    class _Box:
+        def __init__(self):
+            self.budget = _Budget()
+            self.tools = {"web_search": object(), "github": object()}
+            self.trace = None
+
+        def has(self, name):
+            return name in self.tools
+
+        def call(self, name, _args):
+            calls["tool"] += 1
+            if calls.get("replay"):
+                raise AssertionError("live search " + name)
+            if name == "github":
+                return ToolResult(
+                    ok=True,
+                    data={"items": [{
+                        "full_name": "sindresorhus/got",
+                        "html_url": "https://github.com/sindresorhus/got",
+                        "description": "HTTP request library for developers.",
+                        "stargazers_count": 14000,
+                        "pushed_at": RECENT,
+                        "language": "JavaScript",
+                        "license": {"spdx_id": "MIT"},
+                    }]},
+                    error="",
+                    source_url="https://api.github.com/search",
+                    fetched_at=RECENT,
+                )
+            return ToolResult(
+                ok=True,
+                data={"items": [{
+                    "url": "https://github.com/sindresorhus/got",
+                    "title": "got",
+                    "snippet": "HTTP request library for developers.",
+                }]},
+                error="",
+                source_url="https://example.test",
+                fetched_at=RECENT,
+            )
+
+    def model(prompt, _system):
+        calls["model"] += 1
+        if calls.get("replay"):
+            raise AssertionError("live model")
+        if "CANDIDATE, ALREADY_EXISTS, or NO_GO" in prompt:
+            return json.dumps({
+                "verdict": "NO_GO",
+                "reason": "Nothing else.",
+                "problem_quote": "Lists objects in a bucket for developers.",
+                "alternative_repo": None,
+            })
+        if "same_core_job" in prompt or "Alternative:" in prompt:
+            return json.dumps({
+                "same_core_job": True,
+                "same_input_output": True,
+                "same_target_user": True,
+                "covers_main_features": True,
+                "same_problem": True,
+                "quotes": ["HTTP request library for developers."],
+                "reason": "same job",
+            })
+        return json.dumps({
+            "problem": "Listing a bucket is awkward.",
+            "target_user": "developers",
+            "category": "http",
+            "search_queries": ["bucket browser"],
+            "quotes": ["Lists objects in a bucket for developers."],
+        })
+
+    from scripts.judge_repo import judge
+
+    first = judge(
+        "acme/widget",
+        out_dir=tmp_path / "out-a",
+        log_dir=tmp_path / "logs-a",
+        run_id="pipe-a",
+        getter=getter,
+        relevance_client=RelevanceClient(cache_dir=tmp_path / "model-a", mock_handler=model),
+        plan_rescue=True,
+        commit="abc123",
+        toolbox=_Box(),
+    )
+    calls["replay"] = True
+    before = dict(calls)
+    second = judge(
+        "acme/widget",
+        out_dir=tmp_path / "out-b",
+        log_dir=tmp_path / "logs-b",
+        run_id="pipe-b",
+        getter=getter,
+        relevance_client=RelevanceClient(cache_dir=tmp_path / "model-b", mock_handler=model),
+        plan_rescue=True,
+        commit="abc123",
+        toolbox=_Box(),
+    )
+    assert calls["github"] == before["github"]
+    assert calls["tool"] == before["tool"]
+    assert calls["model"] == before["model"]
+    assert second["verdict"] == first["verdict"]
+    assert second["reason"].split("Method:")[0] == first["reason"].split("Method:")[0]
+    assert second["rescue_plans"] == first["rescue_plans"]
+    from app.agents.search_snapshot import search_events_hash
+
+    assert search_events_hash(tmp_path / "logs-a" / "trace-pipe-a.jsonl") == search_events_hash(
+        tmp_path / "logs-b" / "trace-pipe-b.jsonl"
+    )
+    assert "SEARCH_SNAPSHOT" in (tmp_path / "logs-b" / "trace-pipe-b.jsonl").read_text(encoding="utf-8")
+    assert first["verdict"] == "ALREADY_EXISTS"
+    assert "sindresorhus/got" in first["reason"]

@@ -115,17 +115,30 @@ class HostedRelevanceClient(RelevanceClient):
         step: str = "",
         call_budget_s: float | None = None,
     ) -> tuple[str, str, str]:
+        from app.agents.search_snapshot import remember_model, replay_model
+
+        model = self.nvidia_model or self.model
+        sent = trim_prompt(prompt)
+        stored = replay_model(system_prompt, sent, model, 0)
+        if stored is not None:
+            if stored.get("incomplete"):
+                raise RelevanceLLMError("search snapshot is incomplete: no stored model reply for this prompt")
+            served = str(stored.get("served_model") or model)
+            requested = str(stored.get("requested_model") or model)
+            self._observe(requested, served, repo_id, step, provider="nvidia-direct", cache_hit=True)
+            self.last_cache_hit = True
+            return str(stored.get("response_text") or ""), requested, served
         if self.mock_handler is not None:
             return super()._complete(
                 prompt, system_prompt, repo_id=repo_id, step=step, call_budget_s=call_budget_s,
             )
-        model = self.nvidia_model or self.model
         messages: list[dict[str, str]] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": trim_prompt(prompt)})
         cached = self._read_hosted_cache(model, system_prompt, prompt)
         if cached is not None:
+            remember_model(system_prompt, sent, model, 0, cached["response_text"], model, cached["served_model"])
             self._observe(
                 model, cached["served_model"], repo_id, step,
                 provider=cached["provider"], cache_hit=True,
@@ -144,6 +157,7 @@ class HostedRelevanceClient(RelevanceClient):
                 self._observe(model, "", repo_id, step, status="error", provider="nvidia-direct")
             else:
                 self._write_hosted_cache(model, system_prompt, prompt, text, served, "nvidia-direct")
+                remember_model(system_prompt, sent, model, 0, text, model, served)
                 self._observe(model, served, repo_id, step, provider="nvidia-direct")
                 self.providers_used.append("nvidia-direct")
                 return text, model, served
@@ -157,6 +171,7 @@ class HostedRelevanceClient(RelevanceClient):
                 self._observe(self._gemini_model, "", repo_id, step, status="error", provider="gemini")
             else:
                 self._write_hosted_cache(model, system_prompt, prompt, text, served, "gemini")
+                remember_model(system_prompt, sent, self._gemini_model, 0, text, self._gemini_model, served)
                 self._observe(self._gemini_model, served, repo_id, step, provider="gemini")
                 self.providers_used.append("gemini")
                 return text, self._gemini_model, served

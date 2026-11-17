@@ -849,22 +849,18 @@ class RelevanceClient:
         sampling: dict[str, Any] = {"model": model, "temperature": 0, "stream": False, "max_tokens": int(self.max_tokens)}
         sampling.update(body_extra)
         inference_sha = inference_settings_sha256(sampling)
-        from app.agents.search_snapshot import current_session
+        from app.agents.search_snapshot import remember_model, replay_model
 
-        snapshot = current_session()
         temperature = float(sampling.get("temperature") or 0)
-        prompt_key = hashlib.sha256(f"{system_prompt}\n{prompt}".encode("utf-8")).hexdigest()
-        if snapshot is not None:
-            stored = snapshot.model_get(prompt_key, model, temperature)
-            if stored is not None:
-                served = str(stored.get("served_model") or model)
-                requested = str(stored.get("requested_model") or model)
-                self._observe(requested, served, repo_id, step, cache_hit=True, tier=tier_label)
-                self.last_cache_hit = True
-                return str(stored.get("response_text") or ""), requested, served
-            if snapshot.replaying:
-                snapshot.blocked += 1
-                return "", model, ""
+        stored = replay_model(system_prompt, prompt, model, temperature)
+        if stored is not None:
+            if stored.get("incomplete"):
+                raise RelevanceLLMError("search snapshot is incomplete: no stored model reply for this prompt")
+            served = str(stored.get("served_model") or model)
+            requested = str(stored.get("requested_model") or model)
+            self._observe(requested, served, repo_id, step, cache_hit=True, tier=tier_label)
+            self.last_cache_hit = True
+            return str(stored.get("response_text") or ""), requested, served
         settings_sha = request_settings_sha256(sent_request_settings(sampling))
         cache_key = hashlib.sha256(
             f"{model}\n---\n{prompt_hash}\n---\n{input_hash}\n---\n{inference_sha}".encode("utf-8")
@@ -941,8 +937,7 @@ class RelevanceClient:
             self.last_cache_hit = False
             self.last_cache_file = cache_file
             self._log_served(repo_id, step, served, time.monotonic() - call_start, cache_hit=False)
-            if snapshot is not None:
-                snapshot.model_put(prompt_key, model, temperature, text, model, served)
+            remember_model(system_prompt, prompt, model, temperature, text, model, served)
             return text, model, served
 
         if self.mock_handler is not None:
@@ -2970,7 +2965,7 @@ def search_prior_art(
                         _own(gh_row, why_own)
                         continue
                     bucket.append((fn_lower, gh_row))
-            elif not gh_res.ok and str(gh_res.error or "") == "BUDGET_EXHAUSTED":
+            elif not gh_res.ok and str(gh_res.error or "") == "BUDGET_EXHAUSTED" and "snapshot" not in str(gh_res.error or ""):
                 truncated.add("github")
             elif not gh_res.ok:
                 # A rate limit (HTTP 403/429), an HTTP error or a network error is a source error,

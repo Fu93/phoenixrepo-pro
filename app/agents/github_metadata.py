@@ -132,7 +132,9 @@ def attach_github_metadata(
         row["metadata_status"] = "ok"
         row["fetch_status"] = "ok"
         if trace is not None:
-            trace.event(
+            from app.agents.search_snapshot import note_search_event
+
+            note_search_event(trace.event(
                 agent_name="orchestrator",
                 action="GITHUB_METADATA",
                 input_summary={"repo": repo},
@@ -143,7 +145,7 @@ def attach_github_metadata(
                     "archived": row.get("archived"),
                 },
                 status="ok",
-            )
+            ))
     return rows
 
 
@@ -153,10 +155,12 @@ def _unavailable(row: dict[str, Any], trace: Any | None, repo: str, exc: BaseExc
     row["fetch_status"] = "metadata_unavailable"
     if trace is None:
         return
-    trace.event(
+    from app.agents.search_snapshot import note_search_event
+
+    note_search_event(trace.event(
         agent_name="orchestrator",
         action="GITHUB_METADATA",
         input_summary={"repo": repo},
         output_summary={"status": "metadata unavailable", "error": str(exc)[:180]},
         status="error",
-    )
+    ))

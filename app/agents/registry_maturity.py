@@ -149,7 +149,9 @@ def attach_registry_metadata(
             status = "metadata unavailable"
             error = str(exc)[:180]
         if trace is not None:
-            trace.event(
+            from app.agents.search_snapshot import note_search_event
+
+            note_search_event(trace.event(
                 agent_name="orchestrator",
                 action="REGISTRY_METADATA",
                 input_summary={"package": name, "registry": kind},
@@ -160,7 +162,7 @@ def attach_registry_metadata(
                     "error": error,
                 },
                 status="ok" if status == "ok" else "error",
-            )
+            ))
 
     from pro.pace import map_ordered
 

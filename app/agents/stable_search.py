@@ -314,23 +314,27 @@ def stable_github_candidates(
             )
         except Exception as exc:  # noqa: BLE001 — a search miss keeps the web results
             if trace is not None:
-                trace.event(
+                from app.agents.search_snapshot import note_search_event
+
+                note_search_event(trace.event(
                     agent_name="orchestrator",
                     action="STABLE_SEARCH",
                     input_summary={"repo_id": repo_id, "query": query},
                     output_summary={"status": "metadata unavailable", "error": str(exc)[:180]},
                     status="error",
-                )
+                ))
             continue
         rows.extend(found)
         if trace is not None:
-            trace.event(
+            from app.agents.search_snapshot import note_search_event
+
+            note_search_event(trace.event(
                 agent_name="orchestrator",
                 action="STABLE_SEARCH",
                 input_summary={"repo_id": repo_id, "query": query, "commit": commit or "no-commit"},
                 output_summary={"status": "ok", "count": len(found), "repos": [row["alternative_id"] for row in found]},
                 status="ok",
-            )
+            ))
     return merge_ranked(rows)
 
 

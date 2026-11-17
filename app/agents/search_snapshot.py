@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 from contextvars import ContextVar
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -23,6 +24,22 @@ from typing import Any, Callable
 _SESSION: ContextVar["SnapshotSession | None"] = ContextVar("search_snapshot", default=None)
 
 _SEARCH_ACTIONS = ("SEARCH_SNAPSHOT", "PRIOR_ART_SEARCH", "STABLE_SEARCH", "QUERY_GENERATION", "GITHUB_METADATA", "REGISTRY_METADATA")
+_TIMESTAMP = re.compile(r"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?")
+_RUN_ID = re.compile(r"\brun[-_][0-9a-fA-F]{6,}\b")
+
+
+def canonical_prompt(system: str, prompt: str) -> str:
+    """Prompt text with timestamps and run ids removed, so a replay hits the same key."""
+
+    text = f"{system}\n{prompt}"
+    text = _TIMESTAMP.sub(" ", text)
+    text = _RUN_ID.sub(" ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def model_cache_key(system: str, prompt: str, model: str, temperature: float) -> str:
+    body = canonical_prompt(system, prompt)
+    return hashlib.sha256(f"{model}\n{float(temperature):.1f}\n{body}".encode("utf-8")).hexdigest()
 
 
 def default_dir() -> Path:
@@ -57,7 +74,13 @@ def canonical_search_json(doc: dict[str, Any]) -> str:
 
 
 def snapshot_hash(doc: dict[str, Any]) -> str:
+    """Hash of the canonical search body. The sealed file hash is sha256 of the stored bytes."""
+
     return hashlib.sha256(canonical_search_json(doc).encode("utf-8")).hexdigest()
+
+
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def current_session() -> "SnapshotSession | None":
@@ -82,18 +105,49 @@ def as_of_datetime() -> datetime:
 
 
 class SnapshotSession:
-    def __init__(self, repo_id: str, commit: str, path: Path, *, refreshed: bool, fetched_at: str, records: list[dict[str, Any]], model_calls: list[dict[str, Any]], replaying: bool) -> None:
+    def __init__(
+        self,
+        repo_id: str,
+        commit: str,
+        path: Path,
+        *,
+        refreshed: bool,
+        fetched_at: str,
+        records: list[dict[str, Any]],
+        model_calls: list[dict[str, Any]],
+        replaying: bool,
+        collected_at: str = "",
+        problem: Any = None,
+        queries: list[str] | None = None,
+        search_results: list[dict[str, Any]] | None = None,
+        source_counts: dict[str, int] | None = None,
+        source_status: dict[str, str] | None = None,
+        search_events: list[dict[str, str]] | None = None,
+        captured: bool = False,
+        rescue: Any = None,
+    ) -> None:
         self.repo_id = repo_id
         self.commit = commit
         self.path = path
         self.refreshed = refreshed
         self.fetched_at = fetched_at
+        self.collected_at = collected_at
         self.records = records
         self.model_calls = model_calls
+        self.problem = problem
+        self.queries = list(queries or [])
+        self.search_results = list(search_results or [])
+        self.source_counts = dict(source_counts or {})
+        self.source_status = dict(source_status or {})
+        self.search_events = list(search_events or [])
+        self.captured = captured
+        self.rescue = rescue
         self.replaying = replaying
         self.live_calls = 0
         self.blocked = 0
+        self.incomplete = False
         self.sealed_hash = ""
+        self._finished = False
         self._index = {(str(item.get("kind")), str(item.get("key"))): item for item in records}
 
     def find(self, kind: str, key: str) -> dict[str, Any] | None:
@@ -109,21 +163,76 @@ class SnapshotSession:
         self.records.append(record)
         self._index[(kind, key)] = record
 
+    def ready(self) -> bool:
+        return self.replaying and self.captured
+
+    def capture(
+        self,
+        *,
+        problem: Any,
+        queries: list[str],
+        results: list[dict[str, Any]],
+        source_counts: dict[str, int] | None = None,
+        source_status: dict[str, str] | None = None,
+    ) -> None:
+        if self.replaying:
+            return
+        self.problem = _jsonish(problem) if problem is not None else None
+        self.queries = list(queries)
+        self.search_results = _jsonish(results)
+        self.source_counts = {str(key): int(value) for key, value in (source_counts or {}).items()}
+        self.source_status = {str(key): str(value) for key, value in (source_status or {}).items()}
+        self.captured = True
+
+    def note(self, record: dict[str, Any] | None) -> None:
+        if self.replaying or not isinstance(record, dict):
+            return
+        action = str(record.get("action") or "")
+        if action not in _SEARCH_ACTIONS or action == "SEARCH_SNAPSHOT":
+            return
+        self.search_events.append({
+            "action": action,
+            "input_summary": str(record.get("input_summary") or ""),
+            "output_summary": str(record.get("output_summary") or ""),
+        })
+
     def document(self) -> dict[str, Any]:
         return {
-            "repo_id": self.repo_id,
+            "captured": self.captured,
+            "collected_at": self.collected_at,
             "commit": self.commit,
             "fetched_at": self.fetched_at,
-            "refreshed": self.refreshed,
-            "records": self.records,
             "model_calls": self.model_calls,
-            "snapshot_sha256": self.sealed_hash,
+            "problem": self.problem,
+            "queries": self.queries,
+            "records": self.records,
+            "refreshed": self.refreshed,
+            "repo_id": self.repo_id,
+            "rescue": self.rescue,
+            "search_events": self.search_events,
+            "search_results": self.search_results,
+            "source_counts": self.source_counts,
+            "source_status": self.source_status,
         }
 
-    def seal(self, trace: Any | None) -> str:
-        digest = snapshot_hash(self.document())
+    def canonical_text(self) -> str:
+        return json.dumps(self.document(), sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def finish(self, trace: Any | None) -> str:
+        """Write the snapshot bytes once and seal sha256 of those exact bytes."""
+
+        if self._finished and self.sealed_hash:
+            return self.sealed_hash
+        text = self.canonical_text()
+        raw = text.encode("utf-8")
+        digest = hashlib.sha256(raw).hexdigest()
         self.sealed_hash = digest
-        self._write()
+        self._finished = True
+        try:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self.path.write_bytes(raw)
+        except OSError:
+            pass
         if trace is not None:
             trace.event(
                 agent_name="orchestrator",
@@ -133,42 +242,36 @@ class SnapshotSession:
                     "snapshot_sha256": digest,
                     "refreshed": self.refreshed,
                     "records": len(self.records),
+                    "model_calls": len(self.model_calls),
                 },
                 status="ok",
             )
         return digest
 
+    def seal(self, trace: Any | None) -> str:
+        return self.finish(trace)
+
     def close(self) -> None:
-        if not self.sealed_hash:
+        if self._finished:
             return
-        self._write()
-
-    def _write(self) -> None:
-        try:
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-            self.path.write_text(json.dumps(self.document(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        except OSError:
-            pass
-
-    def model_key(self, prompt_sha256: str, model: str, temperature: float) -> str:
-        return f"{model}\n{temperature}\n{prompt_sha256}"
+        if self.captured or self.records or self.model_calls:
+            self.finish(None)
 
     def model_get(self, prompt_sha256: str, model: str, temperature: float) -> dict[str, Any] | None:
-        key = self.model_key(prompt_sha256, model, temperature)
         for item in self.model_calls:
-            if item.get("key") == key:
+            if item.get("key") == prompt_sha256 or (
+                item.get("model") == model and item.get("temperature") == float(temperature) and item.get("key") == prompt_sha256
+            ):
                 return item
         return None
 
     def model_put(self, prompt_sha256: str, model: str, temperature: float, text: str, requested: str, served: str) -> None:
-        key = self.model_key(prompt_sha256, model, temperature)
-        if any(item.get("key") == key for item in self.model_calls):
+        if self.replaying or any(item.get("key") == prompt_sha256 for item in self.model_calls):
             return
         self.model_calls.append({
-            "key": key,
-            "prompt_sha256": prompt_sha256,
+            "key": prompt_sha256,
             "model": model,
-            "temperature": temperature,
+            "temperature": float(temperature),
             "response_text": text,
             "requested_model": requested,
             "served_model": served,
@@ -184,7 +287,7 @@ def open_snapshot(repo_id: str, commit: str, *, refresh: bool = False, directory
             saved = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             saved = {}
-        if isinstance(saved, dict) and saved.get("records"):
+        if isinstance(saved, dict) and (saved.get("records") or saved.get("captured") or saved.get("model_calls")):
             return SnapshotSession(
                 repo_id,
                 commit,
@@ -194,6 +297,15 @@ def open_snapshot(repo_id: str, commit: str, *, refresh: bool = False, directory
                 records=list(saved.get("records") or []),
                 model_calls=list(saved.get("model_calls") or []),
                 replaying=True,
+                collected_at=str(saved.get("collected_at") or ""),
+                problem=saved.get("problem"),
+                queries=list(saved.get("queries") or []),
+                search_results=list(saved.get("search_results") or []),
+                source_counts=dict(saved.get("source_counts") or {}),
+                source_status=dict(saved.get("source_status") or {}),
+                search_events=list(saved.get("search_events") or []),
+                captured=bool(saved.get("captured")),
+                rescue=saved.get("rescue"),
             )
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     return SnapshotSession(
@@ -228,7 +340,7 @@ def load_snapshot(repo_id: str, commit: str, directory: Path | None = None) -> d
 
 
 def search_events_hash(trace_path: Path) -> str:
-    """Hash the search-event summaries. Timestamps and the chain are left out."""
+    """Hash search-event input and output. Run id, timestamps, and the chain are left out."""
 
     parts: list[str] = []
     for line in trace_path.read_text(encoding="utf-8").splitlines():
@@ -237,20 +349,17 @@ def search_events_hash(trace_path: Path) -> str:
         record = json.loads(line)
         if record.get("action") not in _SEARCH_ACTIONS:
             continue
-        parts.append(str(record.get("action")) + "\n" + str(record.get("output_summary") or ""))
+        parts.append(
+            str(record.get("action"))
+            + "\n"
+            + str(record.get("input_summary") or "")
+            + "\n"
+            + str(record.get("output_summary") or "")
+        )
     return hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()
 
 
-def verify_snapshot(trace_path: Path, snapshot_file: Path) -> tuple[bool, str]:
-    """The SEARCH_SNAPSHOT line must name the hash of the stored search record."""
-
-    try:
-        doc = json.loads(snapshot_file.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        return False, f"snapshot is not readable JSON: {exc}"
-    if not isinstance(doc, dict):
-        return False, "snapshot is not an object"
-    digest = snapshot_hash(doc)
+def sealed_hash_from_trace(trace_path: Path) -> str:
     claimed = ""
     for line in trace_path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
@@ -266,6 +375,17 @@ def verify_snapshot(trace_path: Path, snapshot_file: Path) -> tuple[bool, str]:
                 summary = {}
         if isinstance(summary, dict):
             claimed = str(summary.get("snapshot_sha256") or "")
+    return claimed
+
+
+def verify_snapshot(trace_path: Path, snapshot_file: Path) -> tuple[bool, str]:
+    """The SEARCH_SNAPSHOT line must be the sha256 of the snapshot file bytes."""
+
+    try:
+        digest = file_sha256(snapshot_file)
+    except OSError as exc:
+        return False, f"snapshot is not readable: {exc}"
+    claimed = sealed_hash_from_trace(trace_path)
     if not claimed:
         return False, "trace has no SEARCH_SNAPSHOT hash"
     if claimed != digest:
@@ -297,7 +417,11 @@ class SnapshotToolbox:
             return _tool_result(found.get("payload") or {})
         if self.session.replaying:
             self.session.blocked += 1
-            return ToolResult(ok=False, data={}, error="BUDGET_EXHAUSTED", source_url="", fetched_at=self.session.fetched_at)
+            self.session.incomplete = True
+            return ToolResult(
+                ok=False, data={}, error="search snapshot is incomplete",
+                source_url="", fetched_at=self.session.fetched_at,
+            )
         self.session.live_calls += 1
         result = self.inner.call(name, args)
         self.session.put("tool", key, {
@@ -358,6 +482,39 @@ def wrap_github(session: SnapshotSession, getter: Callable[..., Any]) -> Callabl
         return payload
 
     return wrapped
+
+
+def replay_model(system: str, prompt: str, model: str, temperature: float) -> dict[str, Any] | None:
+    """Return a stored reply, or {'incomplete': True} when a replay has no match.
+
+    A recording run returns None so the caller talks to the model and then ``remember_model``.
+    """
+
+    session = current_session()
+    if session is None:
+        return None
+    key = model_cache_key(system, prompt, model, temperature)
+    found = session.model_get(key, model, temperature)
+    if found is not None:
+        return found
+    if session.replaying:
+        session.blocked += 1
+        session.incomplete = True
+        return {"incomplete": True}
+    return None
+
+
+def remember_model(system: str, prompt: str, model: str, temperature: float, text: str, requested: str, served: str) -> None:
+    session = current_session()
+    if session is None or session.replaying:
+        return
+    session.model_put(model_cache_key(system, prompt, model, temperature), model, temperature, text, requested, served)
+
+
+def note_search_event(record: dict[str, Any] | None) -> None:
+    session = current_session()
+    if session is not None:
+        session.note(record)
 
 
 def wrap_registry(session: SnapshotSession, getter: Callable[[str], Any]) -> Callable[[str], Any]:

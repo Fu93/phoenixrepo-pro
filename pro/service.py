@@ -133,6 +133,9 @@ class ProService:
             if exc.status in {404, 429} or exc.kind in {"NotFound", "RateLimit"}:
                 raise
             commit = ""
+        from app.agents.search_snapshot import load_snapshot
+
+        replaying = bool(commit) and not refresh_search and load_snapshot(repo_id, commit) is not None
         if commit and not refresh_search:
             cached = self.cache.get(repo_id, commit)
             if cached:
@@ -161,14 +164,15 @@ class ProService:
                     status=429,
                     kind="queue",
                 )
-            reason = self.ledger.block_reason(ip or "unknown")
-            if reason != "ok":
-                limit = self.ledger.config.per_ip_daily if reason == "per_ip" else self.ledger.config.global_daily
-                noun = "this address" if reason == "per_ip" else "the process"
-                raise ProError(f"Daily run limit reached for {noun} ({limit}).", status=429, kind=reason)
-            self.ledger.reserve(ip or "unknown")
+            if not replaying:
+                reason = self.ledger.block_reason(ip or "unknown")
+                if reason != "ok":
+                    limit = self.ledger.config.per_ip_daily if reason == "per_ip" else self.ledger.config.global_daily
+                    noun = "this address" if reason == "per_ip" else "the process"
+                    raise ProError(f"Daily run limit reached for {noun} ({limit}).", status=429, kind=reason)
+                self.ledger.reserve(ip or "unknown")
             job = Job(f"run-{uuid.uuid4().hex[:12]}", url, repo_id, ip or "unknown")
-            job.charged = True
+            job.charged = not replaying
             job.admitted = can_start
             job.commit = commit
             job.refresh_search = refresh_search

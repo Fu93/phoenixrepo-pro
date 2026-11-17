@@ -755,7 +755,7 @@
     }
 
     async function sha256(text) {
-      const bytes = new TextEncoder().encode(text);
+      const bytes = typeof text === "string" ? new TextEncoder().encode(text) : text;
       const digest = await crypto.subtle.digest("SHA-256", bytes);
       return [...new Uint8Array(digest)].map((part) => part.toString(16).padStart(2, "0")).join("");
     }
@@ -771,22 +771,9 @@
       if (!result || !result.snapshot_sha256 || !result.id) return "";
       const response = await fetch("/pro/api/results/" + encodeURIComponent(result.id) + "/snapshot");
       if (!response.ok) return " Search snapshot file is missing.";
-      const doc = await response.json();
-      const records = (doc.records || []).slice().sort((left, right) => {
-        const a = String(left.kind || "") + "\0" + String(left.key || "");
-        const b = String(right.kind || "") + "\0" + String(right.key || "");
-        return a < b ? -1 : a > b ? 1 : 0;
-      });
-      const body = {
-        commit: doc.commit || "",
-        fetched_at: doc.fetched_at || "",
-        records: records,
-        refreshed: !!doc.refreshed,
-        repo_id: doc.repo_id || "",
-      };
-      const digest = await sha256(canonicalJson(body));
-      const sealed = result.snapshot_sha256;
-      let traced = sealed;
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const digest = await sha256(bytes);
+      let traced = result.snapshot_sha256;
       (result.trace || []).forEach((event) => {
         if (event.action !== "SEARCH_SNAPSHOT" || !event.canonical) return;
         try {
