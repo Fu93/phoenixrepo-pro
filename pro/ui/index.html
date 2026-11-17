@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PhoenixRepo Pro</title>
+  <meta name="description" content="Paste a public GitHub repository. Read whether the idea already exists, the quote, and a tamper-evident receipt.">
+  <meta property="og:title" content="__OG_TITLE__">
+  <meta property="og:description" content="A verdict, the quote it rests on, and a tamper-evident receipt.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="__OG_URL__">
+  <meta property="og:image" content="__OG_IMAGE__">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="__OG_IMAGE__">
+  <link rel="icon" href="/favicon.ico">
+  <style>
+    :root {
+      --ink: #1c1612;
+      --paper: #f4efe6;
+      --card: #fffaf3;
+      --ember: #c2410c;
+      --ember-deep: #9a3412;
+      --moss: #3f6212;
+      --rose: #9f1239;
+      --amber: #a16207;
+      --line: #e6d9c8;
+      --mute: #3f342c;
+      --shadow: 0 18px 50px rgba(60, 32, 12, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 420px at 0% -10%, #ffe7d4 0%, transparent 55%),
+        radial-gradient(700px 380px at 100% 0%, #f3e7c9 0%, transparent 50%),
+        var(--paper);
+      font-family: "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    .wrap, main, article, section, pre, table, .hash, .alt { max-width: 100%; }
+    pre, code, .hash, .mono, a, td, th, p, h1, h2, h3, li, blockquote, .muted {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    pre { white-space: pre-wrap; }
+    table { display: block; overflow-x: auto; }
+    a { color: var(--ember-deep); }
+    button, input { font: inherit; }
+    :focus-visible { outline: 3px solid var(--ember); outline-offset: 3px; }
+    .skip {
+      position: absolute; left: 8px; top: -40px; background: var(--ink); color: #fffaf3;
+      padding: 8px 12px; z-index: 2;
+    }
+    .skip:focus { top: 8px; }
+    .wrap { width: min(1080px, calc(100% - 32px)); margin: 0 auto; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 22px 0 8px;
+    }
+    .brand { display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit; }
+    .mark {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: conic-gradient(from 210deg, #fdba74, var(--ember), #7c2d12, #fdba74);
+      box-shadow: inset 0 0 0 6px #fff6ee;
+    }
+    .brand b { display: block; letter-spacing: 0.14em; font-size: 0.78rem; }
+    .brand span { color: var(--mute); font-size: 0.92rem; }
+    nav { display: flex; gap: 14px; align-items: center; }
+    nav a { text-decoration: none; color: var(--ink); }
+    .mono, code, .hash { font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, Consolas, monospace; }
+    h1 { font-size: clamp(2.2rem, 5vw, 4.4rem); line-height: 0.95; font-weight: 600; margin: 12px 0; letter-spacing: -0.03em; }
+    h2 { font-size: 1.45rem; margin: 0 0 8px; }
+    .lede { font-size: 1.18rem; max-width: 42rem; }
+    .muted { color: var(--mute); }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    form.judge { display: flex; gap: 8px; margin: 18px 0; }
+    form.judge input {
+      flex: 1;
+      border: 1px solid #d9cbb8;
+      background: #fff;
+      border-radius: 999px;
+      padding: 14px 18px;
+      min-width: 0;
+    }
+    form.judge button, .btn {
+      border: 0;
+      background: var(--ink);
+      color: #fffaf3;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+    .btn.secondary { background: transparent; color: var(--ink); border: 1px solid #d9cbb8; }
+    .btn:disabled { opacity: 0.55; cursor: wait; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .grid { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 16px; }
+    .stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .stamp {
+      display: inline-block;
+      border: 3px solid currentColor;
+      padding: 6px 12px;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+      transform: rotate(-2deg);
+      text-transform: uppercase;
+    }
+    .stamp.CANDIDATE { color: var(--moss); }
+    .stamp.ALREADY_EXISTS { color: var(--rose); }
+    .stamp.NEEDS_REVIEW, .stamp.NEEDS_PRIOR_ART, .stamp.UNJUDGED { color: var(--amber); }
+    blockquote {
+      margin: 0;
+      padding: 8px 0 8px 14px;
+      border-left: 3px solid var(--ember);
+      font-size: 1.15rem;
+    }
+    .log { list-style: none; margin: 0; padding: 0; }
+    .log li { display: grid; grid-template-columns: 16px 1fr; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); }
+    .log li::before { content: ""; width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: var(--ember); }
+    .steps { list-style: none; margin: 8px 0; padding: 0; }
+    .steps li { color: var(--mute); padding: 3px 0 3px 16px; }
+    .steps li.done { color: var(--moss); }
+    .steps li.now { color: var(--ink); font-weight: 700; }
+    .progress { margin-top: 8px; }
+    .alt { padding: 12px 0; border-top: 1px solid var(--line); }
+    .tag { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem; letter-spacing: 0.08em; }
+    .tag.blocked { color: var(--rose); }
+    .tag.open { color: var(--moss); }
+    .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .item { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .error { color: var(--rose); }
+    footer { color: var(--mute); padding: 28px 0 40px; font-size: 0.92rem; }
+    .timeline { border-left: 2px solid #e7c3a8; margin-left: 8px; padding-left: 16px; }
+    .timeline article { margin: 0 0 12px; }
+    .ok { color: var(--moss); }
+    .bad { color: var(--rose); }
+    @media (max-width: 800px) {
+      .grid, .cols { grid-template-columns: minmax(0, 1fr); }
+      header { align-items: flex-start; flex-direction: column; }
+      form.judge { flex-direction: column; }
+      form.judge button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#app">Skip to the judgement</a>
+  <div class="wrap">
+    <p class="muted" id="wake">If this page was slow to appear, the free instance was waking up. It is ready now.</p>
+    <header>
+      <a class="brand" href="/pro">
+        <i class="mark" aria-hidden="true"></i>
+        <div>
+          <b>PHOENIXREPO PRO</b>
+          <span>Assay a repository before you revive it</span>
+        </div>
+      </a>
+      <nav>
+        <a href="/pro">Judge</a>
+        <a href="/pro#responsible">Responsible AI</a>
+        <a href="/ui">Recorded replays</a>
+      </nav>
+    </header>
+    <main id="app" aria-live="polite"></main>
+    <footer>
+      Type is the browser’s own serif and monospace. No font file and no paid service is loaded.
+      The hash chain shows a trace was not edited. It does not show the verdict is true.
+    </footer>
+  </div>
+  <script>
+    const app = document.getElementById("app");
+    const LABELS = {
+      ALREADY_EXISTS: "Already exists",
+      CANDIDATE: "Worth reviving",
+      NEEDS_REVIEW: "Needs review",
+      NEEDS_PRIOR_ART: "Needs prior art",
+      UNJUDGED: "Not judged",
+      NOT_ENOUGH: "Not enough to judge",
+      NO_GO: "Do not revive",
+    };
+
+    function plainReason(result) {
+      const text = (result.plain_reason || result.reason || "").replace(/web:/g, "");
+      const cut = text.split("Method:")[0].trim();
+      return cut || "No reason was stored.";
+    }
+
+    function detailsFor(result) {
+      const raw = result.reason || "";
+      if (!raw.includes("Method:")) return el("span");
+      const box = el("details");
+      box.append(el("summary", {}, ["How the engine said it"]));
+      box.append(el("p", { class: "mono" }, [raw]));
+      return box;
+    }
+
+    function notEnough(result) {
+      return el("section", { class: "panel" }, [
+        el("h2", {}, ["What would make it judgeable"]),
+        ...(result.would_help || []).map((line) => el("p", {}, [line])),
+      ]);
+    }
+
+    function mismatchNote(result) {
+      const hit = (result.trace || []).some((event) => {
+        const raw = event.canonical || "";
+        return raw.includes("MODEL_MISMATCH") && raw.includes('"status":"error"');
+      });
+      if (!hit) return el("span");
+      return el("p", {}, [
+        "One sealed line is flagged MODEL_MISMATCH with an empty served model and status error. That was a failed NVIDIA call on 26 Oct 2026, not a verdict from another model. Current code records that failure as CALL_FAILED. The sealed line is left as recorded.",
+      ]);
+    }
+
+    function el(tag, props, children) {
+      const node = document.createElement(tag);
+      Object.entries(props || {}).forEach(([key, value]) => {
+        if (key === "class") node.className = value;
+        else if (key.startsWith("on") && typeof value === "function") node.addEventListener(key.slice(2), value);
+        else if (value !== false && value != null) node.setAttribute(key, value);
+      });
+      (children || []).forEach((child) => node.append(child instanceof Node ? child : document.createTextNode(String(child))));
+      return node;
+    }
+
+    function route() {
+      const path = location.pathname.replace(/\/$/, "") || "/";
+      const rescue = path.match(/^\/pro\/r\/([^/]+)\/rescue$/);
+      const trace = path.match(/^\/pro\/r\/([^/]+)\/trace$/);
+      const live = path.match(/^\/pro\/run\/([^/]+)$/);
+      const result = path.match(/^\/pro\/r\/([^/]+)$/);
+      if (live) return renderRun(decodeURIComponent(live[1]));
+      if (rescue) return renderResult(decodeURIComponent(rescue[1]), "rescue");
+      if (trace) return renderResult(decodeURIComponent(trace[1]), "trace");
+      if (result) return renderResult(decodeURIComponent(result[1]), "verdict");
+      return renderHome();
+    }
+
+    async function renderRun(id) {
+      const progress = el("div", { class: "progress", "aria-live": "polite" });
+      const note = el("p", { class: "muted" });
+      app.replaceChildren(el("h1", {}, ["Judgement in progress"]), el("p", { class: "muted" }, ["This address stays valid if you refresh."]), progress, note);
+      const status = await fetch("/pro/api/status").then((response) => response.json());
+      const view = mountWait(progress, status.examples || []);
+      const job = await fetch("/pro/api/runs/" + encodeURIComponent(id)).then((response) => response.json());
+      if (job.status === "done" && job.result_id) {
+        location.href = "/pro/r/" + job.result_id;
+        return;
+      }
+      if (job.status === "error") {
+        note.textContent = job.error || "Judging stopped.";
+        note.className = "error";
+        return;
+      }
+      watch(id, view, note);
+    }
+
+    async function renderHome() {
+      app.replaceChildren(el("p", { class: "muted" }, ["Loading"]));
+      const status = await fetch("/pro/api/status").then((r) => r.json());
+      const examples = status.examples || [];
+      const form = el("form", { class: "judge" }, [
+        el("input", { name: "url", type: "url", required: "true", placeholder: "https://github.com/owner/repository", "aria-label": "Public GitHub repository URL" }),
+        el("button", { type: "submit" }, ["Judge"]),
+      ]);
+      const progress = el("div", { class: "progress", "aria-live": "polite" });
+      const note = el("p", { class: "muted" });
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        startRun(new FormData(form).get("url"), progress, note, form.querySelector("button"), examples);
+      });
+      const mode = status.mode === "demo"
+        ? "Demo mode. No model key is set, so only the recorded examples run. A live judgement needs NVIDIA_API_KEY, with GEMINI_API_KEY as an optional fallback."
+        : `Hosted mode: ${status.mode}. Model ${status.model || "configured"}. Daily cap ${status.limits.global_used}/${status.limits.global_limit}, ${status.limits.max_model_calls} model calls per run.`;
+      app.replaceChildren(
+        el("section", { class: "grid" }, [
+          el("div", {}, [
+            el("p", { class: "muted" }, ["SLAY HACKS · gate 1, in the browser"]),
+            el("h1", {}, ["Paste a public repository. Read the verdict, the quote, and the tamper-evident receipt."]),
+            el("p", { class: "lede" }, ["PhoenixRepo checks whether an abandoned idea already exists in a maintained form. The model proposes. Code keeps a quote only when the words are in the cited text."]),
+            form,
+            triageForm(),
+            note,
+            progress,
+            el("div", { class: "chips" }, examples.map((card) => el("a", { class: "chip", href: "/pro/r/" + card.id }, [
+        (LABELS[card.verdict] || card.verdict) + " · " + card.repo_id + (card.recorded_label ? " · " + card.recorded_label : ""),
+      ]))),
+          ]),
+          el("aside", { class: "panel" }, [
+            el("h2", {}, ["This process"]),
+            el("p", {}, [mode]),
+            el("p", { class: "muted" }, ["A repeat of the same repository and commit is served from the cache and spends no model call and no daily slot."]),
+          ]),
+        ]),
+        responsibleBlock(null),
+      );
+      const preset = new URLSearchParams(location.search).get("url");
+      if (preset) startRun(preset, progress, note, form.querySelector("button"), examples);
+    }
+
+    function triageForm() {
+      const form = el("form", { class: "judge" }, [
+        el("input", { name: "user", "aria-label": "GitHub username", placeholder: "GitHub username" }),
+        el("button", { type: "submit" }, ["Find abandoned repos"]),
+      ]);
+      const out = el("div");
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const user = new FormData(form).get("user");
+        const response = await fetch("/pro/api/triage?user=" + encodeURIComponent(user));
+        const data = await response.json();
+        if (!response.ok) {
+          out.replaceChildren(el("p", { class: "error" }, [(data.error && data.error.message) || "Triage failed."]));
+          return;
+        }
+        if (!(data.repos || []).length) {
+          out.replaceChildren(el("p", {}, ["No public repository for that user has gone 12 months without a push."]));
+          return;
+        }
+        out.replaceChildren(...data.repos.slice(0, 12).map((repo) => el("p", {}, [
+          el("a", { href: "/?url=" + encodeURIComponent(repo.url) }, ["Judge " + repo.repo_id]),
+          " · " + repo.stale_days + " days since the last push · " + repo.stars + " stars",
+        ])));
+      });
+      return el("section", {}, [
+        el("h2", {}, ["Abandoned repositories"]),
+        el("p", { class: "muted" }, ["Public repos with no push in 12 months, ranked by stars and how long they have been quiet."]),
+        form,
+        out,
+      ]);
+    }
+
+    const STEP_DEFS = [
+      ["queued", "Queued"],
+      ["fetch", "Fetch the repository"],
+      ["readme", "Check the README for injected instructions"],
+      ["model", "Ask the model, then check every quote"],
+      ["seal", "Seal the verdict"],
+    ];
+
+    function stepRank(event) {
+      const step = event.step || "";
+      const known = STEP_DEFS.findIndex((row) => row[0] === step);
+      if (known >= 0) return known;
+      const text = (event.message || event.action || "").toLowerCase();
+      if (text.includes("verdict") || text.includes("seal") || text.includes("run_seal")) return 4;
+      if (text.includes("model") || text.includes("judge") || text.includes("scoring") || event.type === "trace") return 3;
+      if (text.includes("readme") || text.includes("injection")) return 2;
+      if (text.includes("fetch")) return 1;
+      if (text.includes("queued")) return 0;
+      return -1;
+    }
+
+    function mountWait(progress, examples) {
+      const elapsed = el("p", { class: "mono" }, ["0:00 elapsed · usually 3–6 minutes"]);
+      const items = STEP_DEFS.map((row) => el("li", {}, [row[1]]));
+      const steps = el("ol", { class: "steps" }, items);
+      const log = el("ol", { class: "log" });
+      const chips = el("div", { class: "chips" }, (examples || []).map((card) => el("a", { class: "chip", href: "/pro/r/" + card.id }, [card.verdict + " · " + card.repo_id])));
+      progress.replaceChildren(
+        el("h2", {}, ["This run"]),
+        elapsed,
+        el("p", {}, ["A live judgement usually takes 3–6 minutes. These recorded examples open immediately."]),
+        chips,
+        steps,
+        log,
+      );
+      return { elapsed, items, log, rank: -1 };
+    }
+
+    function applyEvents(view, events) {
+      view.log.replaceChildren();
+      events.forEach((event) => {
+        if (event.message) view.log.append(el("li", {}, [event.message]));
+        const rank = stepRank(event);
+        if (rank > view.rank) view.rank = rank;
+      });
+      view.items.forEach((item, index) => {
+        item.className = index < view.rank ? "done" : index === view.rank ? "now" : "";
+      });
+    }
+
+    async function startRun(url, progress, note, button, examples) {
+      button.disabled = true;
+      note.textContent = "";
+      let response;
+      try {
+        response = await fetch("/pro/api/runs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+      } catch (error) {
+        note.textContent = "The request did not leave this page.";
+        button.disabled = false;
+        return;
+      }
+      const data = await response.json();
+      button.disabled = false;
+      if (!response.ok) {
+        note.textContent = (data.error && data.error.message) || "The run was refused.";
+        note.className = "error";
+        return;
+      }
+      note.className = "muted";
+      if (data.status === "done" && (data.result_id || data.id)) {
+        location.href = "/pro/r/" + (data.result_id || data.id);
+        return;
+      }
+      if (data.status === "demo") {
+        note.textContent = data.message || "Demo mode.";
+        return;
+      }
+      if (data.url) {
+        location.href = data.url;
+        return;
+      }
+      const view = mountWait(progress, examples);
+      watch(data.id, view, note);
+    }
+
+    function watch(id, view, note) {
+      let finished = false;
+      const started = Date.now();
+      const timer = setInterval(() => {
+        const seconds = Math.floor((Date.now() - started) / 1000);
+        const mm = Math.floor(seconds / 60);
+        const ss = String(seconds % 60).padStart(2, "0");
+        view.elapsed.textContent = mm + ":" + ss + " elapsed · usually 3–6 minutes";
+      }, 1000);
+      const source = new EventSource("/pro/api/runs/" + id + "/events");
+      const seen = [];
+      source.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        seen.push(data);
+        applyEvents(view, seen);
+        if (data.type !== "done" && !(data.type === "status" && data.status && data.status !== "running")) return;
+        finished = true;
+        clearInterval(timer);
+        source.close();
+        if (data.status === "error") note.textContent = data.message || "Judging stopped.";
+        else if (data.result_id) location.href = "/pro/r/" + data.result_id;
+      };
+      source.onerror = () => {
+        source.close();
+        clearInterval(timer);
+        if (!finished) poll(id, view, note);
+      };
+    }
+
+    async function poll(id, view, note) {
+      for (let i = 0; i < 400; i += 1) {
+        const data = await fetch("/pro/api/runs/" + id).then((r) => r.json());
+        applyEvents(view, data.events || []);
+        const seconds = Math.max(0, Math.floor(Date.now() / 1000) - Math.floor(data.started_at || Date.now() / 1000));
+        const mm = Math.floor(seconds / 60);
+        const ss = String(seconds % 60).padStart(2, "0");
+        view.elapsed.textContent = mm + ":" + ss + " elapsed · usually 3–6 minutes";
+        if (data.status === "done" && data.result_id) {
+          location.href = "/pro/r/" + data.result_id;
+          return;
+        }
+        if (data.status === "error") {
+          note.textContent = data.error || "Judging stopped.";
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
+    }
+
+    async function renderResult(id, view) {
+      app.replaceChildren(el("p", { class: "muted" }, ["Loading the result"]));
+      const response = await fetch("/pro/api/results/" + encodeURIComponent(id));
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        app.replaceChildren(el("p", { class: "error" }, [(body.error && body.error.message) || "This result is not on this server."]));
+        return;
+      }
+      const result = await response.json();
+      if (view === "rescue") app.replaceChildren(rescueView(result));
+      else if (view === "trace") app.replaceChildren(traceView(result));
+      else app.replaceChildren(verdictView(result), responsibleBlock(result));
+    }
+
+    function verdictView(result) {
+      const links = el("p", {}, [
+        el("a", { href: "/pro/r/" + result.id + "/rescue" }, ["Rescue plan"]),
+        " · ",
+        el("a", { href: "/pro/r/" + result.id + "/trace" }, ["Trace"]),
+        result.snapshot_sha256 ? " · " : "",
+        result.snapshot_sha256 ? el("a", { href: "/pro/api/results/" + encodeURIComponent(result.id) + "/snapshot" }, ["Search snapshot"]) : "",
+        " · ",
+        el("button", { class: "btn secondary", type: "button", onclick: () => navigator.clipboard.writeText(location.origin + "/pro/r/" + result.id) }, ["Copy permalink"]),
+      ]);
+      const alts = (result.alternatives || []).length
+        ? (result.alternatives || []).map(altCard)
+        : [el("p", { class: "muted" }, ["No alternative quote was stored on this verdict."])];
+      return el("article", { class: "stack" }, [
+        el("p", { class: "muted" }, [result.repo_id + (result.recorded_label ? " · " + result.recorded_label : (result.source ? " · " + result.source : ""))]),
+        el("div", { class: "stamp " + result.verdict }, [LABELS[result.verdict] || result.verdict || "No verdict"]),
+        el("h1", {}, [result.title || result.repo_id]),
+        el("p", { class: "muted" }, [quoteLabel(result)]),
+        result.quote ? el("p", {}, [
+          result.quote_verified ? el("span", { class: "tag open" }, ["Found in source ✓ "]) : el("span", { class: "tag blocked" }, ["Not in the source "]),
+          result.quote,
+        ]) : el("p", { class: "muted" }, ["No verified quote was stored with this verdict."]),
+        el("p", {}, [plainReason(result)]),
+        skippedList(result),
+        durations(result),
+        detailsFor(result),
+        result.verdict === "NOT_ENOUGH" ? notEnough(result) : el("span"),
+        mismatchNote(result),
+        links,
+        el("section", { class: "panel" }, [
+          el("h2", {}, ["Prior art"]),
+          ...alts,
+        ]),
+        el("p", { class: "hash muted" }, [
+          "Tamper-evident receipt ",
+          result.run_hash || "none",
+          ". The hash chain proves the trace was not edited. It does not prove the verdict is correct.",
+        ]),
+        osvPanel(result),
+      ]);
+    }
+
+    function osvPanel(result) {
+      const rows = result.osv || [];
+      const found = rows.filter((row) => (row.ids || []).length);
+      const skipped = rows.length - found.length;
+      const note = skipped ? skipped + " listed package" + (skipped === 1 ? " has" : "s have") + " no pinned version, so no advisory check was made for " + (skipped === 1 ? "it" : "them") + "." : "";
+      if (!found.length && !note) return el("span");
+      return el("section", { class: "panel" }, [
+        el("h2", {}, [found.length ? "Known vulnerabilities" : "Dependency check"]),
+        ...found.map((row) => el("p", {}, [row.ecosystem + " " + row.name + (row.version ? " " + row.version : "") + ": " + row.ids.join(", ")])),
+        note ? el("p", { class: "muted" }, [note]) : el("span"),
+      ]);
+    }
+
+    function quoteLabel(result) {
+      if (!result.quote || result.quote_verified === false) return "";
+      const blocked = (result.alternatives || []).some((row) => row.state === "blocked" || (row.blocked && row.quote_verified !== false));
+      return blocked ? "Quote that blocked the repository" : "Quoted evidence stored with the verdict";
+    }
+
+    function rowState(row) {
+      if (row.state) return row.state;
+      const reason = (row.reason || "").toLowerCase();
+      if (reason.includes("couldn't verify") || reason.includes("not found") || reason.includes("unverified")) return "could_not_verify";
+      if (reason.includes("did not block") || !row.blocked) return "did_not_block";
+      return "blocked";
+    }
+
+    function altCard(row) {
+      const label = (row.name || row.url || "alternative").replace(/^web:/, "");
+      const name = row.url ? el("a", { href: row.url }, [label]) : el("span", {}, [label]);
+      const state = rowState(row);
+      const titles = {
+        blocked: ["blocked", "BLOCKED THE REPOSITORY"],
+        did_not_block: ["open", "CHECKED, DID NOT BLOCK"],
+        could_not_verify: ["blocked", "COULDN'T VERIFY"],
+      };
+      const shown = titles[state] || titles.did_not_block;
+      return el("div", { class: "alt" }, [
+        el("div", { class: "tag " + shown[0] }, [shown[1]]),
+        el("div", {}, [name, " · " + (row.overlap || "overlap not recorded")]),
+        el("p", {}, [
+          row.quote && row.quote_verified ? el("span", { class: "tag open" }, ["Found in source ✓ "]) : el("span"),
+          row.quote || "No quote stored.",
+        ]),
+        el("p", { class: "muted" }, [row.reason || ""]),
+        rubricLine(row),
+      ]);
+    }
+
+    function rubricLine(row) {
+      const first = row.rubric || {};
+      const keys = ["same_core_job", "same_input_output", "same_target_user", "covers_main_features"];
+      if (!keys.some((key) => key in first)) return el("span");
+      const bit = (answers, key) => (answers[key] === true ? "yes" : answers[key] === false ? "no" : "—");
+      const text = keys.map((key) => key.replace(/_/g, " ") + " " + bit(first, key)).join("; ");
+      const second = row.rubric_second || {};
+      const extra = keys.some((key) => key in second)
+        ? " Second read: " + keys.map((key) => bit(second, key)).join("/") + "."
+        : "";
+      return el("p", { class: "muted" }, ["Rubric: " + text + "." + extra + " The feature-list answer is recorded and does not set full or partial."]);
+    }
+
+    function rescueView(result) {
+      const back = el("p", {}, [el("a", { href: "/pro/r/" + result.id }, ["Back to the verdict"])]);
+      if (!result.rescue) {
+        return el("article", {}, [
+          back,
+          el("h1", {}, ["No rescue plan"]),
+          el("p", {}, [result.rescue_note || "A rescue plan is written only for a CANDIDATE."]),
+          el("blockquote", {}, [result.quote || ""]),
+        ]);
+      }
+      const stages = result.rescue.stages || [];
+      return el("article", { class: "stack" }, [
+        back,
+        el("p", {}, [el("a", { href: "/pro/api/results/" + result.id + "/rescue.md" }, ["Download Markdown"])]),
+        el("h1", {}, ["Rescue plan"]),
+        el("p", { class: "muted" }, [result.rescue_note || ("Drafted by " + (result.rescue.drafted_by || "the engine"))]),
+        fallbackNote(result),
+        el("div", { class: "cols" }, stages.map(stageCard)),
+      ]);
+    }
+
+    function stageCard(stage) {
+      const items = stage.items || [];
+      const body = items.length ? items.map((item) => el("div", { class: "item" }, [
+        el("h3", {}, [item.title || "Item"]),
+        el("p", {}, [item.why || ""]),
+        el("blockquote", {}, [item.quote || ""]),
+        el("p", { class: "mono muted" }, [(item.evidence || []).join(", ")]),
+      ])) : [el("p", { class: "muted" }, ["No verified item in this stage."])];
+      return el("section", { class: "panel" }, [el("h2", {}, [stage.stage]), ...body]);
+    }
+
+    function traceView(result) {
+      const out = el("p", { class: "muted" }, ["Not verified yet."]);
+      const list = el("div", { class: "timeline" });
+      let stage = "";
+      groupTrace(result.trace || []).forEach((event) => {
+        const name = stageName(event);
+        if (name !== stage) {
+          stage = name;
+          list.append(el("h2", {}, [name]));
+        }
+        list.append(el("article", {}, [
+          el("strong", { class: "mono" }, [shown(event.action || "event")]),
+          el("div", { class: "muted" }, [shown(event.detail || "")]),
+          el("div", { class: "hash muted" }, [(event.line_hash || "").slice(0, 16)]),
+        ]));
+      });
+      const verify = el("button", { class: "btn", type: "button", onclick: () => checkChain(result.trace || [], out, false, result) }, ["Verify SHA-256"]);
+      const tamper = el("button", { class: "btn secondary", type: "button", onclick: () => checkChain(result.trace || [], out, true, result) }, ["Tamper one line"]);
+      const snapshot = result.snapshot_sha256
+        ? el("a", { href: "/pro/api/results/" + encodeURIComponent(result.id) + "/snapshot" }, ["Download search snapshot"])
+        : el("span");
+      return el("article", { class: "stack" }, [
+        el("p", {}, [el("a", { href: "/pro/r/" + result.id }, ["Back to the verdict"])]),
+        el("h1", {}, ["Trace"]),
+        el("p", {}, ["Each line hash is SHA-256 of the canonical JSON, with line_hash itself left out. The next line’s prev_hash has to equal it. Tamper changes a copy in this browser."]),
+        el("div", { class: "chips" }, [verify, tamper, snapshot]),
+        out,
+        el("section", { class: "panel" }, [list]),
+      ]);
+    }
+
+    function skippedList(result) {
+      const rows = result.skipped || [];
+      if (!rows.length) return el("span");
+      return el("details", {}, [
+        el("summary", {}, [rows.length + " alternatives were checked and skipped"]),
+        ...rows.map((row) => el("p", { class: "muted" }, [(row.alternative || "alternative") + " — " + (row.reason || "")])),
+      ]);
+    }
+
+    function durations(result) {
+      const lines = (result.trace || []).filter((event) => event.action === "STAGE_TIME" && event.detail);
+      if (!lines.length) return el("p", {});
+      return el("p", { class: "muted" }, ["Stage time: " + lines.map((event) => event.detail).join("; ")]);
+    }
+
+    function fallbackNote(result) {
+      const gate = result.rescue && result.rescue.gate1 ? result.rescue.gate1 : {};
+      const calls = gate.fallback_calls || [];
+      const flags = gate.flags || [];
+      if (calls.length) {
+        return el("p", { class: "muted" }, [
+          "A model fallback applied only to " + calls.join(", ") + ". The plan author above is separate.",
+        ]);
+      }
+      if (flags.indexOf("LLM_FALLBACK") >= 0) {
+        return el("p", { class: "muted" }, [
+          "LLM_FALLBACK is from an earlier scoring step, not from this rescue plan.",
+        ]);
+      }
+      return el("span");
+    }
+
+    function shown(text) {
+      return String(text || "").replace(/nightshift/ig, "the model route").replace(/meterless/ig, "the model route");
+    }
+
+    function stageName(event) {
+      const action = String(event.action || "").toUpperCase();
+      const step = String(event.step || "");
+      if (action === "LLM_CALL") {
+        const byStep = {
+          problem: "Read",
+          rescue_plan: "Rescue",
+          alternative: "Alternatives",
+          alternative_batch: "Alternatives",
+          demand: "Alternatives",
+          capabilities: "Alternatives",
+        };
+        return byStep[step] || "Model";
+      }
+      const byAction = {
+        RUN_SEAL: "Verdict",
+        DISCOVERY_FILTER: "Verdict",
+        PROTAGONIST_SELECTION: "Verdict",
+        HMEM_VERDICT_MEMORY: "Verdict",
+        PROBLEM_STATEMENT: "Read",
+        RESCUE_POTENTIAL: "Read",
+        RESCUE_PLAN: "Rescue",
+        RESCUE_PLAN_INPUT: "Rescue",
+        QUERY_GENERATION: "Search",
+        PRIOR_ART_SEARCH: "Search",
+        STAGE_TIME: "Timing",
+        EVIDENCE_BUNDLE: "Fetch",
+      };
+      return byAction[action] || "Other";
+    }
+
+    function groupTrace(events) {
+      const grouped = [];
+      let misses = 0;
+      events.forEach((event) => {
+        const detail = (event.detail || "") + (event.canonical || "");
+        const missing = /HTTP 404|404/.test(detail) && /github/i.test(detail + (event.action || ""));
+        if (missing) {
+          misses += 1;
+          return;
+        }
+        if (misses) {
+          grouped.push({ action: "GitHub 404", detail: misses + " missing GitHub responses grouped", line_hash: "" });
+          misses = 0;
+        }
+        grouped.push(event);
+      });
+      if (misses) grouped.push({ action: "GitHub 404", detail: misses + " missing GitHub responses grouped", line_hash: "" });
+      return grouped;
+    }
+
+    async function sha256(text) {
+      const bytes = typeof text === "string" ? new TextEncoder().encode(text) : text;
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return [...new Uint8Array(digest)].map((part) => part.toString(16).padStart(2, "0")).join("");
+    }
+
+    function canonicalJson(value) {
+      if (value === null || typeof value !== "object") return JSON.stringify(value);
+      if (Array.isArray(value)) return "[" + value.map(canonicalJson).join(",") + "]";
+      const keys = Object.keys(value).sort();
+      return "{" + keys.map((key) => JSON.stringify(key) + ":" + canonicalJson(value[key])).join(",") + "}";
+    }
+
+    async function snapshotNote(result) {
+      if (!result || !result.snapshot_sha256 || !result.id) return "";
+      const response = await fetch("/pro/api/results/" + encodeURIComponent(result.id) + "/snapshot");
+      if (!response.ok) return " Search snapshot file is missing.";
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const digest = await sha256(bytes);
+      let traced = result.snapshot_sha256;
+      (result.trace || []).forEach((event) => {
+        if (event.action !== "SEARCH_SNAPSHOT" || !event.canonical) return;
+        try {
+          const record = JSON.parse(event.canonical);
+          const summary = typeof record.output_summary === "string" ? JSON.parse(record.output_summary) : record.output_summary;
+          if (summary && summary.snapshot_sha256) traced = summary.snapshot_sha256;
+        } catch (error) { /* the chain check already reported a bad line */ }
+      });
+      if (digest !== traced) return " Stored snapshot does not match the sealed SEARCH_SNAPSHOT hash.";
+      return " Search snapshot matches the sealed hash.";
+    }
+
+    async function checkChain(events, out, tamper, result) {
+      const copy = events.map((event) => ({ ...event }));
+      if (tamper && copy.length) {
+        const index = Math.min(1, copy.length - 1);
+        copy[index] = { ...copy[index], canonical: copy[index].canonical + "x" };
+      }
+      let previous = "";
+      let broken = "";
+      for (let i = 0; i < copy.length; i += 1) {
+        const event = copy[i];
+        if ((event.prev_hash || "") !== previous) {
+          broken = "Line " + (i + 1) + " prev_hash does not match the previous line.";
+          break;
+        }
+        const digest = await sha256(event.canonical || "");
+        if (digest !== event.line_hash) {
+          broken = "Line " + (i + 1) + " hash does not match. Computed " + digest.slice(0, 12) + ".";
+          break;
+        }
+        previous = event.line_hash;
+      }
+      if (!copy.length) broken = "This result has no trace lines.";
+      let extra = "";
+      if (!broken && !tamper) extra = await snapshotNote(result);
+      out.className = broken || extra.includes("does not match") || extra.includes("missing") ? "bad" : "ok";
+      out.textContent = broken
+        ? (tamper ? "Tamper detected, as it should be. " : "Chain failed. ") + broken
+        : "Chain matches. Run hash " + previous + "." + extra;
+    }
+
+    function responsibleBlock(result) {
+      const duty = result && result.responsibility ? result.responsibility : null;
+      const model = duty ? duty.model_decides : [
+        "What the repository’s problem and user are.",
+        "Whether a found alternative is the same job.",
+        "A draft rescue plan, after code has already called the verdict CANDIDATE.",
+      ];
+      const code = duty ? duty.code_decides : [
+        "A quote is kept only when it is found in the cited text.",
+        "Injection text in a README is removed before the model sees it.",
+        "The hash chain, the call cap, and the daily run caps.",
+      ];
+      const limits = duty ? duty.limitations : [
+        "A verified quote is not a claim that the verdict is the one a human would write.",
+        "The scored set had four false passes, named in the result for the invoice example and in docs/JUDGES.md.",
+      ];
+      const box = el("div", { class: "panel", id: "injection" });
+      const button = el("button", { class: "btn", type: "button", onclick: () => loadInjection(box) }, ["Run the injection demo"]);
+      const human = result && result.human_label && result.human_label.why
+        ? el("p", {}, ["Human label: " + result.human_label.why])
+        : el("p", { class: "muted" }, ["Open the invoice example to see a recorded false pass next to the human label."]);
+      return el("section", { class: "stack", id: "responsible" }, [
+        el("h2", {}, ["Responsible AI"]),
+        el("div", { class: "grid" }, [
+          el("section", { class: "panel" }, [el("h3", {}, ["The model decides"]), ...model.map((line) => el("p", {}, [line]))]),
+          el("section", { class: "panel" }, [el("h3", {}, ["Code decides"]), ...code.map((line) => el("p", {}, [line]))]),
+        ]),
+        human,
+        el("section", { class: "panel" }, [
+          el("h3", {}, ["Known limits"]),
+          ...limits.map((line) => el("p", {}, [line])),
+          el("p", {}, [(duty && duty.verify || []).join(" ")]),
+        ]),
+        el("section", { class: "panel" }, [
+          el("h3", {}, ["Prompt injection"]),
+          el("p", {}, ["A README can contain instructions aimed at the model. The detector is code, not a model. Matching spans are replaced before the judge stores the README. This demo uses a fixture, not a live repository."]),
+          button,
+          box,
+          result && result.injection ? el("p", { class: "muted" }, [injectionSentence(result.injection)]) : el("span"),
+        ]),
+      ]);
+    }
+
+    function injectionSentence(report) {
+      if (report.note) return report.note;
+      if (report.detected) return "This run removed " + report.count + " injection span(s) before the model saw the README.";
+      return "This run’s README did not match the injection detector.";
+    }
+
+    async function loadInjection(box) {
+      const data = await fetch("/pro/api/injection-demo", { method: "POST" }).then((r) => r.json());
+      const names = (data.report.findings || []).map((item) => item.pattern).join(", ");
+      const pipeline = data.pipeline || {};
+      const attacks = el("div");
+      (data.attacks || []).forEach((row) => {
+        attacks.append(el("p", {}, [
+          (row.caught ? "Caught" : "Not caught") + " — " + row.text + " (" + row.note + ")",
+        ]));
+      });
+      box.replaceChildren(
+        el("p", {}, ["Detected " + data.report.count + ": " + names]),
+        el("p", {}, [
+          "Pipeline check: the injected verdict is " + (pipeline.hostile_still_a_quote ? "still" : "not") +
+          " accepted as a quote. The real sentence is " + (pipeline.real_sentence_kept ? "kept" : "missing") + ".",
+        ]),
+        el("h3", {}, ["Attack table"]),
+        attacks,
+        el("h3", {}, ["Before"]),
+        el("pre", { class: "mono" }, [data.original]),
+        el("h3", {}, ["After, the text the model is allowed to see"]),
+        el("pre", { class: "mono" }, [data.neutralised]),
+      );
+    }
+
+    route();
+  </script>
+</body>
+</html>

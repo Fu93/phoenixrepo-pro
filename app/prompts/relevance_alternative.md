@@ -8,10 +8,12 @@ Never judge quality by repository stars or forks.
 ## Rubric
 
 - `same_problem`: boolean (`true` if the alternative is aimed at solving the same core user problem / struggling job; `false` if it solves an unrelated problem).
-- `overlap`:
-  - `"full"`: The alternative covers the primary core job/use-case of the candidate.
-  - `"partial"`: The alternative addresses a portion of the problem, a narrower sub-problem, or includes it as an incidental minor feature.
-  - `"none"`: The alternative does not address the candidate's core problem (must be "none" if same_problem is false).
+- Four yes/no answers. Code derives `full`, `partial`, or `none` from these. Do not pick that word yourself.
+  - `same_core_job`: the same core job.
+  - `same_input_output`: the same kind of input and the same kind of output.
+  - `same_target_user`: the same kind of user.
+  - `covers_main_features`: it covers the main feature list in the candidate README, not a side feature.
+- `overlap` may be omitted. If you include it, code ignores it when the four answers are present.
 - `reason`: One concise sentence explaining the judgment.
 - `quotes`: 1 to 3 verbatim quotes from the alternative repository's description or README supporting the overlap assessment.
 
@@ -20,7 +22,10 @@ Never judge quality by repository stars or forks.
 ```json
 {
   "same_problem": true,
-  "overlap": "full",
+  "same_core_job": true,
+  "same_input_output": true,
+  "same_target_user": true,
+  "covers_main_features": true,
   "reason": "An open-source tool that provides the same core functionality.",
   "quotes": [
     "exact verbatim words quoted from the alternative description or README"

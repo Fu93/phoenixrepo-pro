@@ -102,6 +102,24 @@ def model_ids(payload: Any) -> list[str]:
     return ids
 
 
+def _part_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return ""
+    parts: list[str] = []
+    for part in content:
+        if isinstance(part, str):
+            parts.append(part)
+        elif isinstance(part, dict):
+            for key in ("text", "content", "reasoning"):
+                value = part.get(key)
+                if isinstance(value, str) and value.strip():
+                    parts.append(value)
+                    break
+    return "".join(parts).strip()
+
+
 def message_text(payload: Any) -> str:
     if not isinstance(payload, dict):
         raise MeterlessError("Meterless chat returned a non-object body.")
@@ -110,18 +128,14 @@ def message_text(payload: Any) -> str:
         raise MeterlessError("Meterless chat returned no choices.")
     message = choices[0].get("message") if isinstance(choices[0], dict) else None
     content = message.get("content") if isinstance(message, dict) else None
-    if isinstance(content, str):
-        return content
-    if isinstance(content, list):
-        parts: list[str] = []
-        for part in content:
-            if isinstance(part, str):
-                parts.append(part)
-            elif isinstance(part, dict) and isinstance(part.get("text"), str):
-                parts.append(part["text"])
-        text = "".join(parts).strip()
-        if text:
-            return text
+    text = _part_text(content).strip()
+    if text:
+        return text
+    if isinstance(message, dict):
+        for key in ("reasoning_content", "reasoning"):
+            extra = _part_text(message.get(key)).strip()
+            if extra:
+                return extra
     raise MeterlessError("Meterless chat content was not text.")
 
 

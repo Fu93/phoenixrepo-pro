@@ -1,0 +1,806 @@
+{
+  "repo_id": "bower/bower",
+  "repo_url": "https://github.com/bower/bower",
+  "title": "bower — judged live on 17 Nov, ALREADY_EXISTS (pnpm)",
+  "verdict": "ALREADY_EXISTS",
+  "reason": "Front-end package management is already solved by maintained free alternatives like pnpm. Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-a55b).",
+  "quote": "Fast, disk space efficient package manager",
+  "alternatives": [
+    {
+      "name": "pnpm/pnpm",
+      "url": "https://github.com/pnpm/pnpm",
+      "overlap": "full",
+      "quote": "Fast, disk space efficient package manager",
+      "reason": "Front-end package management is already solved by maintained free alternatives like pnpm.",
+      "rubric": {
+        "same_core_job": true,
+        "same_input_output": true,
+        "same_target_user": true,
+        "covers_main_features": true
+      },
+      "quote_verified": true,
+      "blocked": true,
+      "state": "blocked"
+    }
+  ],
+  "skipped": [
+    {
+      "alternative": "oven-sh/bun",
+      "reason": "no permissive licence or free tier"
+    },
+    {
+      "alternative": "agalwood/Motrix",
+      "reason": "no permissive licence or free tier"
+    },
+    {
+      "alternative": "yarnpkg/website",
+      "reason": "not mature or official: stars=457, candidate_stars=14892, official=False"
+    },
+    {
+      "alternative": "dominiksalvet/gitpack",
+      "reason": "not mature or official: stars=117, candidate_stars=14892, official=False"
+    },
+    {
+      "alternative": "RendleLabs/dotnet-unpkg",
+      "reason": "last update 2020-06-25 is 2336 days before 2026-11-17"
+    },
+    {
+      "alternative": "davjs/parsed-csharp-repos",
+      "reason": "last update 2016-05-10 is 3843 days before 2026-11-17"
+    },
+    {
+      "alternative": "colinbut/bower-example",
+      "reason": "last update 2017-03-16 is 3533 days before 2026-11-17"
+    },
+    {
+      "alternative": "KhanhLy2510/Hiring-Front-end-Developer",
+      "reason": "last update 2019-02-26 is 2821 days before 2026-11-17"
+    },
+    {
+      "alternative": "web:https://github.com/guillemj/dpkg-www",
+      "reason": "not mature or official: stars=3, candidate_stars=14892, official=False"
+    }
+  ],
+  "problem": "Front-end developers need a generic, unopinionated way to manage and install client-side package dependencies without system-wide conflicts or shared dependencies between projects.",
+  "run_id": "run-44aa9a1aea42",
+  "run_hash": "eb389fcfa663a094313fc0e5fe76bdd50e3ad733ee7b6be93fd48426263020a3",
+  "trace_file": "pro/examples/traces/live-bower.jsonl",
+  "trace": [
+    {
+      "action": "evidence_source",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:05.143779+00:00",
+      "prev_hash": "",
+      "line_hash": "299efd92af6c3f9bfc14d2e21b64cc41c9d274234198478ca0d6d0d447677d51",
+      "canonical": "{\"action\":\"evidence_source\",\"agent_name\":\"gate1\",\"confidence\":null,\"event\":\"evidence_source\",\"input_summary\":\"{\\\"evidence_source\\\": \\\"csv\\\"}\",\"output_summary\":\"{\\\"evidence_source\\\": \\\"csv\\\", \\\"candidate_rows\\\": 1, \\\"prior_rows\\\": 0, \\\"demand_rows\\\": 0}\",\"prev_hash\":\"\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:05.143779+00:00\"}",
+      "detail": "{\"evidence_source\": \"csv\", \"candidate_rows\": 1, \"prior_rows\": 0, \"demand_rows\": 0}"
+    },
+    {
+      "action": "LLM_CALL",
+      "step": "problem",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:13.757330+00:00",
+      "prev_hash": "299efd92af6c3f9bfc14d2e21b64cc41c9d274234198478ca0d6d0d447677d51",
+      "line_hash": "211eece38969266b734bbc1d914de07d0fc76b59e3b23696350c85ab4f2eb1d9",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"step\\\": \\\"problem\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"299efd92af6c3f9bfc14d2e21b64cc41c9d274234198478ca0d6d0d447677d51\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:13.757330+00:00\"}",
+      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
+    },
+    {
+      "action": "RESCUE_POTENTIAL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:13.758138+00:00",
+      "prev_hash": "211eece38969266b734bbc1d914de07d0fc76b59e3b23696350c85ab4f2eb1d9",
+      "line_hash": "9389b212201356099412d256928a5aa9a1339b3f6859ae990e187f86e0a9885b",
+      "canonical": "{\"action\":\"RESCUE_POTENTIAL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"RESCUE_POTENTIAL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\"}\",\"output_summary\":\"{\\\"score\\\": 18667.5, \\\"changes_verdict\\\": false, \\\"source\\\": \\\"github_api\\\", \\\"components\\\": {\\\"stars\\\": 14892, \\\"forks\\\": 1787, \\\"open_issues_count\\\": 15, \\\"external_breakage\\\": 3, \\\"staleness_days\\\": 765, \\\"stars_vs_staleness\\\": 592.57, \\\"ci_state\\\": \\\"ci_configured_zero_runs\\\", \\\"ci_date\\\": null, \\\"dependabot_open\\\": 0, \\\"renovate_open\\\": 0}}\",\"prev_hash\":\"211eece38969266b734bbc1d914de07d0fc76b59e3b23696350c85ab4f2eb1d9\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:13.758138+00:00\"}",
+      "detail": "{\"score\": 18667.5, \"changes_verdict\": false, \"source\": \"github_api\", \"components\": {\"stars\": 14892, \"forks\": 1787, \"open_issues_count\": 15, \"external_breakage\": 3, \"staleness_days\": 765, \"stars_vs_staleness\": 592.57, \"ci_state\": \"ci_configu"
+    },
+    {
+      "action": "PROBLEM_STATEMENT",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:13.758378+00:00",
+      "prev_hash": "9389b212201356099412d256928a5aa9a1339b3f6859ae990e187f86e0a9885b",
+      "line_hash": "4264c3e00b34ac4d33e575ab0cb071b02b3ed65c38bd56c8cb5163628f55ab23",
+      "canonical": "{\"action\":\"PROBLEM_STATEMENT\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PROBLEM_STATEMENT\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\"}\",\"output_summary\":\"{\\\"problem\\\": \\\"Front-end developers need a generic, unopinionated way to manage and install client-side package dependencies without system-wide conflicts or shared dependencies between projects.\\\", \\\"target_user\\\": \\\"Front-end developers and web developers managing client-side libraries and assets\\\", \\\"category\\\": \\\"developer-tools\\\", \\\"quotes\\\": [\\\"A package manager for the web\\\", \\\"Bower offers a generic, unopinionated solution to the problem of front-end package management\\\", \\\"There are no system wide dependencies, no dependencies are shared between different apps, and the dependency tree is flat.\\\"], \\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\"}\",\"prev_hash\":\"9389b212201356099412d256928a5aa9a1339b3f6859ae990e187f86e0a9885b\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:13.758378+00:00\"}",
+      "detail": "Front-end developers need a generic, unopinionated way to manage and install client-side package dependencies without system-wide conflicts or shared dependencies between projects."
+    },
+    {
+      "action": "QUERY_GENERATION",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:13.759494+00:00",
+      "prev_hash": "4264c3e00b34ac4d33e575ab0cb071b02b3ed65c38bd56c8cb5163628f55ab23",
+      "line_hash": "786ef124d9dbdf2d45cd1397c8a91671f3ed2e91503c8de32fd33e0a02a6ac58",
+      "canonical": "{\"action\":\"QUERY_GENERATION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"QUERY_GENERATION\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\"}\",\"output_summary\":\"{\\\"queries\\\": [\\\"front-end package management\\\", \\\"client-side dependency manager\\\", \\\"best front-end package management tools\\\", \\\"best client-side dependency manager tools\\\", \\\"web package manager\\\", \\\"flat dependency tree tool\\\", \\\"git based package installer\\\"]}\",\"prev_hash\":\"4264c3e00b34ac4d33e575ab0cb071b02b3ed65c38bd56c8cb5163628f55ab23\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:13.759494+00:00\"}",
+      "detail": "{\"queries\": [\"front-end package management\", \"client-side dependency manager\", \"best front-end package management tools\", \"best client-side dependency manager tools\", \"web package manager\", \"flat dependency tree tool\", \"git based package in"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:31:14.462768+00:00",
+      "prev_hash": "786ef124d9dbdf2d45cd1397c8a91671f3ed2e91503c8de32fd33e0a02a6ac58",
+      "line_hash": "504a644cc0f738a3911f9ff370e25458c221a7ff16630f8af03dc5e675610b3d",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"bower/bower\\\", \\\"path\\\": \\\"pyproject.toml\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/bower/bower/contents/pyproject.toml\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"786ef124d9dbdf2d45cd1397c8a91671f3ed2e91503c8de32fd33e0a02a6ac58\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:14.462768+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/bower/bower/c"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:31:15.127095+00:00",
+      "prev_hash": "504a644cc0f738a3911f9ff370e25458c221a7ff16630f8af03dc5e675610b3d",
+      "line_hash": "984667b181c9dcf9625905b8584a53ade9178c982d387306513b91b3a935af47",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"bower/bower\\\", \\\"path\\\": \\\"setup.py\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/bower/bower/contents/setup.py\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"504a644cc0f738a3911f9ff370e25458c221a7ff16630f8af03dc5e675610b3d\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:15.127095+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/bower/bower/c"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:31:15.822422+00:00",
+      "prev_hash": "984667b181c9dcf9625905b8584a53ade9178c982d387306513b91b3a935af47",
+      "line_hash": "856701d60754e48e35f0ef2339f87bf3e793e2ab12581dec8e10fbfc352bf54f",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"bower/bower\\\", \\\"path\\\": \\\"setup.cfg\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/bower/bower/contents/setup.cfg\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"984667b181c9dcf9625905b8584a53ade9178c982d387306513b91b3a935af47\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:15.822422+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/bower/bower/c"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:16.623707+00:00",
+      "prev_hash": "856701d60754e48e35f0ef2339f87bf3e793e2ab12581dec8e10fbfc352bf54f",
+      "line_hash": "ed591a2b01cdd4aa79bffa52feb9f368931f246798296e3eb81a60cfc368e92d",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"bower/bower\\\", \\\"path\\\": \\\"package.json\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/bower/bower/contents/package.json\\\", \\\"sha256\\\": \\\"5c3ea829bbcde2baca3ff9d761afb87b5ad60fdbff298672ee294416e7c3a3a9\\\"}\",\"prev_hash\":\"856701d60754e48e35f0ef2339f87bf3e793e2ab12581dec8e10fbfc352bf54f\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:16.623707+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/bower/bower/contents/package.json\", \"sha256\": \"5c3ea829bbcde2baca3ff9d761afb87b5ad60fdbff298672ee294416e7c3a3a9\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:31:17.385451+00:00",
+      "prev_hash": "ed591a2b01cdd4aa79bffa52feb9f368931f246798296e3eb81a60cfc368e92d",
+      "line_hash": "c5a2381556868ce60cc28fd8f397ab1eaf743dd9274a0f20f33b9355a2be6d18",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"bower/bower\\\", \\\"path\\\": \\\"Cargo.toml\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/bower/bower/contents/Cargo.toml\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"ed591a2b01cdd4aa79bffa52feb9f368931f246798296e3eb81a60cfc368e92d\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:17.385451+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/bower/bower/c"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:17.394644+00:00",
+      "prev_hash": "c5a2381556868ce60cc28fd8f397ab1eaf743dd9274a0f20f33b9355a2be6d18",
+      "line_hash": "2e94ead25c3217912c95c6ba51f5ec45518c19b9d0c5f93d11965fc6595b29be",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"best front-end package management tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=best+front-end+package+management+tools\\\", \\\"sha256\\\": \\\"1931c3c95c45283c456f380d8d2722c193e4f3f1f3c6a4fa0aaf3c2ad4c502b7\\\"}\",\"prev_hash\":\"c5a2381556868ce60cc28fd8f397ab1eaf743dd9274a0f20f33b9355a2be6d18\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:17.394644+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=best+front-end+package+management+tools\", \"sha256\": \"1931c3c95c45283c456f380d8d2722c193e4f3f1f3c6a4fa0aaf3c2ad4c502b7\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:17.395506+00:00",
+      "prev_hash": "2e94ead25c3217912c95c6ba51f5ec45518c19b9d0c5f93d11965fc6595b29be",
+      "line_hash": "1a3a12d5e5fe581356d100e37af6b70a4c3ee1053baaf9fc2d86c7913f2fb071",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"front-end package management\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=front-end+package+management\\\", \\\"sha256\\\": \\\"60ad514a4d23772a0a95ff3067f517c40702d0ec0425a4a72ca5af61d606d056\\\"}\",\"prev_hash\":\"2e94ead25c3217912c95c6ba51f5ec45518c19b9d0c5f93d11965fc6595b29be\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:17.395506+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=front-end+package+management\", \"sha256\": \"60ad514a4d23772a0a95ff3067f517c40702d0ec0425a4a72ca5af61d606d056\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:17.395828+00:00",
+      "prev_hash": "1a3a12d5e5fe581356d100e37af6b70a4c3ee1053baaf9fc2d86c7913f2fb071",
+      "line_hash": "81683085621456da8bef60721143d0703c15a045b43b20bc11a83191912b261a",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"client-side dependency manager\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=client-side+dependency+manager\\\", \\\"sha256\\\": \\\"8898ab66a5f4f1eab1b9107133edb272af4a5d82e7bf76957cf3194e528b0bb2\\\"}\",\"prev_hash\":\"1a3a12d5e5fe581356d100e37af6b70a4c3ee1053baaf9fc2d86c7913f2fb071\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:17.395828+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=client-side+dependency+manager\", \"sha256\": \"8898ab66a5f4f1eab1b9107133edb272af4a5d82e7bf76957cf3194e528b0bb2\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:17.397342+00:00",
+      "prev_hash": "81683085621456da8bef60721143d0703c15a045b43b20bc11a83191912b261a",
+      "line_hash": "96256bf95bdbc4bbe8c72c302d57e61ea2b1233d9261ef01a42410daafd0f4dd",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"best client-side dependency manager tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=best+client-side+dependency+manager+tools\\\", \\\"sha256\\\": \\\"86d879f9ca949cff586395ad879b3132ffd0a0758669bb8f9d92d8347fdad4a1\\\"}\",\"prev_hash\":\"81683085621456da8bef60721143d0703c15a045b43b20bc11a83191912b261a\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:17.397342+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=best+client-side+dependency+manager+tools\", \"sha256\": \"86d879f9ca949cff586395ad879b3132ffd0a0758669bb8f9d92d8347fdad4a1\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:17.397861+00:00",
+      "prev_hash": "96256bf95bdbc4bbe8c72c302d57e61ea2b1233d9261ef01a42410daafd0f4dd",
+      "line_hash": "1ef453751c8ab860e1e9263d564677513850d54cf1aa529c919dac00eb0e5312",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"web package manager\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=web+package+manager\\\", \\\"sha256\\\": \\\"96e8cc2f85c80197bb6ff767a9804b287c9aa28996be857c437e347ccc2ac833\\\"}\",\"prev_hash\":\"96256bf95bdbc4bbe8c72c302d57e61ea2b1233d9261ef01a42410daafd0f4dd\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:17.397861+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=web+package+manager\", \"sha256\": \"96e8cc2f85c80197bb6ff767a9804b287c9aa28996be857c437e347ccc2ac833\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:17.398550+00:00",
+      "prev_hash": "1ef453751c8ab860e1e9263d564677513850d54cf1aa529c919dac00eb0e5312",
+      "line_hash": "ce518326726cbfc1c26fdb4de36eef05e439e1e68b7297678ab5b6a694cba096",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"flat dependency tree tool\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=flat+dependency+tree+tool\\\", \\\"sha256\\\": \\\"f78e7c29cead1067cfd397aad0fd7fd62cbf58d8ad01485f06e22b55dbcd1f1c\\\"}\",\"prev_hash\":\"1ef453751c8ab860e1e9263d564677513850d54cf1aa529c919dac00eb0e5312\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:17.398550+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=flat+dependency+tree+tool\", \"sha256\": \"f78e7c29cead1067cfd397aad0fd7fd62cbf58d8ad01485f06e22b55dbcd1f1c\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:18.627176+00:00",
+      "prev_hash": "ce518326726cbfc1c26fdb4de36eef05e439e1e68b7297678ab5b6a694cba096",
+      "line_hash": "b5a6d4ee1219c424fba5c297c9a7b93ae6ae58a5b89d303003ff8ebbad8c99a4",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"git based package installer\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=git+based+package+installer\\\", \\\"sha256\\\": \\\"ce80d0962734c120353ee09fb5761fa5e8b44b7b72c34e58d09e22cc893d4f86\\\"}\",\"prev_hash\":\"ce518326726cbfc1c26fdb4de36eef05e439e1e68b7297678ab5b6a694cba096\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:18.627176+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=git+based+package+installer\", \"sha256\": \"ce80d0962734c120353ee09fb5761fa5e8b44b7b72c34e58d09e22cc893d4f86\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:19.824317+00:00",
+      "prev_hash": "b5a6d4ee1219c424fba5c297c9a7b93ae6ae58a5b89d303003ff8ebbad8c99a4",
+      "line_hash": "91c85d18a5eac8385ca05f66f227b9922974e9f28e3a427c23cd0f90c089e1c8",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"front-end package management\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=front-end+package+management&per_page=5\\\", \\\"sha256\\\": \\\"e6cc6e40b19179b0d12a24c1eab197e762f50d31b9d5880301ac1c5f046c64eb\\\"}\",\"prev_hash\":\"b5a6d4ee1219c424fba5c297c9a7b93ae6ae58a5b89d303003ff8ebbad8c99a4\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:19.824317+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=front-end+package+management&per_page=5\", \"sha256\": \"e6cc6e40b19179b0d12a24c1eab197e762f50d31b9d5880301ac1c5f046c64eb\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:19.827994+00:00",
+      "prev_hash": "91c85d18a5eac8385ca05f66f227b9922974e9f28e3a427c23cd0f90c089e1c8",
+      "line_hash": "7e55b20c812d35554eaef7e33ce3e97426b5bc5d57a48d30ccf8895f6f3036b9",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"front-end package management\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=front-end+package+management\\\", \\\"sha256\\\": \\\"85b87b8ad75b658d4cb4e1ee5186dca808567102c2c6ff2f05f8b3f1eac034ed\\\"}\",\"prev_hash\":\"91c85d18a5eac8385ca05f66f227b9922974e9f28e3a427c23cd0f90c089e1c8\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:19.827994+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=front-end+package+management\", \"sha256\": \"85b87b8ad75b658d4cb4e1ee5186dca808567102c2c6ff2f05f8b3f1eac034ed\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:21.028573+00:00",
+      "prev_hash": "7e55b20c812d35554eaef7e33ce3e97426b5bc5d57a48d30ccf8895f6f3036b9",
+      "line_hash": "3d9f4e3206ff3e8cea4d47c57360fee35d72c781dd750d6bf941589c5730d92d",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"client-side dependency manager\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=client-side+dependency+manager&per_page=5\\\", \\\"sha256\\\": \\\"ba57243609272405780ad2a1b4f9559087a564bbd5ac056ccb949002dbf5c8dd\\\"}\",\"prev_hash\":\"7e55b20c812d35554eaef7e33ce3e97426b5bc5d57a48d30ccf8895f6f3036b9\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:21.028573+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=client-side+dependency+manager&per_page=5\", \"sha256\": \"ba57243609272405780ad2a1b4f9559087a564bbd5ac056ccb949002dbf5c8dd\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:21.030607+00:00",
+      "prev_hash": "3d9f4e3206ff3e8cea4d47c57360fee35d72c781dd750d6bf941589c5730d92d",
+      "line_hash": "8fe36ac3805b2d2430003da0d4dc367319a87bab2e90030787ec4b0c27e192d9",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"client-side dependency manager\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=client-side+dependency+manager\\\", \\\"sha256\\\": \\\"c9038ea5e1cbcd0315621961ef5aeb41d5c14903ec0a5e6de9601eb1dcc51188\\\"}\",\"prev_hash\":\"3d9f4e3206ff3e8cea4d47c57360fee35d72c781dd750d6bf941589c5730d92d\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:21.030607+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=client-side+dependency+manager\", \"sha256\": \"c9038ea5e1cbcd0315621961ef5aeb41d5c14903ec0a5e6de9601eb1dcc51188\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:21.927730+00:00",
+      "prev_hash": "8fe36ac3805b2d2430003da0d4dc367319a87bab2e90030787ec4b0c27e192d9",
+      "line_hash": "cb9f5e3bf0c54f07ac9f91b354a57c77e86c6cf6be994f98b1293f483c6efd55",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"best front-end package management tools\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=best+front-end+package+management+tools&per_page=5\\\", \\\"sha256\\\": \\\"6279cd48f81d8609942a014d507f66a34303e64a62a7f8240f74e94041261bfc\\\"}\",\"prev_hash\":\"8fe36ac3805b2d2430003da0d4dc367319a87bab2e90030787ec4b0c27e192d9\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:21.927730+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=best+front-end+package+management+tools&per_page=5\", \"sha256\": \"6279cd48f81d8609942a014d507f66a34303e64a62a7f8240f74e94041261bfc\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:21.929569+00:00",
+      "prev_hash": "cb9f5e3bf0c54f07ac9f91b354a57c77e86c6cf6be994f98b1293f483c6efd55",
+      "line_hash": "941940895aa0de7d1f59bf1cca18bd1fef09182b6a469b027c677b31de189de2",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"best front-end package management tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=best+front-end+package+management+tools\\\", \\\"sha256\\\": \\\"74361bdc43e19235ead28948ebb54e3a15aa61b5c25604f37d89abe12efe87b8\\\"}\",\"prev_hash\":\"cb9f5e3bf0c54f07ac9f91b354a57c77e86c6cf6be994f98b1293f483c6efd55\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:21.929569+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=best+front-end+package+management+tools\", \"sha256\": \"74361bdc43e19235ead28948ebb54e3a15aa61b5c25604f37d89abe12efe87b8\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:22.803907+00:00",
+      "prev_hash": "941940895aa0de7d1f59bf1cca18bd1fef09182b6a469b027c677b31de189de2",
+      "line_hash": "214f23c6fc784e8f75928d8fde598217bf89d2673a8b5d7343cbe5a5ed7b6bd4",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"best client-side dependency manager tools\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=best+client-side+dependency+manager+tools&per_page=5\\\", \\\"sha256\\\": \\\"f3a6e0655028f9c56c17ea6962460f7a6d4ad9fa24a3ff98245afb95c6329975\\\"}\",\"prev_hash\":\"941940895aa0de7d1f59bf1cca18bd1fef09182b6a469b027c677b31de189de2\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:22.803907+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=best+client-side+dependency+manager+tools&per_page=5\", \"sha256\": \"f3a6e0655028f9c56c17ea6962460f7a6d4ad9fa24a3ff98245afb95c6329975\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:23.853883+00:00",
+      "prev_hash": "214f23c6fc784e8f75928d8fde598217bf89d2673a8b5d7343cbe5a5ed7b6bd4",
+      "line_hash": "b80019241fce9c1b2197d1c2e6fc6d271c5b20c0bad2c629eb332e944fa41343",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"web package manager\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=web+package+manager&per_page=5\\\", \\\"sha256\\\": \\\"6d3433c2d8028890e528646ba6b2d3e4837f88833c023dccb36b03e48eebbc5d\\\"}\",\"prev_hash\":\"214f23c6fc784e8f75928d8fde598217bf89d2673a8b5d7343cbe5a5ed7b6bd4\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:23.853883+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=web+package+manager&per_page=5\", \"sha256\": \"6d3433c2d8028890e528646ba6b2d3e4837f88833c023dccb36b03e48eebbc5d\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:24.905246+00:00",
+      "prev_hash": "b80019241fce9c1b2197d1c2e6fc6d271c5b20c0bad2c629eb332e944fa41343",
+      "line_hash": "bc170fc3353f99f95269e4529ddf58f45bdcd0388c51e495cb39318ac4ef181a",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"flat dependency tree tool\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=flat+dependency+tree+tool&per_page=5\\\", \\\"sha256\\\": \\\"6db2d1b49199888facb45bd199e0e0cb31792382c3372ebad2de84eb5fe628ef\\\"}\",\"prev_hash\":\"b80019241fce9c1b2197d1c2e6fc6d271c5b20c0bad2c629eb332e944fa41343\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:24.905246+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=flat+dependency+tree+tool&per_page=5\", \"sha256\": \"6db2d1b49199888facb45bd199e0e0cb31792382c3372ebad2de84eb5fe628ef\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:26.080937+00:00",
+      "prev_hash": "bc170fc3353f99f95269e4529ddf58f45bdcd0388c51e495cb39318ac4ef181a",
+      "line_hash": "1d8e2480f8de8cdf6e45db4ad5f40a9c096351e6c8d36860293e1f84af2f4bc1",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"git based package installer\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=git+based+package+installer&per_page=5\\\", \\\"sha256\\\": \\\"c570c864b2e51a97a73fcc817b468215bb5b037833aa4d30835b86654d873a1c\\\"}\",\"prev_hash\":\"bc170fc3353f99f95269e4529ddf58f45bdcd0388c51e495cb39318ac4ef181a\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:26.080937+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=git+based+package+installer&per_page=5\", \"sha256\": \"c570c864b2e51a97a73fcc817b468215bb5b037833aa4d30835b86654d873a1c\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:26.914498+00:00",
+      "prev_hash": "1d8e2480f8de8cdf6e45db4ad5f40a9c096351e6c8d36860293e1f84af2f4bc1",
+      "line_hash": "9bd5959870cc0dc9e6de22b94eb5697742d26eda9855bcee4334a1c6e726d101",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"RendleLabs/dotnet-unpkg\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/RendleLabs/dotnet-unpkg/readme\\\", \\\"sha256\\\": \\\"b668d5582412c825b469bbc04092675ca753be6ac858373f0f6d3b54c0761bc9\\\"}\",\"prev_hash\":\"1d8e2480f8de8cdf6e45db4ad5f40a9c096351e6c8d36860293e1f84af2f4bc1\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:26.914498+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/RendleLabs/dotnet-unpkg/readme\", \"sha256\": \"b668d5582412c825b469bbc04092675ca753be6ac858373f0f6d3b54c0761bc9\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:27.747861+00:00",
+      "prev_hash": "9bd5959870cc0dc9e6de22b94eb5697742d26eda9855bcee4334a1c6e726d101",
+      "line_hash": "f40ff3c43cb9df10ad7bbdcf29d0943878def3adfed46260f2cf8183dcb1c449",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"colinbut/bower-example\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/colinbut/bower-example/readme\\\", \\\"sha256\\\": \\\"b440fe34adc2fd546274927030cfb8d411952af78610f1a206d20a1d9d173e92\\\"}\",\"prev_hash\":\"9bd5959870cc0dc9e6de22b94eb5697742d26eda9855bcee4334a1c6e726d101\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:27.747861+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/colinbut/bower-example/readme\", \"sha256\": \"b440fe34adc2fd546274927030cfb8d411952af78610f1a206d20a1d9d173e92\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:31:28.461290+00:00",
+      "prev_hash": "f40ff3c43cb9df10ad7bbdcf29d0943878def3adfed46260f2cf8183dcb1c449",
+      "line_hash": "88c78f2dafdcaba091be2fbe3cef9aa008ee51ae10098c285660f04649a61ad4",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"KhanhLy2510/Hiring-Front-end-Developer\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/KhanhLy2510/Hiring-Front-end-Developer/readme\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"f40ff3c43cb9df10ad7bbdcf29d0943878def3adfed46260f2cf8183dcb1c449\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:28.461290+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/KhanhLy2510/"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:29.409564+00:00",
+      "prev_hash": "88c78f2dafdcaba091be2fbe3cef9aa008ee51ae10098c285660f04649a61ad4",
+      "line_hash": "d2aecee7aa16174da4eb4982f8d90ac29259d35b8e5bf55e803411a0512a39f8",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"yarnpkg/website\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/yarnpkg/website/readme\\\", \\\"sha256\\\": \\\"fddda5f5a6caf478f6ccfb9bd44f932a3de5fc3394febf1c515e6cbf974c5575\\\"}\",\"prev_hash\":\"88c78f2dafdcaba091be2fbe3cef9aa008ee51ae10098c285660f04649a61ad4\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:29.409564+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/yarnpkg/website/readme\", \"sha256\": \"fddda5f5a6caf478f6ccfb9bd44f932a3de5fc3394febf1c515e6cbf974c5575\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:31:30.237367+00:00",
+      "prev_hash": "d2aecee7aa16174da4eb4982f8d90ac29259d35b8e5bf55e803411a0512a39f8",
+      "line_hash": "57157e52df5da9732e561f9a87937751e5deb179ad40174e0d35e372ab079bed",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"davjs/parsed-csharp-repos\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/davjs/parsed-csharp-repos/readme\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"d2aecee7aa16174da4eb4982f8d90ac29259d35b8e5bf55e803411a0512a39f8\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:30.237367+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/davjs/parsed"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:31.359087+00:00",
+      "prev_hash": "57157e52df5da9732e561f9a87937751e5deb179ad40174e0d35e372ab079bed",
+      "line_hash": "f42dc5c93faf197cda767aa01d8a935ed1824960f7f23e16ac4604f15004ff7f",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"dominiksalvet/gitpack\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/dominiksalvet/gitpack/readme\\\", \\\"sha256\\\": \\\"77e0c89b1a40432dc08f9c42cc94dda08935671ed2b42376387db47a3f531b38\\\"}\",\"prev_hash\":\"57157e52df5da9732e561f9a87937751e5deb179ad40174e0d35e372ab079bed\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:31.359087+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/dominiksalvet/gitpack/readme\", \"sha256\": \"77e0c89b1a40432dc08f9c42cc94dda08935671ed2b42376387db47a3f531b38\"}"
+    },
+    {
+      "action": "PRIOR_ART_SEARCH",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:31.360198+00:00",
+      "prev_hash": "f42dc5c93faf197cda767aa01d8a935ed1824960f7f23e16ac4604f15004ff7f",
+      "line_hash": "2c2716390e23957d9a260292b67272cc5ee91c697e9cb1af5c17e703eeb6cba4",
+      "canonical": "{\"action\":\"PRIOR_ART_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PRIOR_ART_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"queries\\\": [\\\"front-end package management\\\", \\\"client-side dependency manager\\\", \\\"best front-end package management tools\\\", \\\"best client-side dependency manager tools\\\", \\\"web package manager\\\", \\\"flat dependency tree tool\\\", \\\"git based package installer\\\"]}\",\"output_summary\":\"{\\\"total_results\\\": 15, \\\"source_counts\\\": {\\\"github\\\": 6, \\\"npm\\\": 0, \\\"pypi\\\": 0, \\\"web\\\": 9}, \\\"source_status\\\": {\\\"github\\\": \\\"ok\\\", \\\"npm\\\": \\\"ok\\\", \\\"web\\\": \\\"ok\\\"}}\",\"prev_hash\":\"f42dc5c93faf197cda767aa01d8a935ed1824960f7f23e16ac4604f15004ff7f\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:31.360198+00:00\"}",
+      "detail": "{\"total_results\": 15, \"source_counts\": {\"github\": 6, \"npm\": 0, \"pypi\": 0, \"web\": 9}, \"source_status\": {\"github\": \"ok\", \"npm\": \"ok\", \"web\": \"ok\"}}"
+    },
+    {
+      "action": "own_identity",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:31.360554+00:00",
+      "prev_hash": "2c2716390e23957d9a260292b67272cc5ee91c697e9cb1af5c17e703eeb6cba4",
+      "line_hash": "286059ea5af4625d90e28594e94110bceb887c3a6d54b7d730596c196f678519",
+      "canonical": "{\"action\":\"own_identity\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"own_identity\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\"}\",\"output_summary\":\"{\\\"own_identity\\\": [{\\\"alternative\\\": \\\"bower/bower\\\", \\\"url\\\": \\\"https://api.github.com/repos/bower/bower\\\", \\\"reason\\\": \\\"same repository\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/bower/bower\\\", \\\"url\\\": \\\"https://github.com/bower/bower\\\", \\\"reason\\\": \\\"own homepage, docs, or repository URL\\\"}], \\\"identities\\\": {\\\"repo_id\\\": \\\"bower/bower\\\", \\\"owner\\\": \\\"bower\\\", \\\"name\\\": \\\"bower\\\", \\\"packages\\\": [\\\"bower\\\"], \\\"urls\\\": [\\\"bower.github.io/bower\\\", \\\"bower.io\\\", \\\"github.com/bower/bower\\\"]}}\",\"prev_hash\":\"2c2716390e23957d9a260292b67272cc5ee91c697e9cb1af5c17e703eeb6cba4\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:31.360554+00:00\"}",
+      "detail": "{\"own_identity\": [{\"alternative\": \"bower/bower\", \"url\": \"https://api.github.com/repos/bower/bower\", \"reason\": \"same repository\"}, {\"alternative\": \"web:https://github.com/bower/bower\", \"url\": \"https://github.com/bower/bower\", \"reason\": \"own "
+    },
+    {
+      "action": "STABLE_SEARCH",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:32.421232+00:00",
+      "prev_hash": "286059ea5af4625d90e28594e94110bceb887c3a6d54b7d730596c196f678519",
+      "line_hash": "b791e510cc54d8c6e1b0f63cebff3fba19ef2d595b8edca3dd4ac466991c5cb6",
+      "canonical": "{\"action\":\"STABLE_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STABLE_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"query\\\": \\\"package manager\\\", \\\"commit\\\": \\\"4e0c3c1181c21624c5b3ab5bdf5d3becdb172b5a\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"count\\\": 5, \\\"repos\\\": [\\\"oven-sh/bun\\\", \\\"astral-sh/uv\\\", \\\"Homebrew/brew\\\", \\\"pnpm/pnpm\\\", \\\"helm/helm\\\"]}\",\"prev_hash\":\"286059ea5af4625d90e28594e94110bceb887c3a6d54b7d730596c196f678519\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:32.421232+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"count\": 5, \"repos\": [\"oven-sh/bun\", \"astral-sh/uv\", \"Homebrew/brew\", \"pnpm/pnpm\", \"helm/helm\"]}"
+    },
+    {
+      "action": "STABLE_SEARCH",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:33.332246+00:00",
+      "prev_hash": "b791e510cc54d8c6e1b0f63cebff3fba19ef2d595b8edca3dd4ac466991c5cb6",
+      "line_hash": "0ae8f3c0b88ff2d6f391f2529e6ffa34e267d4bfac3a7cd9e55e79e663ac3339",
+      "canonical": "{\"action\":\"STABLE_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STABLE_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"query\\\": \\\"manager stars:>=50 fork:false\\\", \\\"commit\\\": \\\"4e0c3c1181c21624c5b3ab5bdf5d3becdb172b5a\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"count\\\": 5, \\\"repos\\\": [\\\"garrytan/gstack\\\", \\\"oven-sh/bun\\\", \\\"nvm-sh/nvm\\\", \\\"astral-sh/uv\\\", \\\"agalwood/Motrix\\\"]}\",\"prev_hash\":\"b791e510cc54d8c6e1b0f63cebff3fba19ef2d595b8edca3dd4ac466991c5cb6\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:33.332246+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"count\": 5, \"repos\": [\"garrytan/gstack\", \"oven-sh/bun\", \"nvm-sh/nvm\", \"astral-sh/uv\", \"agalwood/Motrix\"]}"
+    },
+    {
+      "action": "GITHUB_METADATA",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:34.152874+00:00",
+      "prev_hash": "0ae8f3c0b88ff2d6f391f2529e6ffa34e267d4bfac3a7cd9e55e79e663ac3339",
+      "line_hash": "dc06d84ffc66df28e34af817ffeb099bf4a8f0f5af6a4f562e84cd3a700d70c9",
+      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"guillemj/dpkg-www\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 3, \\\"pushed_at\\\": \\\"2026-05-10T23:19:29Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"0ae8f3c0b88ff2d6f391f2529e6ffa34e267d4bfac3a7cd9e55e79e663ac3339\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:34.152874+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"stars\": 3, \"pushed_at\": \"2026-05-10T23:19:29Z\", \"archived\": false}"
+    },
+    {
+      "action": "ALTERNATIVES_SKIPPED",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:34.154791+00:00",
+      "prev_hash": "dc06d84ffc66df28e34af817ffeb099bf4a8f0f5af6a4f562e84cd3a700d70c9",
+      "line_hash": "451f14b7e3b9df98d8b2c3e745ec8b09870a7972dd862f2aff30d6395d9f362e",
+      "canonical": "{\"action\":\"ALTERNATIVES_SKIPPED\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVES_SKIPPED\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"count\\\": 9}\",\"output_summary\":\"{\\\"skipped\\\": [{\\\"alternative\\\": \\\"oven-sh/bun\\\", \\\"reason\\\": \\\"no permissive licence or free tier\\\"}, {\\\"alternative\\\": \\\"agalwood/Motrix\\\", \\\"reason\\\": \\\"no permissive licence or free tier\\\"}, {\\\"alternative\\\": \\\"yarnpkg/website\\\", \\\"reason\\\": \\\"not mature or official: stars=457, candidate_stars=14892, official=False\\\"}, {\\\"alternative\\\": \\\"dominiksalvet/gitpack\\\", \\\"reason\\\": \\\"not mature or official: stars=117, candidate_stars=14892, official=False\\\"}, {\\\"alternative\\\": \\\"RendleLabs/dotnet-unpkg\\\", \\\"reason\\\": \\\"last update 2020-06-25 is 2336 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"davjs/parsed-csharp-repos\\\", \\\"reason\\\": \\\"last update 2016-05-10 is 3843 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"colinbut/bower-example\\\", \\\"reason\\\": \\\"last update 2017-03-16 is 3533 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"KhanhLy2510/Hiring-Front-end-Developer\\\", \\\"reason\\\": \\\"last update 2019-02-26 is 2821 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/guillemj/dpkg-www\\\", \\\"reason\\\": \\\"not mature or official: stars=3, candidate_stars=14892, official=False\\\"}]}\",\"prev_hash\":\"dc06d84ffc66df28e34af817ffeb099bf4a8f0f5af6a4f562e84cd3a700d70c9\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:34.154791+00:00\"}",
+      "detail": "{\"skipped\": [{\"alternative\": \"oven-sh/bun\", \"reason\": \"no permissive licence or free tier\"}, {\"alternative\": \"agalwood/Motrix\", \"reason\": \"no permissive licence or free tier\"}, {\"alternative\": \"yarnpkg/website\", \"reason\": \"not mature or off"
+    },
+    {
+      "action": "LLM_CALL",
+      "step": "alternative_batch",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:45.506342+00:00",
+      "prev_hash": "451f14b7e3b9df98d8b2c3e745ec8b09870a7972dd862f2aff30d6395d9f362e",
+      "line_hash": "6be59443f691d51cae12faff6126738c8d812a141b095ed6702b563a4686c6c7",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"step\\\": \\\"alternative_batch\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"451f14b7e3b9df98d8b2c3e745ec8b09870a7972dd862f2aff30d6395d9f362e\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:45.506342+00:00\"}",
+      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
+    },
+    {
+      "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:45.506572+00:00",
+      "prev_hash": "6be59443f691d51cae12faff6126738c8d812a141b095ed6702b563a4686c6c7",
+      "line_hash": "f3fbc7558b0d022500737dc416968912f7d0291782d6ed44a58afe3252886b11",
+      "canonical": "{\"action\":\"ALTERNATIVE_BATCH_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVE_BATCH_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"indexes\\\": [0, 1, 2, 3], \\\"alternative\\\": null, \\\"chunk_index\\\": 0}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"parsed_indexes\\\": [0, 1, 2, 3], \\\"reason\\\": null, \\\"chunk_index\\\": 0}\",\"prev_hash\":\"6be59443f691d51cae12faff6126738c8d812a141b095ed6702b563a4686c6c7\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:45.506572+00:00\"}",
+      "detail": "{\"requested_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"served_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"parsed_indexes\": [0, 1, 2, 3], \"reason\": null, \"chunk_index\": 0}"
+    },
+    {
+      "action": "LLM_CALL",
+      "step": "alternative_batch",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:57.507062+00:00",
+      "prev_hash": "f3fbc7558b0d022500737dc416968912f7d0291782d6ed44a58afe3252886b11",
+      "line_hash": "621e15cab195312bc171a8ff8fd03a23ee02f4a04a11f8012ad1e10fa1b89228",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"step\\\": \\\"alternative_batch\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"f3fbc7558b0d022500737dc416968912f7d0291782d6ed44a58afe3252886b11\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:57.507062+00:00\"}",
+      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
+    },
+    {
+      "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:57.507291+00:00",
+      "prev_hash": "621e15cab195312bc171a8ff8fd03a23ee02f4a04a11f8012ad1e10fa1b89228",
+      "line_hash": "5a2ab2518cc2c402d6ec2f8b75aa1fd9020179279a1e0cc2b80f9b22be0d9206",
+      "canonical": "{\"action\":\"ALTERNATIVE_BATCH_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVE_BATCH_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"indexes\\\": [0, 1], \\\"alternative\\\": null, \\\"chunk_index\\\": 1}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"parsed_indexes\\\": [0, 1], \\\"reason\\\": null, \\\"chunk_index\\\": 1}\",\"prev_hash\":\"621e15cab195312bc171a8ff8fd03a23ee02f4a04a11f8012ad1e10fa1b89228\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:57.507291+00:00\"}",
+      "detail": "{\"requested_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"served_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"parsed_indexes\": [0, 1], \"reason\": null, \"chunk_index\": 1}"
+    },
+    {
+      "action": "ALTERNATIVES_VERIFIED",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:31:57.507530+00:00",
+      "prev_hash": "5a2ab2518cc2c402d6ec2f8b75aa1fd9020179279a1e0cc2b80f9b22be0d9206",
+      "line_hash": "24540a3987b9e0606be585bd4b1876d266d77a9e9e86c9bf20f7ae5cbe6b1afd",
+      "canonical": "{\"action\":\"ALTERNATIVES_VERIFIED\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVES_VERIFIED\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"searched\\\": 15}\",\"output_summary\":\"{\\\"alternatives\\\": [{\\\"alternative_id\\\": \\\"pnpm/pnpm\\\", \\\"url\\\": \\\"https://github.com/pnpm/pnpm\\\", \\\"source\\\": \\\"github\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"pnpm is a fast, disk-space efficient package manager for JavaScript that installs dependencies in an isolated way, directly solving the same core problem for front-end developers.\\\", \\\"quotes\\\": [\\\"Fast, disk space efficient package manager\\\"]}]}\",\"prev_hash\":\"5a2ab2518cc2c402d6ec2f8b75aa1fd9020179279a1e0cc2b80f9b22be0d9206\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:31:57.507530+00:00\"}",
+      "detail": "{\"alternatives\": [{\"alternative_id\": \"pnpm/pnpm\", \"url\": \"https://github.com/pnpm/pnpm\", \"source\": \"github\", \"overlap\": \"full\", \"reason\": \"pnpm is a fast, disk-space efficient package manager for JavaScript that installs dependencies in an "
+    },
+    {
+      "action": "LLM_CALL",
+      "step": "discovery",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:32:24.725133+00:00",
+      "prev_hash": "24540a3987b9e0606be585bd4b1876d266d77a9e9e86c9bf20f7ae5cbe6b1afd",
+      "line_hash": "3b2d5ab6ed0a4920b2a4216c9a522bdf63eca34be6afada0c70738be6f82fc11",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"step\\\": \\\"discovery\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"24540a3987b9e0606be585bd4b1876d266d77a9e9e86c9bf20f7ae5cbe6b1afd\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:32:24.725133+00:00\"}",
+      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
+    },
+    {
+      "action": "GATE_DECISION",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:32:24.725708+00:00",
+      "prev_hash": "3b2d5ab6ed0a4920b2a4216c9a522bdf63eca34be6afada0c70738be6f82fc11",
+      "line_hash": "7aa5751f83709053b34a712e650a5088c8d62cc3ea5f7bf72ab660f6a3c255c7",
+      "canonical": "{\"action\":\"GATE_DECISION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GATE_DECISION\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\"}\",\"output_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"raw_verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"named_alternative\\\": {\\\"id\\\": \\\"pnpm/pnpm\\\", \\\"url\\\": \\\"https://github.com/pnpm/pnpm\\\", \\\"title\\\": \\\"\\\"}, \\\"gate_alternative\\\": {\\\"id\\\": \\\"pnpm/pnpm\\\", \\\"url\\\": \\\"https://github.com/pnpm/pnpm\\\", \\\"title\\\": \\\"\\\"}, \\\"gate\\\": {\\\"applied\\\": true, \\\"outcome\\\": \\\"passed\\\", \\\"checks\\\": {\\\"A\\\": \\\"pass\\\", \\\"B\\\": \\\"pass\\\", \\\"C\\\": \\\"pass\\\", \\\"D\\\": \\\"pass\\\", \\\"E\\\": \\\"pass\\\"}, \\\"failed\\\": [], \\\"fail_reasons\\\": {}, \\\"shortcut\\\": null, \\\"role\\\": \\\"block\\\", \\\"blocks\\\": true}, \\\"final_verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"path\\\": \\\"gate-pass\\\", \\\"coverage_override\\\": false}\",\"prev_hash\":\"3b2d5ab6ed0a4920b2a4216c9a522bdf63eca34be6afada0c70738be6f82fc11\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:32:24.725708+00:00\"}",
+      "detail": "{\"repo_id\": \"bower/bower\", \"raw_verdict\": \"ALREADY_EXISTS\", \"named_alternative\": {\"id\": \"pnpm/pnpm\", \"url\": \"https://github.com/pnpm/pnpm\", \"title\": \"\"}, \"gate_alternative\": {\"id\": \"pnpm/pnpm\", \"url\": \"https://github.com/pnpm/pnpm\", \"title\""
+    },
+    {
+      "action": "DISCOVERY_FILTER",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:32:24.725860+00:00",
+      "prev_hash": "7aa5751f83709053b34a712e650a5088c8d62cc3ea5f7bf72ab660f6a3c255c7",
+      "line_hash": "c92b2fd7ea59756d66549b3dae4913e36e5f3334f4a576bd72d96fea67b0180b",
+      "canonical": "{\"action\":\"DISCOVERY_FILTER\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"DISCOVERY_FILTER\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\"}\",\"output_summary\":\"{\\\"verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"reason\\\": \\\"Front-end package management is already solved by maintained free alternatives like pnpm. Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-a55b).\\\", \\\"evidence_source\\\": \\\"csv\\\", \\\"evidence\\\": [{\\\"alternative\\\": \\\"pnpm/pnpm\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"Fast, disk space efficient package manager\\\", \\\"reason\\\": \\\"Front-end package management is already solved by maintained free alternatives like pnpm.\\\", \\\"rubric\\\": {\\\"same_core_job\\\": true, \\\"same_input_output\\\": true, \\\"same_target_user\\\": true, \\\"covers_main_features\\\": true}}], \\\"must_beat\\\": [], \\\"skipped\\\": [{\\\"alternative\\\": \\\"oven-sh/bun\\\", \\\"reason\\\": \\\"no permissive licence or free tier\\\"}, {\\\"alternative\\\": \\\"agalwood/Motrix\\\", \\\"reason\\\": \\\"no permissive licence or free tier\\\"}, {\\\"alternative\\\": \\\"yarnpkg/website\\\", \\\"reason\\\": \\\"not mature or official: stars=457, candidate_stars=14892, official=False\\\"}, {\\\"alternative\\\": \\\"dominiksalvet/gitpack\\\", \\\"reason\\\": \\\"not mature or official: stars=117, candidate_stars=14892, official=False\\\"}, {\\\"alternative\\\": \\\"RendleLabs/dotnet-unpkg\\\", \\\"reason\\\": \\\"last update 2020-06-25 is 2336 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"davjs/parsed-csharp-repos\\\", \\\"reason\\\": \\\"last update 2016-05-10 is 3843 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"colinbut/bower-example\\\", \\\"reason\\\": \\\"last update 2017-03-16 is 3533 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"KhanhLy2510/Hiring-Front-end-Developer\\\", \\\"reason\\\": \\\"last update 2019-02-26 is 2821 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/guillemj/dpkg-www\\\", \\\"reason\\\": \\\"not mature or official: stars=3, candidate_stars=14892, official=False\\\"}]}\",\"prev_hash\":\"7aa5751f83709053b34a712e650a5088c8d62cc3ea5f7bf72ab660f6a3c255c7\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:32:24.725860+00:00\"}",
+      "detail": "ALREADY_EXISTS Front-end package management is already solved by maintained free alternatives like pnpm. Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-a55b)."
+    },
+    {
+      "action": "PROTAGONIST_SELECTION",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:32:24.726040+00:00",
+      "prev_hash": "c92b2fd7ea59756d66549b3dae4913e36e5f3334f4a576bd72d96fea67b0180b",
+      "line_hash": "22cdc4e2a8eb216e5d1c3508a26fc6915c00fdd7546fce2eed7b2dc8c4a06089",
+      "canonical": "{\"action\":\"PROTAGONIST_SELECTION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PROTAGONIST_SELECTION\",\"input_summary\":\"{\\\"candidate_count\\\": 0}\",\"output_summary\":\"{\\\"repo_id\\\": null, \\\"total\\\": 0.0, \\\"feasibility\\\": 0, \\\"reason\\\": \\\"No candidates provided.\\\"}\",\"prev_hash\":\"c92b2fd7ea59756d66549b3dae4913e36e5f3334f4a576bd72d96fea67b0180b\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:32:24.726040+00:00\"}",
+      "detail": "{\"repo_id\": null, \"total\": 0.0, \"feasibility\": 0, \"reason\": \"No candidates provided.\"}"
+    },
+    {
+      "action": "HMEM_VERDICT_MEMORY",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:32:24.730378+00:00",
+      "prev_hash": "22cdc4e2a8eb216e5d1c3508a26fc6915c00fdd7546fce2eed7b2dc8c4a06089",
+      "line_hash": "246d635711c58a274978875ac15b0ff2d7817267feae93144e40325da43ea776",
+      "canonical": "{\"action\":\"HMEM_VERDICT_MEMORY\",\"agent_name\":\"hmem\",\"confidence\":null,\"event\":\"HMEM_VERDICT_MEMORY\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\"}\",\"output_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"memory_id\\\": \\\"mem-e7a6579a5261\\\", \\\"remembered_before\\\": [], \\\"verdict_changed\\\": false, \\\"note\\\": \\\"First verdict H-MEM holds for this repository.\\\"}\",\"prev_hash\":\"22cdc4e2a8eb216e5d1c3508a26fc6915c00fdd7546fce2eed7b2dc8c4a06089\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:32:24.730378+00:00\"}",
+      "detail": "{\"repo_id\": \"bower/bower\", \"verdict\": \"ALREADY_EXISTS\", \"memory_id\": \"mem-e7a6579a5261\", \"remembered_before\": [], \"verdict_changed\": false, \"note\": \"First verdict H-MEM holds for this repository.\"}"
+    },
+    {
+      "action": "STAGE_TIME",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:32:24.730548+00:00",
+      "prev_hash": "246d635711c58a274978875ac15b0ff2d7817267feae93144e40325da43ea776",
+      "line_hash": "9f8ba8c739c156bb11be06897a1b7850a0cf24d940370924c1cdc7bf5d78a0ee",
+      "canonical": "{\"action\":\"STAGE_TIME\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STAGE_TIME\",\"input_summary\":\"{\\\"stages\\\": [\\\"problem\\\", \\\"search\\\"]}\",\"output_summary\":\"{\\\"problem_seconds\\\": 8.58, \\\"search_seconds\\\": 13.97, \\\"alternatives_seconds\\\": 26.15, \\\"discovery_seconds\\\": 27.22, \\\"model_retries\\\": 0}\",\"prev_hash\":\"246d635711c58a274978875ac15b0ff2d7817267feae93144e40325da43ea776\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:32:24.730548+00:00\"}",
+      "detail": "problem 8.58s, search 13.97s, alternatives 26.15s, discovery 27.22s"
+    },
+    {
+      "action": "SEARCH_SNAPSHOT",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:32:25.200935+00:00",
+      "prev_hash": "9f8ba8c739c156bb11be06897a1b7850a0cf24d940370924c1cdc7bf5d78a0ee",
+      "line_hash": "3bb3e6e6a386b823a9096e8d9fc99356559a8f82e76937615be2b20240f9804d",
+      "canonical": "{\"action\":\"SEARCH_SNAPSHOT\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"SEARCH_SNAPSHOT\",\"input_summary\":\"{\\\"repo_id\\\": \\\"bower/bower\\\", \\\"commit\\\": \\\"4e0c3c1181c21624c5b3ab5bdf5d3becdb172b5a\\\"}\",\"output_summary\":\"{\\\"snapshot_sha256\\\": \\\"e82419c455c3efbad318e6251e36c1b29a0c1d1b960f785bb5ac27e1b60a2aee\\\", \\\"refreshed\\\": false, \\\"records\\\": 34, \\\"model_calls\\\": 4}\",\"prev_hash\":\"9f8ba8c739c156bb11be06897a1b7850a0cf24d940370924c1cdc7bf5d78a0ee\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:32:25.200935+00:00\"}",
+      "detail": "{\"snapshot_sha256\": \"e82419c455c3efbad318e6251e36c1b29a0c1d1b960f785bb5ac27e1b60a2aee\", \"refreshed\": false, \"records\": 34, \"model_calls\": 4}"
+    },
+    {
+      "action": "RUN_SEAL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:32:25.201224+00:00",
+      "prev_hash": "3bb3e6e6a386b823a9096e8d9fc99356559a8f82e76937615be2b20240f9804d",
+      "line_hash": "eb389fcfa663a094313fc0e5fe76bdd50e3ad733ee7b6be93fd48426263020a3",
+      "canonical": "{\"action\":\"RUN_SEAL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"RUN_SEAL\",\"input_summary\":\"{\\\"prev_hash\\\": \\\"3bb3e6e6a386b823a9096e8d9fc99356559a8f82e76937615be2b20240f9804d\\\"}\",\"output_summary\":\"Final run hash is this line's line_hash.\",\"prev_hash\":\"3bb3e6e6a386b823a9096e8d9fc99356559a8f82e76937615be2b20240f9804d\",\"retry_count\":0,\"run_id\":\"run-44aa9a1aea42\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:32:25.201224+00:00\"}",
+      "detail": "Run seal. The line hash is the run hash."
+    }
+  ],
+  "rescue": null,
+  "rescue_note": "A rescue plan is written only for a worth-reviving verdict, and it is sealed with the trace.",
+  "injection": {
+    "detected": false,
+    "neutralised": false,
+    "count": 0,
+    "findings": []
+  },
+  "provider": "nvidia",
+  "source": "recorded-live-judge",
+  "source_note": "Judged live on 2026-11-17 on build 9763a0d, hosted NVIDIA path, cold run. A replay from the sealed snapshot gave the same verdict, blocker, candidate list and rescue text. The snapshot is stored with this example. Packed with scripts/pro_add_live_example.py --snapshot.",
+  "demo": true,
+  "model_calls": 4,
+  "commit": "4e0c3c1181c21624c5b3ab5bdf5d3becdb172b5a",
+  "snapshot_sha256": "e82419c455c3efbad318e6251e36c1b29a0c1d1b960f785bb5ac27e1b60a2aee",
+  "snapshot_refreshed": false,
+  "human_label": {},
+  "osv": [
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "abbrev",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "chalk",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "configstore",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "decompress-zip",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "destroy",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "findup-sync",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "fstream",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "fstream-ignore",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "github",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "glob",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "graceful-fs",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "handlebars",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "is-root",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "junk",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "lockfile",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "lru-cache",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "md5-hex",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "mout",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "nopt",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "opn",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "q",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [
+        "GHSA-7xfp-9c55-5vqj",
+        "GHSA-p8p7-x288-28g6"
+      ],
+      "name": "request",
+      "version": "2.67.0"
+    }
+  ],
+  "plain_reason": "A maintained alternative already does this job. The quote was found in that alternative's own text.",
+  "quote_verified": true,
+  "responsibility": {
+    "model_decides": [
+      "What the repository's problem and user are, in the problem step.",
+      "Whether a found alternative is the same job, and at what overlap.",
+      "A draft rescue plan, when gate 1 has already returned CANDIDATE and a model call is still allowed."
+    ],
+    "code_decides": [
+      "A quote is kept only when quote_in_text finds it in the cited text.",
+      "A full-overlap alternative blocks only when the maturity and licence checks also pass. A failed check is recorded under must-beat and does not block.",
+      "BUDGET_EXHAUSTED cannot produce CANDIDATE. A search that stops early is NEEDS_REVIEW or UNJUDGED.",
+      "Prompt-injection spans in a README are removed before the text is stored for the model.",
+      "The trace hash. Each line's line_hash is SHA-256 of the canonical JSON body, and the next line's prev_hash must equal it.",
+      "The per-run model-call cap and the daily run caps. A cache hit spends neither."
+    ],
+    "injection": {
+      "detected": false,
+      "neutralised": false,
+      "count": 0,
+      "findings": []
+    },
+    "limitations": [
+      "A verified quote shows those words were in the cited text. It does not show that the alternative is a good product, or that the verdict is the one a human would write.",
+      "The scored set had four false passes: CANDIDATE where the human label's only acceptable verdict was ALREADY_EXISTS (Invoice generator, ScrapeServ, raindrop-wordpress-linkblog-sync, go-file-sync). They are listed in docs/JUDGES.md.",
+      "The hash chain shows the recorded lines were not edited after sealing. It does not show the lines are true.",
+      "A Gemini fallback is not a Nemotron answer. The trace flags MODEL_MISMATCH when the served id is outside nvidia/nemotron-*.",
+      "On a free Render service the result cache lives on an ephemeral disk and is empty after a restart or spin-down."
+    ],
+    "verify": [
+      "On the trace page, Verify hashes each canonical line with SHA-256 in the browser and checks that each prev_hash equals the previous line_hash.",
+      "Tamper edits a copy of one line in the browser. The committed file is not written.",
+      "From a checkout: python scripts/verify_trace.py TRACE --expected-run-hash HASH"
+    ],
+    "run_hash": "eb389fcfa663a094313fc0e5fe76bdd50e3ad733ee7b6be93fd48426263020a3",
+    "trace_file": "pro/examples/traces/live-bower.jsonl"
+  },
+  "id": "live-bower",
+  "cached": true,
+  "recorded_on": "2026-11-17",
+  "snapshot_file": "pro/examples/snapshots/live-bower.snapshot.json"
+}

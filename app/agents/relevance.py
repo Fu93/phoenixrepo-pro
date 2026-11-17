@@ -389,6 +389,7 @@ class FallbackBudget:
         self.completed_calls = 0
         self.infra_seconds = 0.0
         self.last_cause = ""
+        self._lock = threading.Lock()
 
     def remaining(self) -> float:
         return self.seconds - self.infra_seconds
@@ -432,10 +433,15 @@ class FallbackBudget:
         return max(0.0, self.remaining())
 
     def note_completed(self) -> None:
-        self.completed_calls += 1
+        with self._lock:
+            self.completed_calls += 1
 
     def charge_failure(self, elapsed: float, message: str, *, kind: str) -> None:
         """Count one infrastructure failure. ``elapsed`` is the time of this failed call only."""
+        with self._lock:
+            self._charge_failure(elapsed, message, kind=kind)
+
+    def _charge_failure(self, elapsed: float, message: str, *, kind: str) -> None:
         self.infra_seconds += max(0.0, float(elapsed))
         text = str(message or "").strip()
         if text:
@@ -843,6 +849,18 @@ class RelevanceClient:
         sampling: dict[str, Any] = {"model": model, "temperature": 0, "stream": False, "max_tokens": int(self.max_tokens)}
         sampling.update(body_extra)
         inference_sha = inference_settings_sha256(sampling)
+        from app.agents.search_snapshot import remember_model, replay_model
+
+        temperature = float(sampling.get("temperature") or 0)
+        stored = replay_model(system_prompt, prompt, model, temperature)
+        if stored is not None:
+            if stored.get("incomplete"):
+                raise RelevanceLLMError("search snapshot is incomplete: no stored model reply for this prompt")
+            served = str(stored.get("served_model") or model)
+            requested = str(stored.get("requested_model") or model)
+            self._observe(requested, served, repo_id, step, cache_hit=True, tier=tier_label)
+            self.last_cache_hit = True
+            return str(stored.get("response_text") or ""), requested, served
         settings_sha = request_settings_sha256(sent_request_settings(sampling))
         cache_key = hashlib.sha256(
             f"{model}\n---\n{prompt_hash}\n---\n{input_hash}\n---\n{inference_sha}".encode("utf-8")
@@ -919,6 +937,7 @@ class RelevanceClient:
             self.last_cache_hit = False
             self.last_cache_file = cache_file
             self._log_served(repo_id, step, served, time.monotonic() - call_start, cache_hit=False)
+            remember_model(system_prompt, prompt, model, temperature, text, model, served)
             return text, model, served
 
         if self.mock_handler is not None:
@@ -1465,6 +1484,60 @@ def _normalize_for_quote(text: str) -> str:
     return _DASH_SPACING.sub("-", normalize_whitespace(str(text or "").translate(_MARKUP_TRANS))).casefold()
 
 
+_ZERO_WIDTH = re.compile(r"[\u200b\u200c\u200d\ufeff]")
+_HTML_TAG = re.compile(r"<[^>]+>")
+_MD_LINK = re.compile(r"!\[([^\]]*)\]\([^)]*\)|\[([^\]]*)\]\(([^)]*)\)")
+
+
+def _link_label(match: re.Match[str], *, keep_url: bool) -> str:
+    if match.group(1) is not None:
+        return " " + match.group(1) + " "
+    label = match.group(2) or ""
+    url = match.group(3) or "" if keep_url else ""
+    return " " + label + " " + url + " "
+
+
+_CODE_FENCE = re.compile(r"```[^\n]*\n?(.*?)```", re.S)
+_REF_DEF = re.compile(r"^\s*\[[^\]]+\]:\s*\S+.*$", re.M)
+_REF_LINK = re.compile(r"\[([^\]]+)\]\s*\[[^\]]*\]")
+_AUTOLINK = re.compile(r"<(https?://[^>]+)>")
+_HEADING = re.compile(r"^\s{0,3}#{1,6}\s*", re.M)
+_BLOCKQUOTE = re.compile(r"^\s{0,3}>\s?", re.M)
+_LIST_MARK = re.compile(r"^\s{0,3}(?:[-*+]|\d+\.)\s+", re.M)
+_HTML_ENTITY = {"&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'", "&nbsp;": " "}
+
+
+def strip_markdown(text: str) -> str:
+    """Plain words in order. Markers go. Invented sentences still fail the substring check."""
+
+    raw = _ZERO_WIDTH.sub("", str(text or ""))
+    raw = _CODE_FENCE.sub(lambda match: " " + match.group(1) + " ", raw)
+    raw = _MD_LINK.sub(lambda match: _link_label(match, keep_url=False), raw)
+    raw = _REF_LINK.sub(lambda match: " " + match.group(1) + " ", raw)
+    raw = _REF_DEF.sub(" ", raw)
+    raw = _AUTOLINK.sub(" ", raw)
+    raw = _HTML_TAG.sub(" ", raw)
+    for entity, char in _HTML_ENTITY.items():
+        raw = raw.replace(entity, char)
+    raw = _HEADING.sub("", raw)
+    raw = _BLOCKQUOTE.sub("", raw)
+    raw = _LIST_MARK.sub("", raw)
+    return _normalize_for_quote(raw).replace('"', "")
+
+
+def _unfold_markup(text: str, *, keep_url: bool) -> str:
+    """Words in order, after links and tags. A paraphrase still fails.
+
+    Keeping the URL lets a quote of the address match. Dropping it lets a quote
+    of the sentence match when the address sat between two words.
+    """
+
+    raw = _ZERO_WIDTH.sub("", str(text or ""))
+    raw = _MD_LINK.sub(lambda match: _link_label(match, keep_url=keep_url), raw)
+    raw = _HTML_TAG.sub(" ", raw)
+    return _normalize_for_quote(raw).replace('"', "")
+
+
 def quote_in_text(quote: str, text: str) -> bool:
     """Deterministic quote verification: case-insensitive substring check after normalising
     whitespace, Markdown emphasis marks and typographic quotes."""
@@ -1473,7 +1546,61 @@ def quote_in_text(quote: str, text: str) -> bool:
     if normalize_whitespace(quote).casefold() in normalize_whitespace(text).casefold():
         return True
     nq = _normalize_for_quote(quote)
-    return bool(nq) and nq in _normalize_for_quote(text)
+    if nq and nq in _normalize_for_quote(text):
+        return True
+    for keep_url in (True, False):
+        soft = _unfold_markup(quote, keep_url=keep_url)
+        if soft and soft in _unfold_markup(text, keep_url=keep_url):
+            return True
+    plain_quote = strip_markdown(quote)
+    plain_text = strip_markdown(text)
+    return bool(plain_quote) and plain_quote in plain_text
+
+
+_CAPABILITY_STOP = frozenset(
+    "a an the of to for and or with from your our this that free web online open source app tool "
+    "software using into over than then just more most some any all not but its".split()
+)
+
+
+def _capability_tokens(text: str) -> set[str]:
+    words = re.findall(r"[a-z0-9]+", str(text or "").casefold())
+    return {word for word in words if len(word) > 3 and word not in _CAPABILITY_STOP}
+
+
+def capability_hold(verdict: str, must_beat: list[dict[str, Any]] | None, cand_text: str) -> str | None:
+    """NEEDS_REVIEW when a full-overlap web quote shares the candidate's job and only metadata failed.
+
+    A name that did not match is not required. The quote still has to be the one the run stored.
+    This does not turn the row into ALREADY_EXISTS: the maturity rule did not pass.
+    """
+
+    if verdict != "CANDIDATE":
+        return None
+    cand = _capability_tokens(cand_text)
+    if len(cand) < 2:
+        return None
+    for item in must_beat or []:
+        if not isinstance(item, dict):
+            continue
+        alt = str(item.get("alternative") or "")
+        if not (alt.startswith("web:") or alt.startswith("http")):
+            continue
+        if str(item.get("overlap") or "") != "full":
+            continue
+        quote = str(item.get("quote") or "")
+        reason = str(item.get("reason") or "").casefold()
+        if not any(token in reason for token in ("no push", "not mature", "stars=")):
+            continue
+        shared = sorted(cand & _capability_tokens(quote))
+        if len(shared) < 2:
+            continue
+        shown = ", ".join(shared[:4])
+        return (
+            f"needs review: {alt} is full overlap and its quote shares {shown} with the candidate. "
+            "The maturity check did not block it, so this is not recorded as worth reviving"
+        )
+    return None
 
 
 def build_search_queries(candidate: dict[str, Any], problem_statement: dict[str, Any]) -> list[str]:
@@ -1708,7 +1835,12 @@ def _evidence_rows(rows: list[dict[str, Any]] | None) -> list[dict[str, str]]:
         if key in seen:
             continue
         seen.add(key)
-        out.append({"alternative": name, "overlap": overlap, "quote": quote, "reason": why})
+        item: dict[str, Any] = {"alternative": name, "overlap": overlap, "quote": quote, "reason": why}
+        if isinstance(r.get("rubric"), dict) and r.get("rubric"):
+            item["rubric"] = r["rubric"]
+        if isinstance(r.get("rubric_second"), dict) and r.get("rubric_second"):
+            item["rubric_second"] = r["rubric_second"]
+        out.append(item)
     return out
 
 
@@ -1826,6 +1958,38 @@ def _emit_gate_decision(
     )
 
 
+_NOT_A_NAME = {"", "none", "null", "n/a", "na", "unknown", "nil", "undefined"}
+
+
+def _listed_alternative(name: str | None, rows: list[dict[str, Any]]) -> bool:
+    """True when the model named a repository that is actually in the candidate list."""
+
+    from app.agents.alt_key import canonical_alternative_key, github_owner_repo
+
+    text = str(name or "").strip()
+    if text.casefold() in _NOT_A_NAME:
+        return False
+    wanted = github_owner_repo(text)
+    wanted_key = "github.com/" + wanted.casefold() if wanted else ""
+    folded = text.casefold().rstrip("/")
+    for row in rows:
+        alt_id = str(row.get("alternative_id") or "").strip()
+        url = str(row.get("url") or "").strip().rstrip("/")
+        if folded == alt_id.casefold().rstrip("/") or (url and folded == url.casefold()):
+            return True
+        if alt_id.casefold().startswith("web:") and folded == alt_id[4:].casefold().rstrip("/"):
+            return True
+        key = canonical_alternative_key(row)
+        if wanted_key and key == wanted_key:
+            return True
+        repo_name = alt_id.split("/")[-1]
+        if "/" not in text and text.casefold() == repo_name.casefold() and len(text) > 2:
+            return True
+        if wanted and f"github.com/{wanted}".casefold() in url.casefold():
+            return True
+    return False
+
+
 def judge_discovery(
     candidate: dict[str, Any],
     prior_rows: list[dict[str, Any]],
@@ -1852,15 +2016,21 @@ def judge_discovery(
     combined_priors: list[dict[str, Any]] = []
     seen_ids: dict[str, dict[str, Any]] = {}
 
+    from app.agents.alt_key import canonical_alternative_key
+
     for r in list(prior_rows or []) + list(problem_alternatives or []):
         alt_id = str(r.get("alternative_id") or r.get("url") or "").strip()
-        alt_key = alt_id.casefold()
+        alt_key = canonical_alternative_key(r) or alt_id.casefold()
         if not alt_key:
             continue
         if alt_key in seen_ids:
             existing = seen_ids[alt_key]
-            if r.get("overlap") and not existing.get("overlap"):
+            if r.get("overlap") == "full" and existing.get("overlap") != "full":
+                existing["overlap"] = "full"
+            elif r.get("overlap") and not existing.get("overlap"):
                 existing["overlap"] = r["overlap"]
+            if r.get("overlap_reads") == "disagree":
+                existing["overlap_reads"] = "disagree"
             if r.get("same_problem") is not None and existing.get("same_problem") is None:
                 existing["same_problem"] = r["same_problem"]
             if r.get("excerpt") and not existing.get("excerpt"):
@@ -1909,10 +2079,15 @@ def judge_discovery(
     ]
     # A verified full-overlap alternative of any source (GitHub included) means an open-source or
     # commercial substitute exists; GitHub partial overlap only needs a human look.
-    full_overlap_rows = [
-        r for r in combined_priors
-        if r.get("same_problem") is True and str(r.get("overlap") or "") == "full"
-    ]
+    from app.agents.stable_search import blocker_rank
+
+    full_overlap_rows = sorted(
+        [
+            r for r in combined_priors
+            if r.get("same_problem") is True and str(r.get("overlap") or "") == "full"
+        ],
+        key=blocker_rank(candidate),
+    )
     github_partial_rows = [
         r for r in combined_priors
         if not _is_web_row(r) and r.get("same_problem") is True and str(r.get("overlap") or "") == "partial"
@@ -1979,24 +2154,32 @@ def judge_discovery(
     if obj is None:
         verdict = "NEEDS_REVIEW"
         reason = "unverified LLM quote: LLM response was not valid JSON"
-        return verdict, f"{reason}. Method: llm+verified quote (requested={req_m}, served={srv_m})."
+        return verdict, f"{reason}. Method: llm, quote not verified (requested={req_m}, served={srv_m})."
 
     raw_verdict = str(obj.get("verdict") or "NO_GO").strip().upper()
     reason = str(obj.get("reason") or "").strip()
     problem_quote = str(obj.get("problem_quote") or "").strip()
+    if (
+        problem_quote
+        and problem_quote.casefold() not in {"unknown", "none", "null"}
+        and cand_text
+        and not quote_in_text(problem_quote, cand_text)
+    ):
+        replacement = _retry_verified_quote(client, repo_id, cand_text, problem_quote)
+        if replacement:
+            problem_quote = replacement
     alt_repo = str(obj.get("alternative_repo") or "").strip() if obj.get("alternative_repo") else None
     alt_quote = str(obj.get("alternative_quote") or "").strip() if obj.get("alternative_quote") else None
 
     # Deterministic verification. `picked` is what the report shows for a refusal or a review.
     picked: list[dict[str, Any]] = []
-    from datetime import date as _date
-
     from app.agents.blocker import evaluate_blocker
+    from app.agents.search_snapshot import as_of_date
 
     must_beat: list[dict[str, str]] = []
 
     def _blocker(row: dict[str, Any]) -> dict[str, Any]:
-        return evaluate_blocker(candidate, row, as_of=_date.today())
+        return evaluate_blocker(candidate, row, as_of=as_of_date())
 
     def _must(row: dict[str, Any], decision: dict[str, Any]) -> dict[str, str]:
         quotes = [str(q).strip() for q in (row.get("quotes") or []) if str(q).strip()]
@@ -2111,7 +2294,11 @@ def judge_discovery(
         path_label = "own-identity"
         gate_shortcut = "own-identity"
     elif raw_verdict == "ALREADY_EXISTS":
-        # Check alternative repo matches one in combined_priors
+        # A name that is not one of the checked alternatives is no name. "None"
+        # is that case. It must not become a quote-not-in-source review.
+        if not _listed_alternative(alt_repo, combined_priors):
+            alt_repo = None
+            alt_quote = None
         matched_row = None
         if alt_repo:
             for r in combined_priors:
@@ -2129,17 +2316,39 @@ def judge_discovery(
                 ):
                     matched_row = r
                     break
-        if matched_row is None:
+        if matched_row is None and alt_repo:
             verdict = "NEEDS_REVIEW"
             reason = f"unverified LLM quote: alternative_repo '{alt_repo}' not found in candidate prior-art"
             path_label = "unmatched"
+        elif matched_row is None:
+            if problem_quote and quote_in_text(problem_quote, cand_text):
+                verdict = "CANDIDATE"
+                reason = "the model named no alternative from the candidate list"
+            else:
+                verdict = "NEEDS_REVIEW"
+                reason = "the model named no alternative from the candidate list"
+            path_label = "unnamed"
         else:
             alt_text = f"{matched_row.get('excerpt', '')} {matched_row.get('description', '')} {matched_row.get('text', '')} {matched_row.get('readme', '')}"
             if not alt_quote or not quote_in_text(alt_quote, alt_text):
-                verdict = "NEEDS_REVIEW"
-                reason = f"unverified LLM quote: alternative_quote '{alt_quote}' not found in alternative {matched_row.get('alternative_id')} text"
-                picked = [{**matched_row, "reason": reason}]
-                path_label = "alt-quote"
+                # The sentence was not in the alternative. Drop that row. Do not
+                # turn the whole repository into NEEDS_REVIEW because of it.
+                must_beat.append({
+                    "alternative": str(matched_row.get("alternative_id") or matched_row.get("url") or ""),
+                    "overlap": str(matched_row.get("overlap") or ""),
+                    "quote": alt_quote or "",
+                    "reason": "couldn't verify: the quote was not in the alternative's text",
+                })
+                if problem_quote and quote_in_text(problem_quote, cand_text):
+                    verdict = "CANDIDATE"
+                    reason = (
+                        f"couldn't verify {matched_row.get('alternative_id')}: "
+                        "the quote was not in its text, so it was dropped"
+                    )
+                else:
+                    verdict = "NEEDS_REVIEW"
+                    reason = f"unverified LLM quote: problem_quote '{problem_quote}' not found in candidate README or description"
+                path_label = "dropped-alt"
                 gate_row = matched_row
             elif matched_row.get("overlap") and matched_row.get("overlap") != "full":
                 verdict = "NEEDS_REVIEW"
@@ -2234,6 +2443,42 @@ def judge_discovery(
         reason = f"unverified LLM quote: unexpected verdict '{raw_verdict}'"
         path_label = "unexpected"
 
+    verified_ready: list[tuple[dict[str, Any], list[str]]] = []
+    for row in blocking_full:
+        own_text = f"{row.get('excerpt', '')} {row.get('description', '')} {row.get('text', '')} {row.get('readme', '')}"
+        own_quotes = [str(q) for q in (row.get("quotes") or []) if str(q).strip() and quote_in_text(str(q), own_text)]
+        if own_quotes:
+            verified_ready.append((row, own_quotes))
+    if verified_ready and verdict != "ALREADY_EXISTS":
+        # The maturity gate does not wait for the model's verdict word. A mature
+        # full-overlap row blocks even when the model said NO_GO and named nothing.
+        # The row still needs a quote that is actually in its own text.
+        m, quotes = verified_ready[0]
+        verdict = "ALREADY_EXISTS"
+        reason = (
+            f"verified full-overlap alternative {m.get('url') or m.get('alternative_id')} already solves the same problem"
+            + (f" (quote: '{quotes[0]}')" if quotes else "")
+            + f"; the model said {raw_verdict}"
+        )
+        picked = [{**m, "quotes": quotes, "overlap": "full", "reason": reason, "rubric": m.get("rubric") or {}}]
+        path_label = "BF"
+        gate_row = m
+        gate_decision = _stored(m)
+
+    disagreed = [row for row in combined_priors if row.get("overlap_reads") == "disagree"]
+    if disagreed and verdict == "CANDIDATE" and not blocking_full:
+        verdict = "NEEDS_REVIEW"
+        reason = "overlap judged differently on two reads"
+        path_label = "overlap-reread"
+        picked = []
+
+    hold = capability_hold(verdict, must_beat, cand_text)
+    if hold:
+        verdict = "NEEDS_REVIEW"
+        reason = hold
+        path_label = "capability"
+        picked = []
+
     coverage_override = False
     if verdict == "CANDIDATE" and coverage_blocked:
         # One rule for every path that can reach CANDIDATE (the own-identity and must-beat
@@ -2245,12 +2490,34 @@ def judge_discovery(
         coverage_override = True
 
     clean_reason = reason.rstrip().rstrip(".")
-    labeled_reason = f"{clean_reason}. Method: llm+verified quote (requested={req_m}, served={srv_m})."
+    low_reason = clean_reason.casefold()
+    quote_verified = not any(phrase in low_reason for phrase in ("unverified", "not found", "no quote"))
+    if raw_verdict == "NO_GO" and not (problem_quote and problem_quote.casefold() not in {"unknown", "none", "null", ""} and quote_in_text(problem_quote, cand_text)):
+        quote_verified = False
+    method = "llm+verified quote" if quote_verified else "llm, quote not verified"
+    labeled_reason = f"{clean_reason}. Method: {method} (requested={req_m}, served={srv_m})."
     show = _evidence_rows(picked) if verdict in {"ALREADY_EXISTS", "NEEDS_REVIEW"} else []
     blocked_names = {
         str(p.get("alternative_id") or p.get("alternative") or p.get("url") or "").casefold()
         for p in picked
     }
+    from app.agents.alt_key import canonical_alternative_key
+
+    winner_keys = {canonical_alternative_key(row) for row in picked if isinstance(row, dict)}
+    for row in combined_priors:
+        if row.get("same_problem") is not True:
+            continue
+        key = canonical_alternative_key(row)
+        if key and key in winner_keys:
+            continue
+        quotes = [str(q).strip() for q in (row.get("quotes") or []) if str(q).strip()]
+        must_beat.append({
+            "alternative": str(row.get("alternative_id") or row.get("url") or ""),
+            "overlap": str(row.get("overlap") or ""),
+            "quote": quotes[0] if quotes else "",
+            "reason": str(row.get("reason") or "checked"),
+            "rubric": row.get("rubric") if isinstance(row.get("rubric"), dict) else {},
+        })
     deduped: list[dict[str, str]] = []
     seen_beat: set[str] = set()
     for item in must_beat:
@@ -2320,33 +2587,36 @@ def extract_problem_statement(
         }
 
     if obj is None:
-        return None, {
-            "requested_model": req_m,
-            "served_model": srv_m,
-            "fallback": True,
-            "error": "LLM output invalid JSON",
-        }
-
-    quotes = obj.get("quotes")
-    if not isinstance(quotes, list) or len(quotes) == 0:
-        return None, {
-            "error": "unverified LLM quote: no quotes provided in problem statement",
-            "unverified_quote": "",
-            "requested_model": req_m,
-            "served_model": srv_m,
-            "fallback": False,
-        }
-
-    for q in quotes:
-        q_str = str(q or "").strip()
-        if not q_str or not quote_in_text(q_str, cand_text):
+        retried = _retry_problem_from_section(client, prompt_record.text, repo_id, desc, readme, cand_text)
+        if retried is None:
             return None, {
-                "error": f"unverified LLM quote: problem quote '{q_str}' not found in candidate README or description",
-                "unverified_quote": q_str,
                 "requested_model": req_m,
                 "served_model": srv_m,
-                "fallback": False,
+                "fallback": True,
+                "error": "LLM output invalid JSON",
             }
+        obj, verified, req_m, srv_m = retried
+    else:
+        verified, rejected = _problem_quotes(obj.get("quotes"), cand_text)
+    if not verified:
+        retried = _retry_problem_statement(
+            client, prompt_record.text, repo_id, desc, readme, prob, rejected, cand_text,
+        )
+        if retried is not None:
+            obj, verified, req_m, srv_m = retried
+        else:
+            retried = _retry_problem_from_section(client, prompt_record.text, repo_id, desc, readme, cand_text)
+            if retried is not None:
+                obj, verified, req_m, srv_m = retried
+            else:
+                detail = rejected or "no quotes provided in problem statement"
+                return None, {
+                    "error": f"unverified LLM quote: problem quote '{detail}' not found in candidate README or description",
+                    "unverified_quote": rejected,
+                    "requested_model": req_m,
+                    "served_model": srv_m,
+                    "fallback": False,
+                }
 
     raw_queries = obj.get("search_queries") or []
     search_queries = [str(sq).strip() for sq in raw_queries if str(sq).strip()]
@@ -2356,9 +2626,143 @@ def extract_problem_statement(
         "target_user": str(obj.get("target_user") or "").strip(),
         "category": str(obj.get("category") or "").strip(),
         "search_queries": search_queries[:5],
-        "quotes": [str(q).strip() for q in quotes if str(q).strip()],
+        "quotes": verified,
     }
     return problem_data, {"requested_model": req_m, "served_model": srv_m, "fallback": False}
+
+
+def _problem_quotes(quotes: Any, cand_text: str) -> tuple[list[str], str]:
+    """Every quote must occur in the candidate text. One miss rejects the set."""
+
+    if not isinstance(quotes, list) or not quotes:
+        return [], ""
+    kept: list[str] = []
+    for quote in quotes:
+        q_str = str(quote or "").strip()
+        if not q_str or not quote_in_text(q_str, cand_text):
+            return [], q_str
+        kept.append(q_str)
+    return kept, ""
+
+
+def _numbered_sentences(text: str) -> list[str]:
+    chunks = re.split(r"\n+|(?<=[.!?])\s+", str(text or ""))
+    sentences: list[str] = []
+    for chunk in chunks:
+        sentence = " ".join(chunk.split()).strip(" *-#>")
+        if len(sentence) >= 8:
+            sentences.append(sentence)
+    return sentences[:40]
+
+
+def _indexes_to_quotes(obj: dict[str, Any], sentences: list[str]) -> list[str]:
+    raw = obj.get("sentence_indexes")
+    if not isinstance(raw, list):
+        raw = obj.get("quote_indexes") if isinstance(obj.get("quote_indexes"), list) else []
+    if not raw and isinstance(obj.get("sentence_index"), int):
+        raw = [obj["sentence_index"]]
+    picked: list[str] = []
+    for item in raw:
+        try:
+            index = int(item)
+        except (TypeError, ValueError):
+            continue
+        if 0 <= index < len(sentences):
+            picked.append(sentences[index])
+    return picked
+
+
+def _retry_verified_quote(client, repo_id: str, source_text: str, rejected: str) -> str:
+    """One more extraction. The model may only point at a sentence in the source text."""
+
+    sentences = _numbered_sentences(source_text)
+    if not sentences or client is None:
+        return ""
+    numbered = "\n".join(f"{index}. {sentence}" for index, sentence in enumerate(sentences))
+    prompt = (
+        "The previous quote was not in the source. The exact source text is numbered below. "
+        "Return strict JSON {\"sentence_indexes\": [n]}. Do not write a new sentence.\n"
+        f"Rejected quote: {rejected!r}\n{numbered}"
+    )
+    try:
+        text, _req, _srv = client.complete(
+            prompt, "Quote only by sentence index from the source text.", repo_id=repo_id, step="problem_quote_retry",
+        )
+        obj = extract_json_object(text) or {}
+    except Exception:
+        return ""
+    for quote in _indexes_to_quotes(obj, sentences):
+        if quote_in_text(quote, source_text):
+            return quote
+    return ""
+
+
+def _readme_first_section(readme: str) -> str:
+    text = str(readme or "").strip()
+    if not text:
+        return ""
+    parts = [part.strip() for part in re.split(r"\n\s*\n", text) if part.strip()]
+    return "\n\n".join(parts[:2])[:2000]
+
+
+def _retry_problem_from_section(client, system_prompt: str, repo_id: str, desc: str, readme: str, cand_text: str):
+    """One more extraction, using the description and the first section of the README."""
+
+    section = _readme_first_section(readme)
+    if client is None or not (desc or section):
+        return None
+    prompt = (
+        f"Candidate Repository: {repo_id}\n"
+        "The previous extraction did not produce a quote from the source. "
+        "Use only the description and the README first section below.\n"
+        f"Description: {desc}\n"
+        f"README first section:\n```\n{section}\n```\n"
+        "Return strict JSON with problem, target_user, category, search_queries, and quotes. "
+        "Each quote must be copied from the description or the README first section."
+    )
+    try:
+        obj, _text, req_m, srv_m = _complete_json(client, prompt, system_prompt, repo_id, "problem")
+    except Exception:
+        return None
+    if obj is None:
+        return None
+    verified, _rejected = _problem_quotes(obj.get("quotes"), cand_text)
+    if not verified:
+        return None
+    obj = dict(obj)
+    obj["quotes"] = verified
+    return obj, verified, req_m, srv_m
+
+
+def _retry_problem_statement(client, system_prompt: str, repo_id: str, desc: str, readme: str, prob: str, rejected: str, cand_text: str):
+    """One more call. The model returns sentence indexes, not a free-text quote."""
+
+    sentences = _numbered_sentences(cand_text)
+    if not sentences:
+        return None
+    numbered = "\n".join(f"{index}. {sentence}" for index, sentence in enumerate(sentences))
+    missed = rejected or "no quote was provided"
+    prompt = (
+        f"Candidate Repository: {repo_id}\n"
+        f"The previous quote was not in the source: {missed!r}.\n"
+        "Do not paraphrase. Choose the sentence numbers that state the problem.\n"
+        "Return strict JSON with problem, target_user, category, search_queries, "
+        "and sentence_indexes (integers from the list).\n"
+        f"{numbered}"
+    )
+    try:
+        obj, _text, req_m, srv_m = _complete_json(client, prompt, system_prompt, repo_id, "problem")
+    except Exception:
+        return None
+    if obj is None:
+        return None
+    picked = _indexes_to_quotes(obj, sentences) or [str(quote) for quote in (obj.get("quotes") or [])]
+    verified, _rejected = _problem_quotes(picked, cand_text)
+    if not verified:
+        return None
+    obj = dict(obj)
+    obj["quotes"] = verified
+    return obj, verified, req_m, srv_m
 
 
 class SearchResultsList(list):
@@ -2377,11 +2781,44 @@ class SearchResultsList(list):
         self.insufficient_coverage: bool = insufficient_coverage
 
 
+def _cached_web_call(candidate: dict[str, Any], repo_id: str, toolbox: Any, tool_name: str, query: str) -> Any:
+    """Reuse a web-search body for the same repository, commit, and query."""
+
+    from app.agents.stable_search import cached_payload
+
+    commit = str(candidate.get("_head_commit") or "")
+    if not commit:
+        return toolbox.call(tool_name, {"query": query})
+    cache_dir = candidate.get("_search_cache")
+
+    def produce() -> dict[str, Any]:
+        result = toolbox.call(tool_name, {"query": query})
+        data = result.data if getattr(result, "ok", False) and isinstance(getattr(result, "data", None), dict) else {}
+        return {
+            "ok": bool(getattr(result, "ok", False)),
+            "error": str(getattr(result, "error", "") or ""),
+            "items": list((data or {}).get("items") or [])[:6],
+        }
+
+    payload = cached_payload(
+        "web", repo_id, commit, query, produce,
+        cache_dir=Path(cache_dir) if cache_dir else None,
+    )
+
+    class _Hit:
+        ok = bool(payload.get("ok"))
+        data = {"items": payload.get("items") or []}
+        error = str(payload.get("error") or "")
+
+    return _Hit()
+
+
 def search_prior_art(
     candidate: dict[str, Any],
     queries: list[str],
     toolbox: Any,
     language: str | None = None,
+    parallel_web: bool = False,
 ) -> SearchResultsList:
     """Search for potential prior-art alternatives across queries via the existing toolbox.
 
@@ -2408,8 +2845,12 @@ def search_prior_art(
             "reason": why,
         })
 
+    from app.agents.alt_key import canonical_alternative_key
+
     results: list[dict[str, Any]] = []
     seen_ids: set[str] = {cand_id.casefold()}
+    if "/" in cand_id:
+        seen_ids.add("github.com/" + cand_id.casefold())
     if cand_url:
         seen_ids.add(cand_url)
 
@@ -2450,6 +2891,17 @@ def search_prior_art(
     # spend most of it before the search begins.)
     truncated: set[str] = set()
     searched_queries = 0
+    web_prefetch: dict[str, Any] = {}
+    if parallel_web and toolbox is not None and "web" in source_status and queries:
+        from pro.pace import map_ordered
+
+        tool_name = "web_search" if (hasattr(toolbox, "has") and toolbox.has("web_search")) or (hasattr(toolbox, "tools") and "web_search" in getattr(toolbox, "tools", {})) else "web"
+
+        def _fetch_web(query: str):
+            return query, _cached_web_call(candidate, cand_id, toolbox, tool_name, query)
+
+        for query, result in map_ordered(_fetch_web, list(queries), workers=4):
+            web_prefetch[query] = result
 
     def _plan(index: int) -> set[str]:
         planned = {src for src in ("github", "web") if src in source_status}
@@ -2513,7 +2965,7 @@ def search_prior_art(
                         _own(gh_row, why_own)
                         continue
                     bucket.append((fn_lower, gh_row))
-            elif not gh_res.ok and str(gh_res.error or "") == "BUDGET_EXHAUSTED":
+            elif not gh_res.ok and str(gh_res.error or "") == "BUDGET_EXHAUSTED" and "snapshot" not in str(gh_res.error or ""):
                 truncated.add("github")
             elif not gh_res.ok:
                 # A rate limit (HTTP 403/429), an HTTP error or a network error is a source error,
@@ -2541,7 +2993,7 @@ def search_prior_art(
                         "description": str(it.get("description") or ""),
                         "readme": "",
                         "licence_spdx": str(it.get("license") or ""),
-                        "stars": 0,
+                        "stars": None,
                         "pushed_at": "",
                         "source": "npm",
                         "query": q,
@@ -2561,7 +3013,9 @@ def search_prior_art(
             truncated.add("web")
         elif "web" in source_status:
             tool_name = "web_search" if (hasattr(toolbox, "has") and toolbox.has("web_search")) or (hasattr(toolbox, "tools") and "web_search" in toolbox.tools) else "web"
-            web_res = toolbox.call(tool_name, {"query": q})
+            web_res = web_prefetch.get(q)
+            if web_res is None:
+                web_res = _cached_web_call(candidate, cand_id, toolbox, tool_name, q)
             if web_res.ok and isinstance(web_res.data, dict):
                 for it in (web_res.data.get("items") or [])[:6]:
                     url = str(it.get("url") or "").strip()
@@ -2587,7 +3041,7 @@ def search_prior_art(
                         "description": desc,
                         "readme": snippet,
                         "licence_spdx": "",
-                        "stars": 0,
+                        "stars": None,
                         "pushed_at": "",
                         "source": "web",
                         "query": q,
@@ -2617,14 +3071,24 @@ def search_prior_art(
                     per_source[src].append(bk[cur[bi]])
                     cur[bi] += 1
                     moved = True
+    def _already(key: str, row: dict[str, Any]) -> bool:
+        canon = canonical_alternative_key(row)
+        return key in seen_ids or bool(canon and canon in seen_ids)
+
+    def _remember(key: str, row: dict[str, Any]) -> None:
+        seen_ids.add(key)
+        canon = canonical_alternative_key(row)
+        if canon:
+            seen_ids.add(canon)
+
     leftovers: list[tuple[str, dict[str, Any]]] = []
     for src in ("web", "github", "npm"):
         taken = 0
         for key, row in per_source[src]:
-            if key in seen_ids:
+            if _already(key, row):
                 continue
             if taken < quotas[src] and len(results) < max_results:
-                seen_ids.add(key)
+                _remember(key, row)
                 results.append(row)
                 source_counts[row["source"]] = source_counts.get(row["source"], 0) + 1
                 taken += 1
@@ -2633,9 +3097,9 @@ def search_prior_art(
     for key, row in leftovers:
         if len(results) >= max_results:
             break
-        if key in seen_ids:
+        if _already(key, row):
             continue
-        seen_ids.add(key)
+        _remember(key, row)
         results.append(row)
         source_counts[row["source"]] = source_counts.get(row["source"], 0) + 1
 
@@ -2678,6 +3142,136 @@ def search_prior_art(
     return found
 
 
+def _compare_reads(first: dict[str, Any], second: dict[str, Any], alt_id: str, trace: Any | None) -> dict[str, Any]:
+    agreed = first.get("overlap") == second.get("overlap") and second.get("overlap") in {"full", "partial", "none"}
+    merged = dict(first)
+    if agreed:
+        merged["overlap_reads"] = "agree"
+        merged["rubric_second"] = second.get("rubric") or {}
+    else:
+        merged["overlap"] = "unresolved"
+        merged["overlap_reads"] = "disagree"
+        merged["same_problem"] = True
+        merged["reason"] = "overlap judged differently on two reads"
+        merged["rubric_second"] = second.get("rubric") or {}
+    if trace is not None:
+        trace.event(
+            agent_name="orchestrator",
+            action="OVERLAP_RUBRIC",
+            input_summary={"alternative": alt_id},
+            output_summary={
+                "first": first.get("rubric") or {},
+                "second": second.get("rubric") or {},
+                "first_overlap": first.get("overlap"),
+                "second_overlap": second.get("overlap"),
+                "result": "agree" if agreed else "disagree",
+            },
+            status="ok",
+        )
+    return merged
+
+
+def _settle_with_reread(
+    obj: dict[str, Any],
+    client: Any | None,
+    problem_statement: dict[str, Any],
+    repo_id: str,
+    alt_id: str,
+    result_text: str,
+    system: str,
+    trace: Any | None,
+) -> dict[str, Any]:
+    from app.agents.overlap import RUBRIC_FIELDS, rubric_answers, settle_entry
+
+    first = settle_entry(obj)
+    if client is None or not first.get("borderline"):
+        return first
+    prompt = (
+        f"Candidate Problem: {problem_statement.get('problem', '')}\n"
+        f"Target User: {problem_statement.get('target_user', '')}\n"
+        f"Alternative: {alt_id}\n"
+        f"Description and README Excerpt:\n```\n{result_text[:900]}\n```\n\n"
+        "Second read of the same alternative. "
+        + RUBRIC_FIELDS
+        + " Reply as strict JSON with the four booleans and verbatim quotes."
+    )
+    try:
+        text, _req, _srv = client.complete(
+            prompt, system, repo_id=repo_id, step="alternative_reread",
+        )
+        second_obj = extract_json_object(text) or {}
+    except Exception as exc:
+        if trace is not None:
+            trace.event(
+                agent_name="orchestrator",
+                action="OVERLAP_RUBRIC",
+                input_summary={"alternative": alt_id},
+                output_summary={"status": "second read failed", "error": str(exc)[:160]},
+                status="error",
+            )
+        return first
+    if rubric_answers(second_obj) is None:
+        if trace is not None:
+            trace.event(
+                agent_name="orchestrator",
+                action="OVERLAP_RUBRIC",
+                input_summary={"alternative": alt_id},
+                output_summary={"status": "second read had no rubric", "first_overlap": first.get("overlap")},
+                status="error",
+            )
+        return first
+    return _compare_reads(first, settle_entry(second_obj), alt_id, trace)
+
+
+def _reread_borderline(
+    entries: list[dict[str, Any]],
+    items: list[tuple[int, dict[str, Any], str]],
+    client: Any | None,
+    problem_statement: dict[str, Any],
+    repo_id: str,
+    system: str,
+    trace: Any | None,
+) -> list[dict[str, Any]]:
+    from app.agents.overlap import settle_entry
+
+    settled = [settle_entry(entry) for entry in entries if isinstance(entry, dict)]
+    borderline = [entry for entry in settled if entry.get("borderline")]
+    if not borderline or client is None:
+        return settled
+    by_index = {index: (res, text) for index, res, text in items}
+
+    def one(entry: dict[str, Any]) -> dict[str, Any]:
+        try:
+            index = int(entry.get("index"))
+        except (TypeError, ValueError):
+            return entry
+        res, text = by_index.get(index, ({}, ""))
+        alt_id = str(res.get("alternative_id") or "")
+        updated = _settle_with_reread(entry, client, problem_statement, repo_id, alt_id, text, system, trace)
+        updated["index"] = index
+        updated["quotes"] = entry.get("quotes") or updated.get("quotes")
+        return updated
+
+    from pro.pace import map_ordered
+
+    redone = map_ordered(one, borderline, workers=4)
+    by_done: dict[int, dict[str, Any]] = {}
+    for entry in redone:
+        try:
+            by_done[int(entry.get("index"))] = entry
+        except (TypeError, ValueError):
+            continue
+    out: list[dict[str, Any]] = []
+    for entry in settled:
+        try:
+            index = int(entry.get("index"))
+        except (TypeError, ValueError):
+            out.append(entry)
+            continue
+        out.append(by_done.get(index, entry))
+    return out
+
+
 def judge_alternative_relevance(
     problem_statement: dict[str, Any],
     candidate_repo_id: str,
@@ -2702,6 +3296,8 @@ def judge_alternative_relevance(
     if client is None:
         client = RelevanceClient()
 
+    from app.agents.overlap import RUBRIC_FIELDS
+
     prompt_record = load_prompt("relevance_alternative")
     user_prompt = (
         f"Candidate Problem: {problem_statement.get('problem', '')}\n"
@@ -2710,8 +3306,9 @@ def judge_alternative_relevance(
         f"Alternative Repository: {alt_id}\n"
         f"URL: {search_result.get('url', '')}\n"
         f"Description and README Excerpt:\n```\n{result_text}\n```\n\n"
-        "Judge whether this alternative solves the same core user problem, the overlap degree (full, partial, none), "
-        "and provide verbatim supporting quotes as strict JSON."
+        "Judge whether this alternative solves the same core user problem. "
+        + RUBRIC_FIELDS
+        + " Provide verbatim supporting quotes as strict JSON."
     )
 
     try:
@@ -2740,6 +3337,9 @@ def judge_alternative_relevance(
             "dropped": True,
         }
 
+    obj = _settle_with_reread(
+        obj, client, problem_statement, candidate_repo_id, alt_id, result_text, prompt_record.text, trace,
+    )
     same_problem = bool(obj.get("same_problem"))
     overlap = str(obj.get("overlap") or "none").strip().lower()
     reason = str(obj.get("reason") or "").strip()
@@ -2793,6 +3393,8 @@ def judge_alternative_relevance(
         "same_problem": True,
         "overlap": overlap,
         "reason": reason,
+        "overlap_reads": str(obj.get("overlap_reads") or ""),
+        "rubric": obj.get("rubric") or {},
         "quotes": [str(q).strip() for q in quotes if str(q).strip()],
         "quote_verified": True,
         "source": str(search_result.get("source") or ""),
@@ -2810,7 +3412,9 @@ def judge_alternative_relevance(
 BATCH_INSTRUCTION = (
     "\n\nBATCH MODE: you will receive several numbered alternatives. Judge EACH one independently "
     "with the rules above. Output strict JSON only, in the form "
-    '{"results": [{"index": <number>, "same_problem": true|false, "overlap": "full"|"partial"|"none", '
+    '{"results": [{"index": <number>, "same_problem": true|false, '
+    '"same_core_job": true|false, "same_input_output": true|false, "same_target_user": true|false, '
+    '"covers_main_features": true|false, '
     '"reason": "...", "quotes": ["verbatim quote from THAT alternative\'s text"]}]} '
     "with exactly one entry per alternative index. Use the index numbers shown in brackets. Do not renumber."
 )
@@ -2924,6 +3528,9 @@ def _row_from_entry(
     The entry was judged either way. A failed quote is not sent back to the model: the guard
     already rejected it.
     """
+    from app.agents.overlap import settle_entry
+
+    entry = settle_entry(entry)
     if not bool(entry.get("same_problem")):
         return None
     alt_id = str(res.get("alternative_id") or "").strip()
@@ -2959,6 +3566,8 @@ def _row_from_entry(
         "required_terms": "",
         "same_problem": True,
         "overlap": str(entry.get("overlap") or "none").strip().lower(),
+        "overlap_reads": str(entry.get("overlap_reads") or ""),
+        "rubric": entry.get("rubric") or {},
         "reason": str(entry.get("reason") or "").strip(),
         "quotes": [str(q).strip() for q in quotes if str(q).strip()],
         "quote_verified": True,
@@ -3173,6 +3782,9 @@ def judge_alternatives_batch(
         _fallback(why)
         return None
 
+    entries = _reread_borderline(
+        entries, items, client, problem_statement, candidate_repo_id, prompt_record.text, trace,
+    )
     verified, missing = _apply_entries(entries, items, candidate_repo_id, problem_statement, trace)
     if missing:
         # One follow-up for the indexes the first reply did not contain. A single missing
@@ -3279,6 +3891,85 @@ def _trace_partial_alternatives(
     )
 
 
+def _judge_one_chunk(problem_statement, candidate_repo_id, chunk, client, trace, budget, chunk_index):
+    """One chunk. The HTTP call is outside any caller lock. The trace lock lives on the hosted client."""
+
+    budget.guard_new_chunk()
+    judged = False
+    verified: list[dict[str, Any]] = []
+    if len(chunk) > 1:
+        batch = judge_alternatives_batch(
+            problem_statement, candidate_repo_id, chunk, client=client, trace=trace,
+            fallback_budget=budget, chunk_index=chunk_index,
+        )
+        if batch is not None:
+            verified.extend(batch)
+            judged = True
+    if not judged:
+        if budget.time_exhausted():
+            raise budget.stop("time_cap")
+        per_item_failures = 0
+        for res in chunk:
+            if budget.time_exhausted():
+                raise budget.stop("time_cap")
+            before = budget.failures
+            alt_row = _per_item(
+                problem_statement, candidate_repo_id, res, client, trace, budget,
+                chunk_index=chunk_index,
+            )
+            if budget.failures > before:
+                per_item_failures += 1
+            if alt_row is not None:
+                verified.append(alt_row)
+        judged = per_item_failures == 0
+    return chunk_index, judged, verified
+
+
+def _filter_chunks_parallel(problem_statement, candidate_repo_id, rows, client, trace, budget, identity, chunk_count, searched, chunk_size):
+    from pro.pace import map_ordered
+
+    chunks = [
+        (chunk_index, rows[start:start + chunk_size])
+        for chunk_index, start in enumerate(range(0, len(rows), chunk_size))
+    ]
+    workers = int(getattr(client, "_pace", None).concurrency if getattr(client, "_pace", None) else 4)
+
+    def run(item):
+        chunk_index, chunk = item
+        return _judge_one_chunk(problem_statement, candidate_repo_id, chunk, client, trace, budget, chunk_index)
+
+    try:
+        results = map_ordered(run, chunks, workers=workers)
+    except InfraFallbackStop as exc:
+        from app.agents.own_identity import split_own
+
+        verified, dropped_after = split_own(identity, [])
+        _trace_own(trace, candidate_repo_id, identity, dropped_after)
+        exc.attach(verified, chunk_count, [])
+        _trace_partial_alternatives(trace, candidate_repo_id, searched, exc.verified, exc)
+        raise
+    from app.agents.own_identity import split_own
+
+    verified_alts: list[dict[str, Any]] = []
+    for _index, judged, rows_out in results:
+        if judged:
+            verified_alts.extend(rows_out)
+    verified_alts, dropped_after = split_own(identity, verified_alts)
+    _trace_own(trace, candidate_repo_id, identity, dropped_after)
+    return verified_alts
+
+
+def _row_blocks(candidate: dict[str, Any] | None, row: dict[str, Any]) -> bool:
+    if candidate is None or str(row.get("overlap") or "") != "full" or row.get("quote_verified") is False:
+        return False
+    from datetime import date as _date
+
+    from app.agents.blocker import evaluate_blocker
+
+    decision = evaluate_blocker(candidate, row, as_of=_date.today())
+    return bool(decision.get("blocks"))
+
+
 def filter_relevant_alternatives(
     problem_statement: dict[str, Any],
     candidate_repo_id: str,
@@ -3288,6 +3979,7 @@ def filter_relevant_alternatives(
     candidate: dict[str, Any] | None = None,
     fallback_budget: FallbackBudget | None = None,
     clock: Callable[[], float] | None = None,
+    skip_immature: bool = False,
 ) -> list[dict[str, Any]]:
     """Evaluate candidate search results and return only those with same_problem=true and verified quotes.
 
@@ -3305,11 +3997,46 @@ def filter_relevant_alternatives(
     """
     from app.agents.own_identity import build_identity, split_own
 
-    rows = list(search_results)
+    from app.agents.alt_key import dedupe_alternatives
+    from app.agents.stable_search import rank_key
+
+    rows = dedupe_alternatives(list(search_results))
+    if skip_immature and candidate is not None:
+        from app.agents.blocker import block_obstacle
+        from app.agents.search_snapshot import as_of_date
+
+        kept: list[dict[str, Any]] = []
+        skipped: list[dict[str, str]] = []
+        when = as_of_date()
+        for row in rows:
+            why = block_obstacle(candidate, row, as_of=when)
+            if why:
+                skipped.append({
+                    "alternative": str(row.get("alternative_id") or row.get("url") or ""),
+                    "reason": why,
+                })
+            else:
+                kept.append(row)
+        if trace is not None and skipped:
+            trace.event(
+                agent_name="orchestrator",
+                action="ALTERNATIVES_SKIPPED",
+                input_summary={"repo_id": candidate_repo_id, "count": len(skipped)},
+                output_summary={"skipped": skipped},
+                status="ok",
+                summary_limit=20000,
+            )
+            try:
+                search_results.skipped = skipped  # type: ignore[attr-defined]
+            except AttributeError:
+                pass
+        rows = kept
+        rows.sort(key=rank_key)
     identity = build_identity(candidate or {"repo_id": candidate_repo_id})
     rows, dropped = split_own(identity, rows)
     _trace_own(trace, candidate_repo_id, identity, dropped)
-    chunk_count = (len(rows) + ALTERNATIVE_CHUNK_SIZE - 1) // ALTERNATIVE_CHUNK_SIZE if rows else 0
+    chunk_size = int(getattr(client, "alternative_batch_size", 0) or ALTERNATIVE_CHUNK_SIZE)
+    chunk_count = (len(rows) + chunk_size - 1) // chunk_size if rows else 0
     if fallback_budget is not None:
         budget = fallback_budget
     else:
@@ -3317,10 +4044,14 @@ def filter_relevant_alternatives(
     verified_alts: list[dict[str, Any]] = []
     verified_chunk_indexes: list[int] = []
     finished = 0
+    if getattr(client, "parallel_batches", False) and chunk_count > 1 and not skip_immature:
+        return _filter_chunks_parallel(
+            problem_statement, candidate_repo_id, rows, client, trace, budget, identity, chunk_count, len(search_results), chunk_size,
+        )
     try:
-        for chunk_index, start in enumerate(range(0, len(rows), ALTERNATIVE_CHUNK_SIZE)):
+        for chunk_index, start in enumerate(range(0, len(rows), chunk_size)):
             budget.guard_new_chunk()
-            chunk = rows[start:start + ALTERNATIVE_CHUNK_SIZE]
+            chunk = rows[start:start + chunk_size]
             judged = False
             if len(chunk) > 1:
                 batch = judge_alternatives_batch(
@@ -3346,8 +4077,6 @@ def filter_relevant_alternatives(
                         per_item_failures += 1
                     if alt_row is not None:
                         verified_alts.append(alt_row)
-                # A batch that failed open can still finish on the per-item salvage.
-                # Those rows are judged. A per-item infrastructure error leaves the chunk unjudged.
                 judged = per_item_failures == 0
             if judged:
                 verified_chunk_indexes.append(chunk_index)

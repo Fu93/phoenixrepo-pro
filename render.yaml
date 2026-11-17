@@ -1,0 +1,41 @@
+# Free web service for PhoenixRepo Pro. One Docker image, health check on /healthz.
+# Secret values are entered in the Dashboard (sync: false). They are not committed.
+services:
+  - type: web
+    name: phoenixrepo-pro
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      - key: SAMPLE_MODE
+        value: "true"
+      - key: PHOENIX_HOSTED
+        value: "true"
+      - key: PHOENIX_TRUST_CF
+        value: "true"
+      - key: PHOENIX_MAX_INFLIGHT
+        value: "2"
+      - key: PHOENIX_CALL_CONCURRENCY
+        value: "4"
+      - key: PHOENIX_CALLS_PER_MINUTE
+        value: "40"
+      - key: NVIDIA_MODEL
+        value: nvidia/nemotron-3-ultra-550b-a55b
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: PHOENIX_MAX_MODEL_CALLS
+        value: "24"
+      - key: PHOENIX_DAILY_RUNS_PER_IP
+        value: "8"
+      - key: PHOENIX_DAILY_RUNS_GLOBAL
+        value: "40"
+      - key: PHOENIX_PRO_DIR
+        value: data/pro-runtime
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false

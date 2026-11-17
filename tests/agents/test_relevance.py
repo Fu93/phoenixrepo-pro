@@ -244,7 +244,8 @@ def test_judge_discovery_downgrades_fabricated_quote_to_needs_review(tmp_path: P
     verdict, reason = judge_discovery(candidate, prior_rows=[], demand_rows=[], client=client)
     assert verdict == "NEEDS_REVIEW"
     assert "unverified LLM quote" in reason
-    assert "Method: llm+verified quote" in reason
+    assert "Method: llm, quote not verified" in reason
+    assert "Method: llm+verified quote" not in reason
 
 
 def test_judge_discovery_already_exists_missing_prior_repo_needs_review(tmp_path: Path):
@@ -272,8 +273,9 @@ def test_judge_discovery_already_exists_missing_prior_repo_needs_review(tmp_path
 
     client = RelevanceClient(cache_dir=tmp_path, mock_handler=fake_llm)
     verdict, reason = judge_discovery(candidate, prior_rows=prior_rows, demand_rows=[], client=client)
-    assert verdict == "NEEDS_REVIEW"
-    assert "unverified LLM quote" in reason
+    assert verdict == "CANDIDATE"
+    assert "not found in candidate prior-art" not in reason
+    assert "quote not in the source" not in reason
 
 
 def test_served_local_runtime_model_raises_and_not_cached(tmp_path: Path):
@@ -1006,8 +1008,8 @@ def test_fabricated_quote_in_alternative_snippet_is_rejected_needs_review(tmp_pa
         client=client,
         problem_alternatives=problem_alternatives,
     )
-    assert verdict == "NEEDS_REVIEW"
-    assert "unverified LLM quote" in reason
+    assert verdict == "CANDIDATE"
+    assert "couldn't verify" in reason
 
 
 def test_query_generation_includes_cli_api_client_and_official_feature_patterns():

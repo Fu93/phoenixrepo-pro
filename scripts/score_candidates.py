@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -506,10 +507,16 @@ def evaluate_demand_evidence(
     accepted_signals: list[dict[str, Any]] = []
     llm_fallback_occurred = False
 
-    for sig in signals_to_judge:
-        judgment, meta = judge_demand(
-            caps, sig, candidate_repo_id=repo_id, client=relevance_client
-        )
+    def _judge_one_signal(sig):
+        return sig, judge_demand(caps, sig, candidate_repo_id=repo_id, client=relevance_client)
+
+    if getattr(relevance_client, "parallel_batches", False) and len(signals_to_judge) > 1:
+        from pro.pace import map_ordered
+
+        judged_signals = map_ordered(_judge_one_signal, signals_to_judge, workers=4)
+    else:
+        judged_signals = [_judge_one_signal(sig) for sig in signals_to_judge]
+    for sig, (judgment, meta) in judged_signals:
         if meta.get("fallback"):
             llm_fallback_occurred = True
             continue
@@ -792,6 +799,9 @@ def score_all(
     facts_client: Any | None = None,
     evidence_source: str | None = None,
     zetaris_client: Any | None = None,
+    before_seal: Any | None = None,
+    head_commit: str = "",
+    stable_getter: Any | None = None,
 ) -> dict[str, Any]:
     """Main execution pipeline for candidate scoring and protagonist selection."""
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -821,6 +831,9 @@ def score_all(
             facts_client=facts_client,
             evidence_source=evidence_source,
             zetaris_client=zetaris_client,
+            before_seal=before_seal,
+            head_commit=head_commit,
+            stable_getter=stable_getter,
         )
     except RelevanceLLMError as exc:
         trace.event(
@@ -861,6 +874,9 @@ def _do_score_candidates(
     facts_client: Any | None = None,
     evidence_source: str | None = None,
     zetaris_client: Any | None = None,
+    before_seal: Any | None = None,
+    head_commit: str = "",
+    stable_getter: Any | None = None,
 ) -> dict[str, Any]:
     require_llm = use_llm and ("--llm" in (command_str or "").split())
     llm_bound = None
@@ -996,6 +1012,11 @@ def _do_score_candidates(
     )
     if custom_toolbox is not None and custom_toolbox.trace is None:
         custom_toolbox.trace = trace
+    from app.agents.search_snapshot import SnapshotToolbox, current_session
+
+    search_session = current_session()
+    if search_session is not None and not isinstance(toolbox, SnapshotToolbox):
+        toolbox = SnapshotToolbox(toolbox, search_session)
 
     eligible_candidates: list[dict[str, Any]] = []
     ineligible_repos: list[dict[str, Any]] = []
@@ -1023,6 +1044,7 @@ def _do_score_candidates(
             }
         )
 
+    _stage_times: dict[str, float] = {}
     for candidate in candidates_raw:
         repo_id = candidate["repo_id"]
         prior_for_repo = [r for r in prior_raw if r["repo_id"] == repo_id]
@@ -1033,19 +1055,46 @@ def _do_score_candidates(
 
         from app.agents.rescue import from_candidate_row, rescue_potential
 
-        if facts_client is not None and hasattr(facts_client, "fetch_rescue"):
-            rescue_facts = facts_client.fetch_rescue(repo_id, default_branch=str(candidate.get("default_branch") or ""))
-            if rescue_facts.get("fetch_status") == "ok":
-                rescue = rescue_potential(rescue_facts, as_of=_rescue_date.today())
-            else:
-                rescue = from_candidate_row(candidate, as_of=_rescue_date.today())
-                rescue["source"] = "snapshot"
-                rescue["fetch_status"] = "source_error"
+        def _compute_rescue():
+            if facts_client is not None and hasattr(facts_client, "fetch_rescue"):
+                rescue_facts = facts_client.fetch_rescue(repo_id, default_branch=str(candidate.get("default_branch") or ""))
+                if rescue_facts.get("fetch_status") == "ok":
+                    return rescue_potential(rescue_facts, as_of=_rescue_date.today())
+                fallback = from_candidate_row(candidate, as_of=_rescue_date.today())
+                fallback["source"] = "snapshot"
+                fallback["fetch_status"] = "source_error"
+                return fallback
+            return from_candidate_row(candidate, as_of=_rescue_date.today())
+
+        from concurrent.futures import ThreadPoolExecutor
+
+        def _load_problem():
+            if search_session is not None and search_session.ready():
+                return search_session.problem, {}
+            if search_session is not None and search_session.replaying:
+                return None, {"error": f"search snapshot for {repo_id}@{head_commit} is missing or incomplete"}
+            if is_client_configured(relevance_client):
+                return extract_problem_statement(candidate, client=relevance_client)
+            return None, None
+
+        if search_session is not None and search_session.replaying and search_session.rescue is not None:
+            rescue = search_session.rescue
+            _problem_started = time.perf_counter()
+            problem_stmt, meta_prob = _load_problem()
+            _stage_times["problem_seconds"] = round(time.perf_counter() - _problem_started, 2)
         else:
-            rescue = from_candidate_row(candidate, as_of=_rescue_date.today())
+            with ThreadPoolExecutor(max_workers=1) as _rescue_pool:
+                _rescue_future = _rescue_pool.submit(_compute_rescue)
+                _problem_started = time.perf_counter()
+                problem_stmt, meta_prob = _load_problem()
+                _stage_times["problem_seconds"] = round(time.perf_counter() - _problem_started, 2)
+                rescue = _rescue_future.result()
+            if search_session is not None and not search_session.replaying:
+                search_session.rescue = json.loads(json.dumps(rescue, default=str))
         rescue_by_repo[repo_id] = rescue
         must_beat = []
         judgement_evidence = []
+        skipped_alts: list[dict[str, str]] = []
         trace.event(
             agent_name="orchestrator",
             action="RESCUE_POTENTIAL",
@@ -1055,7 +1104,6 @@ def _do_score_candidates(
         )
 
         if is_client_configured(relevance_client):
-            problem_stmt, meta_prob = extract_problem_statement(candidate, client=relevance_client)
             if problem_stmt is None:
                 err = str(meta_prob.get("error") or "problem statement extraction failed")
                 # Fail loud: if the problem statement could not be extracted (LLM error,
@@ -1067,7 +1115,10 @@ def _do_score_candidates(
                     reason = f"UNJUDGED (PROBLEM_EXTRACTION_FAILED): {err}. No judgment was made and prior-art search was not run; rerun this repo."
                 else:
                     verdict = "NEEDS_REVIEW"
-                    reason = f"PROBLEM_EXTRACTION_FAILED: {err}. Prior-art search was not run. Method: llm+verified quote (requested={meta_prob.get('requested_model')}, served={meta_prob.get('served_model')})."
+                    if search_session is not None and search_session.replaying:
+                        reason = f"search snapshot for {repo_id}@{head_commit} is incomplete"
+                    else:
+                        reason = f"PROBLEM_EXTRACTION_FAILED: {err}. Prior-art search was not run. Method: llm+verified quote (requested={meta_prob.get('requested_model')}, served={meta_prob.get('served_model')})."
                 trace.event(
                     agent_name="orchestrator",
                     action="DISCOVERY_FILTER",
@@ -1104,36 +1155,69 @@ def _do_score_candidates(
                 queries = build_search_queries(candidate, problem_stmt)
                 queries_tried = list(queries)
 
-                trace.event(
-                    agent_name="orchestrator",
-                    action="QUERY_GENERATION",
-                    input_summary={"repo_id": repo_id},
-                    output_summary={"queries": queries},
-                    status="ok",
-                )
+                from app.agents.search_snapshot import note_search_event
 
-                candidate["_manifest_texts"] = load_manifests(toolbox, repo_id)
-                search_results = search_prior_art(
-                    candidate=candidate,
-                    queries=queries,
-                    toolbox=toolbox,
-                    language=candidate.get("primary_language"),
-                )
+                if search_session is not None and search_session.ready():
+                    queries = list(search_session.queries) or queries
+                    queries_tried = list(queries)
+                    for saved in search_session.search_events:
+                        trace.event(
+                            agent_name="orchestrator",
+                            action=saved["action"],
+                            input_summary=saved["input_summary"],
+                            output_summary=saved["output_summary"],
+                            summary_limit=max(500, len(saved["output_summary"]) + 8, len(saved["input_summary"]) + 8),
+                            status="ok",
+                        )
+                    from app.agents.relevance import SearchResultsList
 
-                trace.event(
-                    agent_name="orchestrator",
-                    action="PRIOR_ART_SEARCH",
-                    input_summary={"repo_id": repo_id, "queries": queries},
-                    output_summary={
-                        "total_results": len(search_results),
-                        "source_counts": getattr(search_results, "source_counts", {}),
-                        "source_status": getattr(search_results, "source_status", {}),
-                    },
-                    status="ok",
-                )
+                    search_results = SearchResultsList(
+                        list(search_session.search_results),
+                        source_counts=dict(search_session.source_counts),
+                        source_status=dict(search_session.source_status),
+                        insufficient_coverage=any(
+                            status != "ok" for status in search_session.source_status.values()
+                        ),
+                    )
+                    _search_seconds = 0.0
+                    _stage_times["search_seconds"] = 0.0
+                else:
+                    note_search_event(trace.event(
+                        agent_name="orchestrator",
+                        action="QUERY_GENERATION",
+                        input_summary={"repo_id": repo_id},
+                        output_summary={"queries": queries},
+                        status="ok",
+                    ))
+
+                if not (search_session is not None and search_session.ready()):
+                    candidate["_manifest_texts"] = load_manifests(toolbox, repo_id)
+                    _search_started = time.perf_counter()
+                    candidate["_head_commit"] = head_commit
+                    search_results = search_prior_art(
+                        candidate=candidate,
+                        queries=queries,
+                        toolbox=toolbox,
+                        language=candidate.get("primary_language"),
+                        parallel_web=bool(getattr(relevance_client, "parallel_batches", False)),
+                    )
+                    _search_seconds = round(time.perf_counter() - _search_started, 2)
+                    _stage_times["search_seconds"] = _search_seconds
+
+                    note_search_event(trace.event(
+                        agent_name="orchestrator",
+                        action="PRIOR_ART_SEARCH",
+                        input_summary={"repo_id": repo_id, "queries": queries},
+                        output_summary={
+                            "total_results": len(search_results),
+                            "source_counts": getattr(search_results, "source_counts", {}),
+                            "source_status": getattr(search_results, "source_status", {}),
+                        },
+                        status="ok",
+                    ))
 
                 # Retry once with broader queries if search yields 0 results
-                if len(search_results) == 0:
+                if not (search_session is not None and search_session.ready()) and len(search_results) == 0:
                     broader = broaden_queries(
                         queries=queries,
                         category=str(problem_stmt.get("category") or ""),
@@ -1141,13 +1225,13 @@ def _do_score_candidates(
                     )
                     if broader:
                         queries_tried.extend(broader)
-                        trace.event(
+                        note_search_event(trace.event(
                             agent_name="orchestrator",
                             action="QUERY_GENERATION",
                             input_summary={"repo_id": repo_id, "retry": True},
                             output_summary={"queries": broader},
                             status="ok",
-                        )
+                        ))
                         broader_results = search_prior_art(
                             candidate=candidate,
                             queries=broader,
@@ -1158,7 +1242,7 @@ def _do_score_candidates(
                         search_results.own_filtered = list(getattr(search_results, "own_filtered", []) or []) + list(
                             getattr(broader_results, "own_filtered", []) or []
                         )
-                        trace.event(
+                        note_search_event(trace.event(
                             agent_name="orchestrator",
                             action="PRIOR_ART_SEARCH",
                             input_summary={"repo_id": repo_id, "queries": broader, "retry": True},
@@ -1168,7 +1252,7 @@ def _do_score_candidates(
                                 "source_status": getattr(broader_results, "source_status", {}),
                             },
                             status="ok",
-                        )
+                        ))
 
                 own_filtered = list(getattr(search_results, "own_filtered", []) or [])
                 identity = build_identity(candidate)
@@ -1184,9 +1268,23 @@ def _do_score_candidates(
                     )
 
                 # If after retry search_results is still 0 and no prior_for_repo from CSV:
+                if search_session is not None and not search_session.replaying and not search_session.captured:
+                    search_session.capture(
+                        problem=problem_stmt,
+                        queries=queries_tried,
+                        results=list(search_results),
+                        source_counts=getattr(search_results, "source_counts", {}),
+                        source_status=getattr(search_results, "source_status", {}),
+                    )
                 if len(search_results) == 0 and len(prior_for_repo) == 0:
-                    verdict = "NEEDS_PRIOR_ART"
-                    reason = f"Zero alternatives checked in prior-art search. Queries tried: {', '.join(queries_tried[:3])}."
+                    if search_session is not None and search_session.replaying and (
+                        search_session.incomplete or not search_session.captured
+                    ):
+                        verdict = "NEEDS_REVIEW"
+                        reason = f"search snapshot for {repo_id}@{head_commit} is missing or incomplete"
+                    else:
+                        verdict = "NEEDS_PRIOR_ART"
+                        reason = f"Zero alternatives checked in prior-art search. Queries tried: {', '.join(queries_tried[:3])}."
                     trace.event(
                         agent_name="orchestrator",
                         action="DISCOVERY_FILTER",
@@ -1209,6 +1307,62 @@ def _do_score_candidates(
                 judgement_evidence: list[dict[str, Any]] = []
                 try:
                     # Alternative relevance step
+                    _alt_started = time.perf_counter()
+                    from app.agents.stable_search import stable_github_candidates
+
+                    extra = []
+                    if problem_stmt.get("category"):
+                        candidate["_category"] = str(problem_stmt.get("category") or "")
+                    replaying = search_session is not None and search_session.ready()
+                    if stable_getter is not None and not replaying:
+                        try:
+                            extra = stable_github_candidates(
+                                candidate, getter=stable_getter, commit=head_commit, trace=trace,
+                            )
+                        except Exception as exc:  # noqa: BLE001 — web results still stand
+                            note_search_event(trace.event(
+                                agent_name="orchestrator",
+                                action="STABLE_SEARCH",
+                                input_summary={"repo_id": repo_id},
+                                output_summary={"status": "metadata unavailable", "error": str(exc)[:180]},
+                                status="error",
+                            ))
+                    if extra and not replaying:
+                        from app.agents.stable_search import merge_preserving_web
+
+                        merged = merge_preserving_web(list(search_results), extra)
+                        search_results.clear()
+                        search_results.extend(merged)
+                    from app.agents.github_metadata import attach_github_metadata
+                    from app.agents.registry_maturity import _http_get_json, attach_registry_metadata
+                    from app.agents.search_snapshot import wrap_registry
+
+                    if not replaying:
+                        if search_session is not None:
+                            github_getter = stable_getter
+                            if github_getter is None:
+                                from app.agents.search_snapshot import wrap_github
+                                from scripts.judge_repo import _get
+
+                                github_getter = wrap_github(search_session, _get)
+                            attach_registry_metadata(
+                                list(search_results), trace=trace, limit=5,
+                                getter=wrap_registry(search_session, _http_get_json),
+                            )
+                            attach_github_metadata(
+                                list(search_results), trace=trace, limit=5, getter=github_getter,
+                            )
+                        else:
+                            attach_registry_metadata(list(search_results), trace=trace, limit=5)
+                            attach_github_metadata(list(search_results), trace=trace, limit=5)
+                        if search_session is not None:
+                            search_session.capture(
+                                problem=problem_stmt,
+                                queries=queries_tried,
+                                results=list(search_results),
+                                source_counts=getattr(search_results, "source_counts", {}),
+                                source_status=getattr(search_results, "source_status", {}),
+                            )
                     problem_alternatives = filter_relevant_alternatives(
                         problem_statement=problem_stmt,
                         candidate_repo_id=repo_id,
@@ -1216,7 +1370,9 @@ def _do_score_candidates(
                         client=relevance_client,
                         trace=trace,
                         candidate=candidate,
+                        skip_immature=True,
                     )
+                    skipped_alts = list(getattr(search_results, "skipped", []) or [])
                     trace.event(
                         agent_name="orchestrator",
                         action="ALTERNATIVES_VERIFIED",
@@ -1238,9 +1394,14 @@ def _do_score_candidates(
                         summary_limit=EVIDENCE_SUMMARY_LIMIT,
                     )
 
+                    _alt_seconds = round(time.perf_counter() - _alt_started, 2)
                     # Combined union of prior_art.csv rows and problem_alternatives
                     if facts_client is not None and problem_alternatives:
-                        problem_alternatives = [facts_client.fetch_alternative(r) for r in problem_alternatives]
+                        problem_alternatives = [
+                            row if row.get("metadata_status") else facts_client.fetch_alternative(row)
+                            for row in problem_alternatives
+                        ]
+                    _disc_started = time.perf_counter()
                     combined_priors = []
                     seen_alts = set()
                     for r in list(prior_for_repo or []) + list(problem_alternatives or []):
@@ -1259,6 +1420,8 @@ def _do_score_candidates(
                         source_counts=getattr(search_results, "source_counts", None),
                         insufficient_coverage=getattr(search_results, "insufficient_coverage", False),
                     )
+                    _stage_times["alternatives_seconds"] = _alt_seconds
+                    _stage_times["discovery_seconds"] = round(time.perf_counter() - _disc_started, 2)
                     verdict, reason = judged
                     judgement_evidence = list(getattr(judged, "evidence", []) or [])
                     must_beat = list(getattr(judged, "must_beat", []) or [])
@@ -1303,6 +1466,14 @@ def _do_score_candidates(
         if verdict == "CANDIDATE" and len(prior_for_repo) == 0:
             verdict = "NEEDS_PRIOR_ART"
             reason = "Zero alternatives checked in prior-art search."
+        if skipped_alts and len(prior_for_repo) == 0:
+            low = reason.casefold()
+            looked_empty = verdict in {"CANDIDATE", "NEEDS_PRIOR_ART"} or any(
+                phrase in low for phrase in ("zero alternative", "no prior art", "no competition")
+            )
+            if looked_empty:
+                verdict = "NEEDS_REVIEW"
+                reason = _skipped_reason(skipped_alts)
 
         if verdict not in {"ALREADY_EXISTS", "NEEDS_REVIEW"}:
             judgement_evidence = []
@@ -1315,7 +1486,8 @@ def _do_score_candidates(
             action="DISCOVERY_FILTER",
             input_summary={"repo_id": repo_id},
             output_summary=_discovery_output(
-                verdict, reason, evidence_mode, evidence=judgement_evidence, must_beat=must_beat
+                verdict, reason, evidence_mode, evidence=judgement_evidence, must_beat=must_beat,
+                skipped=skipped_alts,
             ),
             status="ok",
             summary_limit=EVIDENCE_SUMMARY_LIMIT,
@@ -1364,8 +1536,10 @@ def _do_score_candidates(
         cand_caps, meta_caps = extract_capabilities(candidate, client=relevance_client)
         fallback_caps = bool(meta_caps.get("fallback"))
         flags: list[str] = []
+        fallback_calls: list[str] = []
         if fallback_caps:
             flags.append("LLM_FALLBACK")
+            fallback_calls.append("capabilities")
         if relevance_client and repo_id in relevance_client.repo_mismatches:
             if "MODEL_MISMATCH" not in flags:
                 flags.append("MODEL_MISMATCH")
@@ -1445,16 +1619,24 @@ def _do_score_candidates(
                         status="LLM_FALLBACK",
                     )
             else:
-                trace.event(
-                    agent_name="venture_analyst",
-                    action="LLM_FALLBACK",
-                    input_summary={"repo_id": repo_id, "error": "LLM client not configured"},
-                    output_summary="Falling back to deterministic baseline analyst.",
-                    status="LLM_FALLBACK",
-                )
+                if relevance_client is not None and is_client_configured(relevance_client):
+                    # Discovery and the rescue plan use that client. The venture-analyst
+                    # scorer was not requested, so this is not a fallback of the plan.
+                    llm_success = True
+                else:
+                    trace.event(
+                        agent_name="venture_analyst",
+                        action="LLM_FALLBACK",
+                        input_summary={"repo_id": repo_id, "error": "LLM client not configured"},
+                        output_summary="Falling back to deterministic baseline analyst.",
+                        status="LLM_FALLBACK",
+                    )
+                    fallback_calls.append("venture_analyst")
 
             if not llm_success and "LLM_FALLBACK" not in flags:
                 flags.append("LLM_FALLBACK")
+                if "venture_analyst" not in fallback_calls:
+                    fallback_calls.append("venture_analyst")
 
         # Initial scorecard
         scorecard = Scorecard(
@@ -1570,6 +1752,7 @@ def _do_score_candidates(
                 "total": scorecard.total,
                 "feasibility": scorecard.feasibility_score,
                 "flags": flags,
+                "fallback_calls": fallback_calls,
                 "criteria": criteria_dict,
                 "capabilities": cand_caps,
                 "evidence": [
@@ -1679,6 +1862,42 @@ def _do_score_candidates(
             )
         except Exception:
             pass
+
+    # Durations sit in the sealed chain so a later reader can see where the wall time went.
+    trace.event(
+        agent_name="orchestrator",
+        action="STAGE_TIME",
+        input_summary={"stages": ["problem", "search"]},
+        output_summary={
+            "problem_seconds": _stage_times.get("problem_seconds", 0),
+            "search_seconds": _stage_times.get("search_seconds", 0),
+            "alternatives_seconds": _stage_times.get("alternatives_seconds", 0),
+            "discovery_seconds": _stage_times.get("discovery_seconds", 0),
+            "model_retries": int(getattr(relevance_client, "model_retries", 0) or 0),
+        },
+        status="ok",
+    )
+    if before_seal is not None:
+        # Rescue and any other post-verdict lines have to land before RUN_SEAL.
+        # A line after the seal breaks verify_trace.py.
+        before_seal(trace, candidates_output, ineligible_repos)
+
+    if search_session is not None:
+        rows = list(ineligible_repos) + list(candidates_output)
+        failed = any(
+            str(row.get("verdict") or "") == "UNJUDGED" or "PROBLEM_EXTRACTION_FAILED" in str(row.get("reason") or "")
+            for row in rows
+        )
+        if rows and not failed and (search_session.captured or search_session.replaying):
+            search_session.complete = True
+        if search_session.complete and head_commit:
+            from pro.osv import advisories_for_repo
+
+            advisories_for_repo(search_session.repo_id, commit=head_commit, session=search_session)
+        if search_session.complete:
+            search_session.finish(trace)
+        else:
+            search_session.discard()
 
     # 6. Seal trace
     run_hash = trace.seal()
@@ -1904,25 +2123,32 @@ def _evidence_mode(explicit: str | None) -> str:
     return mode
 
 
+def _skipped_reason(skipped: list[dict[str, str]]) -> str:
+    return f"{len(skipped)} alternatives were checked and none could block."
+
+
 def _discovery_output(
     verdict: str,
     reason: str,
     evidence_mode: str,
     evidence: list[dict[str, Any]] | None = None,
     must_beat: list[dict[str, Any]] | None = None,
+    skipped: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {"verdict": verdict, "reason": reason, "evidence_source": evidence_mode}
     if evidence is not None:
         payload["evidence"] = evidence
     if must_beat is not None:
         payload["must_beat"] = must_beat
+    if skipped:
+        payload["skipped"] = skipped
     return payload
 
 
 def _is_infra_failure(err: str) -> bool:
     """True when an LLM failure is infrastructure (5xx, 429, timeout, invalid JSON), not evidence."""
     low = str(err or "").lower()
-    return any(k in low for k in ("http 5", "http 429", "timed out", "timeout", "nightshift request", "invalid json", "exceeded total timeout"))
+    return any(k in low for k in ("http 5", "503", "http 429", "429", "timed out", "timeout", "nightshift request", "invalid json", "exceeded total timeout"))
 
 
 def main() -> int:

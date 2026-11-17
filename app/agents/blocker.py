@@ -308,11 +308,31 @@ def _mature(candidate: dict[str, Any], alternative: dict[str, Any]) -> tuple[boo
     official = bool(alternative.get("official") or alternative.get("commercial"))
     dated = _as_date(alternative.get("released_at")) is not None or _as_date(alternative.get("page_checked_at")) is not None
     pricing = bool(alternative.get("pricing_page") or alternative.get("free_tier"))
+    if alternative.get("registry_mature") is True:
+        return True, str(alternative.get("registry_reason") or "registry package has a recent release")
     if star_ok:
         return True, f"{stars} stars, at least half of the candidate's {cand}"
     if official and (dated or pricing) and classify_page(alternative) == "product":
         return True, "official or commercial product with a dated release or a pricing page"
-    return False, f"stars={stars}, candidate_stars={cand}, official={official}"
+    shown = "unknown" if stars is None else str(stars)
+    return False, f"stars={shown}, candidate_stars={cand}, official={official}"
+
+
+def block_obstacle(candidate: dict[str, Any], alternative: dict[str, Any], *, as_of: date) -> str:
+    """Why this alternative cannot block, before any overlap call. Empty when overlap is the open question."""
+
+    if alternative.get("archived") is True:
+        return "archived"
+    maintained, maintain_why = _maintained(alternative, as_of)
+    if not maintained:
+        return maintain_why
+    mature, mature_why = _mature(candidate, alternative)
+    if not mature:
+        return "not mature or official: " + mature_why
+    cand_free = candidate.get("free", True) is not False and candidate.get("self_hostable", True) is not False
+    if cand_free and not _licence_ok(alternative):
+        return "no permissive licence or free tier"
+    return ""
 
 
 def evaluate_blocker(candidate: dict[str, Any], alternative: dict[str, Any], *, as_of: date) -> dict[str, Any]:

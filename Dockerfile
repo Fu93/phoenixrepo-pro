@@ -21,8 +21,8 @@ COPY data/replays /app/data/replays
 RUN test -s /app/app/ui/index.html \
     && test -s /app/data/replays/manifest.json \
     && test -s /app/data/replays/invoice-already-exists/trace.jsonl
-RUN mkdir -p /app/logs /app/data/hmem /app/run_artifacts \
-    && chown -R phoenix:phoenix /app/logs /app/data/hmem /app/run_artifacts
+RUN mkdir -p /app/logs /app/data/hmem /app/run_artifacts /app/data/pro-runtime \
+    && chown -R phoenix:phoenix /app/logs /app/data/hmem /app/run_artifacts /app/data/pro-runtime
 USER phoenix
 
 EXPOSE 8000

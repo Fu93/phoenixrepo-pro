@@ -1,0 +1,844 @@
+{
+  "repo_id": "request/request",
+  "repo_url": "https://github.com/request/request",
+  "title": "request — judged live on 17 Nov, ALREADY_EXISTS (got)",
+  "verdict": "ALREADY_EXISTS",
+  "reason": "The deprecated request library's core capability as a simplified HTTP client is already provided by maintained free alternatives like got. Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-a55b).",
+  "quote": "Human-friendly and powerful HTTP request library for Node.js",
+  "alternatives": [
+    {
+      "name": "https://github.com/sindresorhus/got/",
+      "url": "https://github.com/sindresorhus/got/",
+      "overlap": "full",
+      "quote": "Human-friendly and powerful HTTP request library for Node.js",
+      "reason": "The deprecated request library's core capability as a simplified HTTP client is already provided by maintained free alternatives like got.",
+      "rubric": {
+        "same_core_job": true,
+        "same_input_output": true,
+        "same_target_user": true,
+        "covers_main_features": true
+      },
+      "quote_verified": true,
+      "blocked": true,
+      "state": "blocked"
+    },
+    {
+      "name": "sindresorhus/ky",
+      "url": "https://github.com/sindresorhus/ky",
+      "overlap": "full",
+      "quote": "Tiny & elegant JavaScript HTTP client based on the Fetch API",
+      "reason": "Ky is a tiny, elegant JavaScript HTTP client based on Fetch API that works in Node.js, providing simple HTTP calls with HTTPS and redirect support.",
+      "rubric": {
+        "same_core_job": true,
+        "same_input_output": true,
+        "same_target_user": true,
+        "covers_main_features": true
+      },
+      "quote_verified": true,
+      "blocked": false,
+      "state": "did_not_block"
+    }
+  ],
+  "skipped": [
+    {
+      "alternative": "request/request-promise",
+      "reason": "last update 2024-01-31 is 1021 days before 2026-11-17"
+    },
+    {
+      "alternative": "request/request-promise-native",
+      "reason": "last update 2023-05-05 is 1292 days before 2026-11-17"
+    },
+    {
+      "alternative": "kirinlabs/HttpRequest",
+      "reason": "last update 2025-05-23 is 543 days before 2026-11-17"
+    },
+    {
+      "alternative": "7eggs/node-druid-query",
+      "reason": "last update 2024-07-11 is 859 days before 2026-11-17"
+    },
+    {
+      "alternative": "mchaov/simple-sse-nodejs-setup",
+      "reason": "last update 2018-07-31 is 3031 days before 2026-11-17"
+    },
+    {
+      "alternative": "s-KaiNet/sp-request",
+      "reason": "last update 2024-07-06 is 864 days before 2026-11-17"
+    },
+    {
+      "alternative": "SegFaultx64/express-http-to-https",
+      "reason": "last update 2018-11-10 is 2929 days before 2026-11-17"
+    },
+    {
+      "alternative": "duniamay/installing-ionic-framework",
+      "reason": "last update 2021-02-10 is 2106 days before 2026-11-17"
+    },
+    {
+      "alternative": "bikashmaharana16/Ecommproject",
+      "reason": "last update 2021-07-03 is 1963 days before 2026-11-17"
+    },
+    {
+      "alternative": "saurabhmodh94/easyHTTP-library",
+      "reason": "last update 2018-01-04 is 3239 days before 2026-11-17"
+    },
+    {
+      "alternative": "web:https://github.com/node-fetch/node-fetch/",
+      "reason": "not mature or official: stars=8846, candidate_stars=25477, official=False"
+    }
+  ],
+  "problem": "Node.js developers struggle with the verbose and low-level built-in http/https modules when they just need a simple way to make HTTP calls with HTTPS support and automatic redirect following.",
+  "run_id": "run-74b14cc6c066",
+  "run_hash": "291bb148acb68b1fc9bfc2a37a14a4ef1755c4edb9b3f50c3a51f784620d405b",
+  "trace_file": "pro/examples/traces/live-request.jsonl",
+  "trace": [
+    {
+      "action": "evidence_source",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:05.848312+00:00",
+      "prev_hash": "",
+      "line_hash": "1aca91bdce8d21520c2d75b80f210120128de44423251eeb7e0a4b5f2b7065c7",
+      "canonical": "{\"action\":\"evidence_source\",\"agent_name\":\"gate1\",\"confidence\":null,\"event\":\"evidence_source\",\"input_summary\":\"{\\\"evidence_source\\\": \\\"csv\\\"}\",\"output_summary\":\"{\\\"evidence_source\\\": \\\"csv\\\", \\\"candidate_rows\\\": 1, \\\"prior_rows\\\": 0, \\\"demand_rows\\\": 0}\",\"prev_hash\":\"\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:05.848312+00:00\"}",
+      "detail": "{\"evidence_source\": \"csv\", \"candidate_rows\": 1, \"prior_rows\": 0, \"demand_rows\": 0}"
+    },
+    {
+      "action": "LLM_CALL",
+      "step": "problem",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:15.815953+00:00",
+      "prev_hash": "1aca91bdce8d21520c2d75b80f210120128de44423251eeb7e0a4b5f2b7065c7",
+      "line_hash": "96c73358f541b9ad8e732a5c589f3192f93ca3e8faddac53a6ddd4d32868d3ed",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"step\\\": \\\"problem\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"1aca91bdce8d21520c2d75b80f210120128de44423251eeb7e0a4b5f2b7065c7\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:15.815953+00:00\"}",
+      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
+    },
+    {
+      "action": "RESCUE_POTENTIAL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:15.816753+00:00",
+      "prev_hash": "96c73358f541b9ad8e732a5c589f3192f93ca3e8faddac53a6ddd4d32868d3ed",
+      "line_hash": "7db5e3ec4d2218c21b0d0f15dfa8a08cdc8896131d6019965023bb895aa5d6e4",
+      "canonical": "{\"action\":\"RESCUE_POTENTIAL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"RESCUE_POTENTIAL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\"}\",\"output_summary\":\"{\\\"score\\\": 31873.5, \\\"changes_verdict\\\": false, \\\"source\\\": \\\"github_api\\\", \\\"components\\\": {\\\"stars\\\": 25477, \\\"forks\\\": 3132, \\\"open_issues_count\\\": 145, \\\"external_breakage\\\": 2, \\\"staleness_days\\\": 825, \\\"stars_vs_staleness\\\": 940.02, \\\"ci_state\\\": \\\"no_ci\\\", \\\"ci_date\\\": null, \\\"dependabot_open\\\": 0, \\\"renovate_open\\\": 0}}\",\"prev_hash\":\"96c73358f541b9ad8e732a5c589f3192f93ca3e8faddac53a6ddd4d32868d3ed\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:15.816753+00:00\"}",
+      "detail": "{\"score\": 31873.5, \"changes_verdict\": false, \"source\": \"github_api\", \"components\": {\"stars\": 25477, \"forks\": 3132, \"open_issues_count\": 145, \"external_breakage\": 2, \"staleness_days\": 825, \"stars_vs_staleness\": 940.02, \"ci_state\": \"no_ci\", \""
+    },
+    {
+      "action": "PROBLEM_STATEMENT",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:15.816916+00:00",
+      "prev_hash": "7db5e3ec4d2218c21b0d0f15dfa8a08cdc8896131d6019965023bb895aa5d6e4",
+      "line_hash": "07f30cdc84a13a464119d6705e12b4a1b94752a5b5c3a0ec4303dd6b3d641d7e",
+      "canonical": "{\"action\":\"PROBLEM_STATEMENT\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PROBLEM_STATEMENT\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\"}\",\"output_summary\":\"{\\\"problem\\\": \\\"Node.js developers struggle with the verbose and low-level built-in http/https modules when they just need a simple way to make HTTP calls with HTTPS support and automatic redirect following.\\\", \\\"target_user\\\": \\\"Node.js developers building applications that need to make HTTP requests\\\", \\\"category\\\": \\\"developer-tools\\\", \\\"quotes\\\": [\\\"Simplified HTTP request client\\\", \\\"Request is designed to be the simplest way possible to make http calls\\\", \\\"It supports HTTPS and follows redirects by default\\\"], \\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\"}\",\"prev_hash\":\"7db5e3ec4d2218c21b0d0f15dfa8a08cdc8896131d6019965023bb895aa5d6e4\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:15.816916+00:00\"}",
+      "detail": "Node.js developers struggle with the verbose and low-level built-in http/https modules when they just need a simple way to make HTTP calls with HTTPS support and automatic redirect following."
+    },
+    {
+      "action": "QUERY_GENERATION",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:15.818056+00:00",
+      "prev_hash": "07f30cdc84a13a464119d6705e12b4a1b94752a5b5c3a0ec4303dd6b3d641d7e",
+      "line_hash": "db78c0ad7f4d9a9ee90b59ffb228b688097e2535f7137a8f17ce1456d8ca99e5",
+      "canonical": "{\"action\":\"QUERY_GENERATION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"QUERY_GENERATION\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\"}\",\"output_summary\":\"{\\\"queries\\\": [\\\"simple http client nodejs\\\", \\\"nodejs http request library\\\", \\\"best simple http client nodejs tools\\\", \\\"best nodejs http request library tools\\\", \\\"easy http calls javascript\\\", \\\"node https redirect client\\\"]}\",\"prev_hash\":\"07f30cdc84a13a464119d6705e12b4a1b94752a5b5c3a0ec4303dd6b3d641d7e\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:15.818056+00:00\"}",
+      "detail": "{\"queries\": [\"simple http client nodejs\", \"nodejs http request library\", \"best simple http client nodejs tools\", \"best nodejs http request library tools\", \"easy http calls javascript\", \"node https redirect client\"]}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:26:16.668117+00:00",
+      "prev_hash": "db78c0ad7f4d9a9ee90b59ffb228b688097e2535f7137a8f17ce1456d8ca99e5",
+      "line_hash": "9517f82670322b391487aef91bb0e25dba5ecd62d7f38d619a0a67dc8708a8e0",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"request/request\\\", \\\"path\\\": \\\"pyproject.toml\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/request/request/contents/pyproject.toml\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"db78c0ad7f4d9a9ee90b59ffb228b688097e2535f7137a8f17ce1456d8ca99e5\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:16.668117+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/request/reque"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:26:17.329007+00:00",
+      "prev_hash": "9517f82670322b391487aef91bb0e25dba5ecd62d7f38d619a0a67dc8708a8e0",
+      "line_hash": "d2edaef8d9403ec9ffdc18a054b5d04235c34f779f8ca6e3e37aaea56131267c",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"request/request\\\", \\\"path\\\": \\\"setup.py\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/request/request/contents/setup.py\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"9517f82670322b391487aef91bb0e25dba5ecd62d7f38d619a0a67dc8708a8e0\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:17.329007+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/request/reque"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:26:18.180993+00:00",
+      "prev_hash": "d2edaef8d9403ec9ffdc18a054b5d04235c34f779f8ca6e3e37aaea56131267c",
+      "line_hash": "cf9b434771d7fec1fbe562e71d06be8bb973b717b7c0b005a368e964f5910ee9",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"request/request\\\", \\\"path\\\": \\\"setup.cfg\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/request/request/contents/setup.cfg\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"d2edaef8d9403ec9ffdc18a054b5d04235c34f779f8ca6e3e37aaea56131267c\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:18.180993+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/request/reque"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:18.901930+00:00",
+      "prev_hash": "cf9b434771d7fec1fbe562e71d06be8bb973b717b7c0b005a368e964f5910ee9",
+      "line_hash": "120ba15060ac5a7a2316f6464f38a729a9ed93672600cad518490c39c114d571",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"request/request\\\", \\\"path\\\": \\\"package.json\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/request/request/contents/package.json\\\", \\\"sha256\\\": \\\"e930f1e08e29e7e60e9d4fe58d5b97afe055c17adc63d1b8677b3926198b7ad3\\\"}\",\"prev_hash\":\"cf9b434771d7fec1fbe562e71d06be8bb973b717b7c0b005a368e964f5910ee9\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:18.901930+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/request/request/contents/package.json\", \"sha256\": \"e930f1e08e29e7e60e9d4fe58d5b97afe055c17adc63d1b8677b3926198b7ad3\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:26:19.695956+00:00",
+      "prev_hash": "120ba15060ac5a7a2316f6464f38a729a9ed93672600cad518490c39c114d571",
+      "line_hash": "05e0f70ad3145a53066aeaad46b115cb8f5b6cc14859075de16148f22b3816ed",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"file\\\", \\\"repo\\\": \\\"request/request\\\", \\\"path\\\": \\\"Cargo.toml\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/request/request/contents/Cargo.toml\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"120ba15060ac5a7a2316f6464f38a729a9ed93672600cad518490c39c114d571\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:19.695956+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-repository-content\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/request/reque"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:19.704874+00:00",
+      "prev_hash": "05e0f70ad3145a53066aeaad46b115cb8f5b6cc14859075de16148f22b3816ed",
+      "line_hash": "fa50c2dab7b28bead7744d9eeef963151b55be22f4f370dd82ae4aa8bd8d8ba1",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"nodejs http request library\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=nodejs+http+request+library\\\", \\\"sha256\\\": \\\"944014485153508f76ed0eb63d5887fbfb000e0a158814ecc5973ce954a96cec\\\"}\",\"prev_hash\":\"05e0f70ad3145a53066aeaad46b115cb8f5b6cc14859075de16148f22b3816ed\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:19.704874+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=nodejs+http+request+library\", \"sha256\": \"944014485153508f76ed0eb63d5887fbfb000e0a158814ecc5973ce954a96cec\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:19.705193+00:00",
+      "prev_hash": "fa50c2dab7b28bead7744d9eeef963151b55be22f4f370dd82ae4aa8bd8d8ba1",
+      "line_hash": "89c54fb56d672dc333edaee5cbe861329c0e1a7cc912dcab860e7dd87992e12e",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"simple http client nodejs\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=simple+http+client+nodejs\\\", \\\"sha256\\\": \\\"f3aa4c728c5004b5373041cdc72fdb6929c870192cc09d98541fd7d5ac599cf7\\\"}\",\"prev_hash\":\"fa50c2dab7b28bead7744d9eeef963151b55be22f4f370dd82ae4aa8bd8d8ba1\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:19.705193+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=simple+http+client+nodejs\", \"sha256\": \"f3aa4c728c5004b5373041cdc72fdb6929c870192cc09d98541fd7d5ac599cf7\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:19.705472+00:00",
+      "prev_hash": "89c54fb56d672dc333edaee5cbe861329c0e1a7cc912dcab860e7dd87992e12e",
+      "line_hash": "019d58730ca6f25c1d4795dd2c3096408cc138d37ff09f87656f76428fed71b4",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"best simple http client nodejs tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=best+simple+http+client+nodejs+tools\\\", \\\"sha256\\\": \\\"aa9bc061aafd47ddd06f30b5c16a17700c65036c6031c131fdc10bfb5dd60f35\\\"}\",\"prev_hash\":\"89c54fb56d672dc333edaee5cbe861329c0e1a7cc912dcab860e7dd87992e12e\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:19.705472+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=best+simple+http+client+nodejs+tools\", \"sha256\": \"aa9bc061aafd47ddd06f30b5c16a17700c65036c6031c131fdc10bfb5dd60f35\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:19.705778+00:00",
+      "prev_hash": "019d58730ca6f25c1d4795dd2c3096408cc138d37ff09f87656f76428fed71b4",
+      "line_hash": "a143f826aab5159372f146cf49024bd66b0e757b5833211c34500d26f1736506",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"best nodejs http request library tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=best+nodejs+http+request+library+tools\\\", \\\"sha256\\\": \\\"30149e3628322526b878d339656cbbc356032de8c673db1b9b66baab821f0cb2\\\"}\",\"prev_hash\":\"019d58730ca6f25c1d4795dd2c3096408cc138d37ff09f87656f76428fed71b4\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:19.705778+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=best+nodejs+http+request+library+tools\", \"sha256\": \"30149e3628322526b878d339656cbbc356032de8c673db1b9b66baab821f0cb2\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:19.708358+00:00",
+      "prev_hash": "a143f826aab5159372f146cf49024bd66b0e757b5833211c34500d26f1736506",
+      "line_hash": "913c8c4521925feb70752bb69c2dee471848102e675331b69f5c6842cc29c49b",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"easy http calls javascript\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=easy+http+calls+javascript\\\", \\\"sha256\\\": \\\"158c6d13663709d0ec5e75bdfce70aab2f5a21b5644863af16a6c4281b1603ae\\\"}\",\"prev_hash\":\"a143f826aab5159372f146cf49024bd66b0e757b5833211c34500d26f1736506\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:19.708358+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=easy+http+calls+javascript\", \"sha256\": \"158c6d13663709d0ec5e75bdfce70aab2f5a21b5644863af16a6c4281b1603ae\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:20.934752+00:00",
+      "prev_hash": "913c8c4521925feb70752bb69c2dee471848102e675331b69f5c6842cc29c49b",
+      "line_hash": "a7f67ab7b2c353023ee7fc55e0aeb1f746c5888b2235ea3cbdd93952b9ee812e",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"web_search\\\", \\\"args\\\": {\\\"query\\\": \\\"node https redirect client\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://mcp.exa.ai/mcp?q=node+https+redirect+client\\\", \\\"sha256\\\": \\\"61af46e620389f16bf48cb8c578d6b53eb3a88e82b8a913d5286a30a341787a7\\\"}\",\"prev_hash\":\"913c8c4521925feb70752bb69c2dee471848102e675331b69f5c6842cc29c49b\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:20.934752+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://mcp.exa.ai/mcp?q=node+https+redirect+client\", \"sha256\": \"61af46e620389f16bf48cb8c578d6b53eb3a88e82b8a913d5286a30a341787a7\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:22.011432+00:00",
+      "prev_hash": "a7f67ab7b2c353023ee7fc55e0aeb1f746c5888b2235ea3cbdd93952b9ee812e",
+      "line_hash": "26aa2030cc5b518aa3f815e6b9cc5d189d3bcd25500c2ad4d36f5b569ad78798",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"simple http client nodejs\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=simple+http+client+nodejs&per_page=5\\\", \\\"sha256\\\": \\\"37412e4d9f80058a82ce105d0a49349fe2185caa750bb9a9fa3305df9149679d\\\"}\",\"prev_hash\":\"a7f67ab7b2c353023ee7fc55e0aeb1f746c5888b2235ea3cbdd93952b9ee812e\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:22.011432+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=simple+http+client+nodejs&per_page=5\", \"sha256\": \"37412e4d9f80058a82ce105d0a49349fe2185caa750bb9a9fa3305df9149679d\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:22.013721+00:00",
+      "prev_hash": "26aa2030cc5b518aa3f815e6b9cc5d189d3bcd25500c2ad4d36f5b569ad78798",
+      "line_hash": "04e6e6a7dc61c479e1c70bfee90eb5fb0f7ee5ae560b2be166e3f087a706bcde",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"simple http client nodejs\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=simple+http+client+nodejs\\\", \\\"sha256\\\": \\\"f49c5556fad296e9b6af89a81ddfc57bf11f5f17366e7f1c2c36d3781cbc0cd2\\\"}\",\"prev_hash\":\"26aa2030cc5b518aa3f815e6b9cc5d189d3bcd25500c2ad4d36f5b569ad78798\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:22.013721+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=simple+http+client+nodejs\", \"sha256\": \"f49c5556fad296e9b6af89a81ddfc57bf11f5f17366e7f1c2c36d3781cbc0cd2\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:23.193860+00:00",
+      "prev_hash": "04e6e6a7dc61c479e1c70bfee90eb5fb0f7ee5ae560b2be166e3f087a706bcde",
+      "line_hash": "409d5e2cd0c73a97d4a00a9c1fca1b67d06a3e842f18b5aff27c8bcff4f4046d",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"nodejs http request library\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=nodejs+http+request+library&per_page=5\\\", \\\"sha256\\\": \\\"18a22c5819ba52c2bef900885c380c027d17a92314c35c6f0ee1ed6ed102e0c1\\\"}\",\"prev_hash\":\"04e6e6a7dc61c479e1c70bfee90eb5fb0f7ee5ae560b2be166e3f087a706bcde\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:23.193860+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=nodejs+http+request+library&per_page=5\", \"sha256\": \"18a22c5819ba52c2bef900885c380c027d17a92314c35c6f0ee1ed6ed102e0c1\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:23.196946+00:00",
+      "prev_hash": "409d5e2cd0c73a97d4a00a9c1fca1b67d06a3e842f18b5aff27c8bcff4f4046d",
+      "line_hash": "a9bce26659ff2965f72347fcc526970ba7866d20bfed2a76ff28481dcfb1d2e6",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"nodejs http request library\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=nodejs+http+request+library\\\", \\\"sha256\\\": \\\"67c7f45eb71225770801adc972cb895eb5523890d85783354ec8d25efbb9c776\\\"}\",\"prev_hash\":\"409d5e2cd0c73a97d4a00a9c1fca1b67d06a3e842f18b5aff27c8bcff4f4046d\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:23.196946+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=nodejs+http+request+library\", \"sha256\": \"67c7f45eb71225770801adc972cb895eb5523890d85783354ec8d25efbb9c776\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:24.246674+00:00",
+      "prev_hash": "a9bce26659ff2965f72347fcc526970ba7866d20bfed2a76ff28481dcfb1d2e6",
+      "line_hash": "5172acc5a79e0b80daccc525543534a1f4a38d1df18488bea05dbfe7ca76430b",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"best simple http client nodejs tools\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=best+simple+http+client+nodejs+tools&per_page=5\\\", \\\"sha256\\\": \\\"6aead2d259a2cf921eed16d3f65bef0dcafd9ed86dba153c61703378f97f8e84\\\"}\",\"prev_hash\":\"a9bce26659ff2965f72347fcc526970ba7866d20bfed2a76ff28481dcfb1d2e6\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:24.246674+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=best+simple+http+client+nodejs+tools&per_page=5\", \"sha256\": \"6aead2d259a2cf921eed16d3f65bef0dcafd9ed86dba153c61703378f97f8e84\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:24.250087+00:00",
+      "prev_hash": "5172acc5a79e0b80daccc525543534a1f4a38d1df18488bea05dbfe7ca76430b",
+      "line_hash": "7b9cd3775840b5ea8c1631cb08e6f45da87736910cb4ef9678b0bd7719c483a4",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"npm\\\", \\\"args\\\": {\\\"action\\\": \\\"search\\\", \\\"query\\\": \\\"best simple http client nodejs tools\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://registry.npmjs.org/-/v1/search?text=best+simple+http+client+nodejs+tools\\\", \\\"sha256\\\": \\\"d5ea4664f1fdfb8a77110caefea7ef6f6ab06a25e4b15d11911354eb326a564c\\\"}\",\"prev_hash\":\"5172acc5a79e0b80daccc525543534a1f4a38d1df18488bea05dbfe7ca76430b\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:24.250087+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://registry.npmjs.org/-/v1/search?text=best+simple+http+client+nodejs+tools\", \"sha256\": \"d5ea4664f1fdfb8a77110caefea7ef6f6ab06a25e4b15d11911354eb326a564c\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:25.209514+00:00",
+      "prev_hash": "7b9cd3775840b5ea8c1631cb08e6f45da87736910cb4ef9678b0bd7719c483a4",
+      "line_hash": "20c4de68b8d36312046ae88f0608a198d55c5502e60e00409dd3166d8cc6abf2",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"best nodejs http request library tools\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=best+nodejs+http+request+library+tools&per_page=5\\\", \\\"sha256\\\": \\\"a37d093253c3edb543652a20d8f93cbc9c3f34c70850c2dacabb007a32260c9a\\\"}\",\"prev_hash\":\"7b9cd3775840b5ea8c1631cb08e6f45da87736910cb4ef9678b0bd7719c483a4\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:25.209514+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=best+nodejs+http+request+library+tools&per_page=5\", \"sha256\": \"a37d093253c3edb543652a20d8f93cbc9c3f34c70850c2dacabb007a32260c9a\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:26.233425+00:00",
+      "prev_hash": "20c4de68b8d36312046ae88f0608a198d55c5502e60e00409dd3166d8cc6abf2",
+      "line_hash": "5a2a0214a7465429b9a18f948dff32aaf77a41c8947c4f33e262929d316f172e",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"easy http calls javascript\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=easy+http+calls+javascript&per_page=5\\\", \\\"sha256\\\": \\\"a425ec9a0e2b3ca87a2352b5d95b6975494e5804fd06b4122497619fca456b5f\\\"}\",\"prev_hash\":\"20c4de68b8d36312046ae88f0608a198d55c5502e60e00409dd3166d8cc6abf2\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:26.233425+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=easy+http+calls+javascript&per_page=5\", \"sha256\": \"a425ec9a0e2b3ca87a2352b5d95b6975494e5804fd06b4122497619fca456b5f\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:27.368759+00:00",
+      "prev_hash": "5a2a0214a7465429b9a18f948dff32aaf77a41c8947c4f33e262929d316f172e",
+      "line_hash": "708ebf15ef4e275dc210fda552de6556f6179f10642181a897f5815d6628518e",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"repositories\\\", \\\"query\\\": \\\"node https redirect client\\\", \\\"per_page\\\": 5}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/search/repositories?q=node+https+redirect+client&per_page=5\\\", \\\"sha256\\\": \\\"df74da00018a9038a3bf637001ccd24483da5c32d99129896b1142010b5ffff9\\\"}\",\"prev_hash\":\"5a2a0214a7465429b9a18f948dff32aaf77a41c8947c4f33e262929d316f172e\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:27.368759+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/search/repositories?q=node+https+redirect+client&per_page=5\", \"sha256\": \"df74da00018a9038a3bf637001ccd24483da5c32d99129896b1142010b5ffff9\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:28.251373+00:00",
+      "prev_hash": "708ebf15ef4e275dc210fda552de6556f6179f10642181a897f5815d6628518e",
+      "line_hash": "3da04f71eeeb271b351920e21e8b6e5e154cd07f95e6f6b8047fedeb7e909655",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"mchaov/simple-sse-nodejs-setup\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/mchaov/simple-sse-nodejs-setup/readme\\\", \\\"sha256\\\": \\\"fe17318bb8b962c9ace899e4cc509e46282bbb7d697e76b399ee72ce77a042b3\\\"}\",\"prev_hash\":\"708ebf15ef4e275dc210fda552de6556f6179f10642181a897f5815d6628518e\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:28.251373+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/mchaov/simple-sse-nodejs-setup/readme\", \"sha256\": \"fe17318bb8b962c9ace899e4cc509e46282bbb7d697e76b399ee72ce77a042b3\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:29.092674+00:00",
+      "prev_hash": "3da04f71eeeb271b351920e21e8b6e5e154cd07f95e6f6b8047fedeb7e909655",
+      "line_hash": "e09047077d4698fadcc970cb58070cf578ce97987bc9cf7057e4a6928e8db8d7",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"bikashmaharana16/Ecommproject\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/bikashmaharana16/Ecommproject/readme\\\", \\\"sha256\\\": \\\"6d4e6d83b392c524d667eb9ddf517a52ba0953361ae666aadb5f1ecdb54b3040\\\"}\",\"prev_hash\":\"3da04f71eeeb271b351920e21e8b6e5e154cd07f95e6f6b8047fedeb7e909655\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:29.092674+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/bikashmaharana16/Ecommproject/readme\", \"sha256\": \"6d4e6d83b392c524d667eb9ddf517a52ba0953361ae666aadb5f1ecdb54b3040\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:30.061434+00:00",
+      "prev_hash": "e09047077d4698fadcc970cb58070cf578ce97987bc9cf7057e4a6928e8db8d7",
+      "line_hash": "a1762a2ade339df27465680e9788e182e090f644365a030bdb9caa0ab45fb738",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"duniamay/installing-ionic-framework\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/duniamay/installing-ionic-framework/readme\\\", \\\"sha256\\\": \\\"ed36feed3396fe2d8548778779ae9fe1ad0044e29f95f95183c5003ec621d36c\\\"}\",\"prev_hash\":\"e09047077d4698fadcc970cb58070cf578ce97987bc9cf7057e4a6928e8db8d7\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:30.061434+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/duniamay/installing-ionic-framework/readme\", \"sha256\": \"ed36feed3396fe2d8548778779ae9fe1ad0044e29f95f95183c5003ec621d36c\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "GitHub HTTP 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\",\"status\":\"404\"}",
+      "timestamp": "2026-11-17T18:26:30.884684+00:00",
+      "prev_hash": "a1762a2ade339df27465680e9788e182e090f644365a030bdb9caa0ab45fb738",
+      "line_hash": "1dcce80eabfece75b555bd2d87c381ca229cf20814a296f0e9be1d696c90f8b4",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"saurabhmodh94/easyHTTP-library\\\"}}\",\"output_summary\":\"{\\\"ok\\\": false, \\\"error\\\": \\\"GitHub HTTP 404: {\\\\\\\"message\\\\\\\":\\\\\\\"Not Found\\\\\\\",\\\\\\\"documentation_url\\\\\\\":\\\\\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\\\\\",\\\\\\\"status\\\\\\\":\\\\\\\"404\\\\\\\"}\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/saurabhmodh94/easyHTTP-library/readme\\\", \\\"sha256\\\": \\\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\\"}\",\"prev_hash\":\"a1762a2ade339df27465680e9788e182e090f644365a030bdb9caa0ab45fb738\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\",\\\"status\\\":\\\"404\\\"}\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:30.884684+00:00\"}",
+      "detail": "{\"ok\": false, \"error\": \"GitHub HTTP 404: {\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/contents#get-a-repository-readme\\\",\\\"status\\\":\\\"404\\\"}\", \"source_url\": \"https://api.github.com/repos/saurabhmodh9"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:31.805013+00:00",
+      "prev_hash": "1dcce80eabfece75b555bd2d87c381ca229cf20814a296f0e9be1d696c90f8b4",
+      "line_hash": "8fa24a4f5ea5e5ee221f3dfb4d6e864b603ac13a22fead0c9e72ffa96abcc762",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"SegFaultx64/express-http-to-https\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/SegFaultx64/express-http-to-https/readme\\\", \\\"sha256\\\": \\\"375c5eb225e9b2bff198e68466795e7b743de0009d3922d83665b42ffb102822\\\"}\",\"prev_hash\":\"1dcce80eabfece75b555bd2d87c381ca229cf20814a296f0e9be1d696c90f8b4\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:31.805013+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/SegFaultx64/express-http-to-https/readme\", \"sha256\": \"375c5eb225e9b2bff198e68466795e7b743de0009d3922d83665b42ffb102822\"}"
+    },
+    {
+      "action": "TOOL_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:32.838360+00:00",
+      "prev_hash": "8fa24a4f5ea5e5ee221f3dfb4d6e864b603ac13a22fead0c9e72ffa96abcc762",
+      "line_hash": "6b955b8c0748fc360fea20523c4eb4613d0c69f23f73c8e7fd91ae14ce8c24aa",
+      "canonical": "{\"action\":\"TOOL_CALL\",\"agent_name\":\"toolbox\",\"confidence\":null,\"event\":\"TOOL_CALL\",\"input_summary\":\"{\\\"tool\\\": \\\"github\\\", \\\"args\\\": {\\\"action\\\": \\\"readme\\\", \\\"repo\\\": \\\"7eggs/node-druid-query\\\"}}\",\"output_summary\":\"{\\\"ok\\\": true, \\\"error\\\": \\\"\\\", \\\"source_url\\\": \\\"https://api.github.com/repos/7eggs/node-druid-query/readme\\\", \\\"sha256\\\": \\\"aad676561f98370a7f7f3a6b09da08968b07301560ffc3102ed230f643c9f0ba\\\"}\",\"prev_hash\":\"8fa24a4f5ea5e5ee221f3dfb4d6e864b603ac13a22fead0c9e72ffa96abcc762\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:32.838360+00:00\"}",
+      "detail": "{\"ok\": true, \"error\": \"\", \"source_url\": \"https://api.github.com/repos/7eggs/node-druid-query/readme\", \"sha256\": \"aad676561f98370a7f7f3a6b09da08968b07301560ffc3102ed230f643c9f0ba\"}"
+    },
+    {
+      "action": "PRIOR_ART_SEARCH",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:32.839697+00:00",
+      "prev_hash": "6b955b8c0748fc360fea20523c4eb4613d0c69f23f73c8e7fd91ae14ce8c24aa",
+      "line_hash": "228b4c245d142c4797acce1464a3b384d318e5478b089bdfaee292c10eb31a30",
+      "canonical": "{\"action\":\"PRIOR_ART_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PRIOR_ART_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"queries\\\": [\\\"simple http client nodejs\\\", \\\"nodejs http request library\\\", \\\"best simple http client nodejs tools\\\", \\\"best nodejs http request library tools\\\", \\\"easy http calls javascript\\\", \\\"node https redirect client\\\"]}\",\"output_summary\":\"{\\\"total_results\\\": 15, \\\"source_counts\\\": {\\\"github\\\": 6, \\\"npm\\\": 0, \\\"pypi\\\": 0, \\\"web\\\": 9}, \\\"source_status\\\": {\\\"github\\\": \\\"ok\\\", \\\"npm\\\": \\\"ok\\\", \\\"web\\\": \\\"ok\\\"}}\",\"prev_hash\":\"6b955b8c0748fc360fea20523c4eb4613d0c69f23f73c8e7fd91ae14ce8c24aa\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:32.839697+00:00\"}",
+      "detail": "{\"total_results\": 15, \"source_counts\": {\"github\": 6, \"npm\": 0, \"pypi\": 0, \"web\": 9}, \"source_status\": {\"github\": \"ok\", \"npm\": \"ok\", \"web\": \"ok\"}}"
+    },
+    {
+      "action": "STABLE_SEARCH",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:33.958605+00:00",
+      "prev_hash": "228b4c245d142c4797acce1464a3b384d318e5478b089bdfaee292c10eb31a30",
+      "line_hash": "be03162c71fc97b4b6f28ba7e0486743c0afb9e776aed6a23df5d49a039cabde",
+      "canonical": "{\"action\":\"STABLE_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STABLE_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"query\\\": \\\"Simplified HTTP request client\\\", \\\"commit\\\": \\\"3c0cddc7c8eb60b470e9519da85896ed7ee0081e\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"count\\\": 4, \\\"repos\\\": [\\\"request/request-promise\\\", \\\"request/request-promise-native\\\", \\\"kirinlabs/HttpRequest\\\", \\\"s-KaiNet/sp-request\\\"]}\",\"prev_hash\":\"228b4c245d142c4797acce1464a3b384d318e5478b089bdfaee292c10eb31a30\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:33.958605+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"count\": 4, \"repos\": [\"request/request-promise\", \"request/request-promise-native\", \"kirinlabs/HttpRequest\", \"s-KaiNet/sp-request\"]}"
+    },
+    {
+      "action": "STABLE_SEARCH",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:34.939522+00:00",
+      "prev_hash": "be03162c71fc97b4b6f28ba7e0486743c0afb9e776aed6a23df5d49a039cabde",
+      "line_hash": "ebe7bccfa5759db956e02c0903c7dd44b9be4a57eaffbd9bafbe164cdf91e1e8",
+      "canonical": "{\"action\":\"STABLE_SEARCH\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STABLE_SEARCH\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"query\\\": \\\"HTTP request client stars:>=50 fork:false\\\", \\\"commit\\\": \\\"3c0cddc7c8eb60b470e9519da85896ed7ee0081e\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"count\\\": 4, \\\"repos\\\": [\\\"psf/requests\\\", \\\"sindresorhus/ky\\\", \\\"cfug/dio\\\", \\\"request/request-promise\\\"]}\",\"prev_hash\":\"be03162c71fc97b4b6f28ba7e0486743c0afb9e776aed6a23df5d49a039cabde\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:34.939522+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"count\": 4, \"repos\": [\"psf/requests\", \"sindresorhus/ky\", \"cfug/dio\", \"request/request-promise\"]}"
+    },
+    {
+      "action": "GITHUB_METADATA",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:35.650996+00:00",
+      "prev_hash": "ebe7bccfa5759db956e02c0903c7dd44b9be4a57eaffbd9bafbe164cdf91e1e8",
+      "line_hash": "4167442288740071e62a6a9e284bff5268def2f6dded751ef7ee907fc1dbc8ac",
+      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"node-fetch/node-fetch\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 8846, \\\"pushed_at\\\": \\\"2026-05-12T09:33:16Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"ebe7bccfa5759db956e02c0903c7dd44b9be4a57eaffbd9bafbe164cdf91e1e8\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:35.650996+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"stars\": 8846, \"pushed_at\": \"2026-05-12T09:33:16Z\", \"archived\": false}"
+    },
+    {
+      "action": "GITHUB_METADATA",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:36.414796+00:00",
+      "prev_hash": "4167442288740071e62a6a9e284bff5268def2f6dded751ef7ee907fc1dbc8ac",
+      "line_hash": "1137ea398e2c0bc0cc2b09f4fc84feb4a7b5603cddf8de1e9c4c446d2d33dec3",
+      "canonical": "{\"action\":\"GITHUB_METADATA\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GITHUB_METADATA\",\"input_summary\":\"{\\\"repo\\\": \\\"sindresorhus/got\\\"}\",\"output_summary\":\"{\\\"status\\\": \\\"ok\\\", \\\"stars\\\": 14964, \\\"pushed_at\\\": \\\"2026-10-30T08:46:04Z\\\", \\\"archived\\\": false}\",\"prev_hash\":\"4167442288740071e62a6a9e284bff5268def2f6dded751ef7ee907fc1dbc8ac\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:36.414796+00:00\"}",
+      "detail": "{\"status\": \"ok\", \"stars\": 14964, \"pushed_at\": \"2026-10-30T08:46:04Z\", \"archived\": false}"
+    },
+    {
+      "action": "ALTERNATIVES_SKIPPED",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:26:36.417215+00:00",
+      "prev_hash": "1137ea398e2c0bc0cc2b09f4fc84feb4a7b5603cddf8de1e9c4c446d2d33dec3",
+      "line_hash": "99e9bf6016a221a7fd50333c41c002e41c1a50c0963bccf9b18caa31b0fb67fa",
+      "canonical": "{\"action\":\"ALTERNATIVES_SKIPPED\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVES_SKIPPED\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"count\\\": 11}\",\"output_summary\":\"{\\\"skipped\\\": [{\\\"alternative\\\": \\\"request/request-promise\\\", \\\"reason\\\": \\\"last update 2024-01-31 is 1021 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"request/request-promise-native\\\", \\\"reason\\\": \\\"last update 2023-05-05 is 1292 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"kirinlabs/HttpRequest\\\", \\\"reason\\\": \\\"last update 2025-05-23 is 543 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"7eggs/node-druid-query\\\", \\\"reason\\\": \\\"last update 2024-07-11 is 859 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"mchaov/simple-sse-nodejs-setup\\\", \\\"reason\\\": \\\"last update 2018-07-31 is 3031 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"s-KaiNet/sp-request\\\", \\\"reason\\\": \\\"last update 2024-07-06 is 864 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"SegFaultx64/express-http-to-https\\\", \\\"reason\\\": \\\"last update 2018-11-10 is 2929 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"duniamay/installing-ionic-framework\\\", \\\"reason\\\": \\\"last update 2021-02-10 is 2106 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"bikashmaharana16/Ecommproject\\\", \\\"reason\\\": \\\"last update 2021-07-03 is 1963 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"saurabhmodh94/easyHTTP-library\\\", \\\"reason\\\": \\\"last update 2018-01-04 is 3239 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/node-fetch/node-fetch/\\\", \\\"reason\\\": \\\"not mature or official: stars=8846, candidate_stars=25477, official=False\\\"}]}\",\"prev_hash\":\"1137ea398e2c0bc0cc2b09f4fc84feb4a7b5603cddf8de1e9c4c446d2d33dec3\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:26:36.417215+00:00\"}",
+      "detail": "{\"skipped\": [{\"alternative\": \"request/request-promise\", \"reason\": \"last update 2024-01-31 is 1021 days before 2026-11-17\"}, {\"alternative\": \"request/request-promise-native\", \"reason\": \"last update 2023-05-05 is 1292 days before 2026-11-17\"}"
+    },
+    {
+      "action": "LLM_CALL",
+      "step": "alternative_batch",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:12.681605+00:00",
+      "prev_hash": "99e9bf6016a221a7fd50333c41c002e41c1a50c0963bccf9b18caa31b0fb67fa",
+      "line_hash": "ebc008565f091a09b0e979a9f42099820623610f934e7df619f86b0905ba0207",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"step\\\": \\\"alternative_batch\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"99e9bf6016a221a7fd50333c41c002e41c1a50c0963bccf9b18caa31b0fb67fa\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:12.681605+00:00\"}",
+      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
+    },
+    {
+      "action": "ALTERNATIVE_BATCH_CALL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:12.681850+00:00",
+      "prev_hash": "ebc008565f091a09b0e979a9f42099820623610f934e7df619f86b0905ba0207",
+      "line_hash": "d7dfd916f6344243d47a890dfbf2658cb583467183b58c6330099eda3cb3c35c",
+      "canonical": "{\"action\":\"ALTERNATIVE_BATCH_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVE_BATCH_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"indexes\\\": [0, 1, 2, 3], \\\"alternative\\\": null, \\\"chunk_index\\\": 0}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"parsed_indexes\\\": [0, 1, 2, 3], \\\"reason\\\": null, \\\"chunk_index\\\": 0}\",\"prev_hash\":\"ebc008565f091a09b0e979a9f42099820623610f934e7df619f86b0905ba0207\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:12.681850+00:00\"}",
+      "detail": "{\"requested_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"served_model\": \"nvidia/nemotron-3-ultra-550b-a55b\", \"parsed_indexes\": [0, 1, 2, 3], \"reason\": null, \"chunk_index\": 0}"
+    },
+    {
+      "action": "ALTERNATIVES_VERIFIED",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:12.682727+00:00",
+      "prev_hash": "d7dfd916f6344243d47a890dfbf2658cb583467183b58c6330099eda3cb3c35c",
+      "line_hash": "b3a22d1dadce9c352c2d89655a5d26f8589904d0f0ac9e4fcf76231d8def5e8b",
+      "canonical": "{\"action\":\"ALTERNATIVES_VERIFIED\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"ALTERNATIVES_VERIFIED\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"searched\\\": 15}\",\"output_summary\":\"{\\\"alternatives\\\": [{\\\"alternative_id\\\": \\\"sindresorhus/ky\\\", \\\"url\\\": \\\"https://github.com/sindresorhus/ky\\\", \\\"source\\\": \\\"github\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"Ky is a tiny, elegant JavaScript HTTP client based on Fetch API that works in Node.js, providing simple HTTP calls with HTTPS and redirect support.\\\", \\\"quotes\\\": [\\\"Tiny & elegant JavaScript HTTP client based on the Fetch API\\\"]}, {\\\"alternative_id\\\": \\\"web:https://github.com/sindresorhus/got/\\\", \\\"url\\\": \\\"https://github.com/sindresorhus/got/\\\", \\\"source\\\": \\\"web\\\", \\\"overlap\\\": \\\"full\\\", \\\"reason\\\": \\\"Got is a human-friendly and powerful HTTP request library specifically for Node.js, directly addressing the same problem.\\\", \\\"quotes\\\": [\\\"Human-friendly and powerful HTTP request library for Node.js\\\"]}]}\",\"prev_hash\":\"d7dfd916f6344243d47a890dfbf2658cb583467183b58c6330099eda3cb3c35c\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:12.682727+00:00\"}",
+      "detail": "{\"alternatives\": [{\"alternative_id\": \"sindresorhus/ky\", \"url\": \"https://github.com/sindresorhus/ky\", \"source\": \"github\", \"overlap\": \"full\", \"reason\": \"Ky is a tiny, elegant JavaScript HTTP client based on Fetch API that works in Node.js, pr"
+    },
+    {
+      "action": "LLM_CALL",
+      "step": "discovery",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:23.219149+00:00",
+      "prev_hash": "b3a22d1dadce9c352c2d89655a5d26f8589904d0f0ac9e4fcf76231d8def5e8b",
+      "line_hash": "a7316714bdd55e043a15c21cbae7a48cde450df64f125e314a98c5917bb1f295",
+      "canonical": "{\"action\":\"LLM_CALL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"LLM_CALL\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"step\\\": \\\"discovery\\\"}\",\"output_summary\":\"{\\\"requested_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"served_model\\\": \\\"nvidia/nemotron-3-ultra-550b-a55b\\\", \\\"provider\\\": \\\"nvidia-direct\\\"}\",\"prev_hash\":\"b3a22d1dadce9c352c2d89655a5d26f8589904d0f0ac9e4fcf76231d8def5e8b\",\"requested_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"served_model\":\"nvidia/nemotron-3-ultra-550b-a55b\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:23.219149+00:00\"}",
+      "detail": "nvidia/nemotron-3-ultra-550b-a55b nvidia-direct"
+    },
+    {
+      "action": "GATE_DECISION",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:23.219755+00:00",
+      "prev_hash": "a7316714bdd55e043a15c21cbae7a48cde450df64f125e314a98c5917bb1f295",
+      "line_hash": "f732a36df37a11a51d8ca0d70e8cb4672060c5909a2192e20dd311fbd48b905d",
+      "canonical": "{\"action\":\"GATE_DECISION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"GATE_DECISION\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\"}\",\"output_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"raw_verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"named_alternative\\\": {\\\"id\\\": \\\"web:https://github.com/sindresorhus/got/\\\", \\\"url\\\": \\\"https://github.com/sindresorhus/got/\\\", \\\"title\\\": \\\"\\\"}, \\\"gate_alternative\\\": {\\\"id\\\": \\\"web:https://github.com/sindresorhus/got/\\\", \\\"url\\\": \\\"https://github.com/sindresorhus/got/\\\", \\\"title\\\": \\\"\\\"}, \\\"gate\\\": {\\\"applied\\\": true, \\\"outcome\\\": \\\"passed\\\", \\\"checks\\\": {\\\"A\\\": \\\"pass\\\", \\\"B\\\": \\\"pass\\\", \\\"C\\\": \\\"pass\\\", \\\"D\\\": \\\"pass\\\", \\\"E\\\": \\\"pass\\\"}, \\\"failed\\\": [], \\\"fail_reasons\\\": {}, \\\"shortcut\\\": null, \\\"role\\\": \\\"block\\\", \\\"blocks\\\": true}, \\\"final_verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"path\\\": \\\"gate-pass\\\", \\\"coverage_override\\\": false}\",\"prev_hash\":\"a7316714bdd55e043a15c21cbae7a48cde450df64f125e314a98c5917bb1f295\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:23.219755+00:00\"}",
+      "detail": "{\"repo_id\": \"request/request\", \"raw_verdict\": \"ALREADY_EXISTS\", \"named_alternative\": {\"id\": \"web:https://github.com/sindresorhus/got/\", \"url\": \"https://github.com/sindresorhus/got/\", \"title\": \"\"}, \"gate_alternative\": {\"id\": \"web:https://git"
+    },
+    {
+      "action": "DISCOVERY_FILTER",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:23.219906+00:00",
+      "prev_hash": "f732a36df37a11a51d8ca0d70e8cb4672060c5909a2192e20dd311fbd48b905d",
+      "line_hash": "d74f208cb11ded70b74cd1e841d4e54bc95da0e5581ad7a2e3e11640ef8a4b9a",
+      "canonical": "{\"action\":\"DISCOVERY_FILTER\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"DISCOVERY_FILTER\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\"}\",\"output_summary\":\"{\\\"verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"reason\\\": \\\"The deprecated request library's core capability as a simplified HTTP client is already provided by maintained free alternatives like got. Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia/nemotron-3-ultra-550b-a55b).\\\", \\\"evidence_source\\\": \\\"csv\\\", \\\"evidence\\\": [{\\\"alternative\\\": \\\"web:https://github.com/sindresorhus/got/\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"Human-friendly and powerful HTTP request library for Node.js\\\", \\\"reason\\\": \\\"The deprecated request library's core capability as a simplified HTTP client is already provided by maintained free alternatives like got.\\\", \\\"rubric\\\": {\\\"same_core_job\\\": true, \\\"same_input_output\\\": true, \\\"same_target_user\\\": true, \\\"covers_main_features\\\": true}}], \\\"must_beat\\\": [{\\\"alternative\\\": \\\"sindresorhus/ky\\\", \\\"overlap\\\": \\\"full\\\", \\\"quote\\\": \\\"Tiny & elegant JavaScript HTTP client based on the Fetch API\\\", \\\"reason\\\": \\\"Ky is a tiny, elegant JavaScript HTTP client based on Fetch API that works in Node.js, providing simple HTTP calls with HTTPS and redirect support.\\\", \\\"rubric\\\": {\\\"same_core_job\\\": true, \\\"same_input_output\\\": true, \\\"same_target_user\\\": true, \\\"covers_main_features\\\": true}}], \\\"skipped\\\": [{\\\"alternative\\\": \\\"request/request-promise\\\", \\\"reason\\\": \\\"last update 2024-01-31 is 1021 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"request/request-promise-native\\\", \\\"reason\\\": \\\"last update 2023-05-05 is 1292 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"kirinlabs/HttpRequest\\\", \\\"reason\\\": \\\"last update 2025-05-23 is 543 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"7eggs/node-druid-query\\\", \\\"reason\\\": \\\"last update 2024-07-11 is 859 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"mchaov/simple-sse-nodejs-setup\\\", \\\"reason\\\": \\\"last update 2018-07-31 is 3031 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"s-KaiNet/sp-request\\\", \\\"reason\\\": \\\"last update 2024-07-06 is 864 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"SegFaultx64/express-http-to-https\\\", \\\"reason\\\": \\\"last update 2018-11-10 is 2929 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"duniamay/installing-ionic-framework\\\", \\\"reason\\\": \\\"last update 2021-02-10 is 2106 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"bikashmaharana16/Ecommproject\\\", \\\"reason\\\": \\\"last update 2021-07-03 is 1963 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"saurabhmodh94/easyHTTP-library\\\", \\\"reason\\\": \\\"last update 2018-01-04 is 3239 days before 2026-11-17\\\"}, {\\\"alternative\\\": \\\"web:https://github.com/node-fetch/node-fetch/\\\", \\\"reason\\\": \\\"not mature or official: stars=8846, candidate_stars=25477, official=False\\\"}]}\",\"prev_hash\":\"f732a36df37a11a51d8ca0d70e8cb4672060c5909a2192e20dd311fbd48b905d\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:23.219906+00:00\"}",
+      "detail": "ALREADY_EXISTS The deprecated request library's core capability as a simplified HTTP client is already provided by maintained free alternatives like got. Method: llm+verified quote (requested=nvidia/nemotron-3-ultra-550b-a55b, served=nvidia"
+    },
+    {
+      "action": "PROTAGONIST_SELECTION",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:23.220125+00:00",
+      "prev_hash": "d74f208cb11ded70b74cd1e841d4e54bc95da0e5581ad7a2e3e11640ef8a4b9a",
+      "line_hash": "ae748202e29168ce0101e612e76ad7f1d6a4cf38df08cfdd060b4dd6b97ec34a",
+      "canonical": "{\"action\":\"PROTAGONIST_SELECTION\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"PROTAGONIST_SELECTION\",\"input_summary\":\"{\\\"candidate_count\\\": 0}\",\"output_summary\":\"{\\\"repo_id\\\": null, \\\"total\\\": 0.0, \\\"feasibility\\\": 0, \\\"reason\\\": \\\"No candidates provided.\\\"}\",\"prev_hash\":\"d74f208cb11ded70b74cd1e841d4e54bc95da0e5581ad7a2e3e11640ef8a4b9a\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:23.220125+00:00\"}",
+      "detail": "{\"repo_id\": null, \"total\": 0.0, \"feasibility\": 0, \"reason\": \"No candidates provided.\"}"
+    },
+    {
+      "action": "HMEM_VERDICT_MEMORY",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:23.225455+00:00",
+      "prev_hash": "ae748202e29168ce0101e612e76ad7f1d6a4cf38df08cfdd060b4dd6b97ec34a",
+      "line_hash": "bd6304f578b0c1f8eabc4633a60e87535e176fd4fba265345d7a6d6fa99f6a74",
+      "canonical": "{\"action\":\"HMEM_VERDICT_MEMORY\",\"agent_name\":\"hmem\",\"confidence\":null,\"event\":\"HMEM_VERDICT_MEMORY\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\"}\",\"output_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"verdict\\\": \\\"ALREADY_EXISTS\\\", \\\"memory_id\\\": \\\"mem-fc97d9230e80\\\", \\\"remembered_before\\\": [], \\\"verdict_changed\\\": false, \\\"note\\\": \\\"First verdict H-MEM holds for this repository.\\\"}\",\"prev_hash\":\"ae748202e29168ce0101e612e76ad7f1d6a4cf38df08cfdd060b4dd6b97ec34a\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:23.225455+00:00\"}",
+      "detail": "{\"repo_id\": \"request/request\", \"verdict\": \"ALREADY_EXISTS\", \"memory_id\": \"mem-fc97d9230e80\", \"remembered_before\": [], \"verdict_changed\": false, \"note\": \"First verdict H-MEM holds for this repository.\"}"
+    },
+    {
+      "action": "STAGE_TIME",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:23.225632+00:00",
+      "prev_hash": "bd6304f578b0c1f8eabc4633a60e87535e176fd4fba265345d7a6d6fa99f6a74",
+      "line_hash": "4586844de66315a41e7c59b276f955f2639af1c8440a49324056ac7525ad2f28",
+      "canonical": "{\"action\":\"STAGE_TIME\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"STAGE_TIME\",\"input_summary\":\"{\\\"stages\\\": [\\\"problem\\\", \\\"search\\\"]}\",\"output_summary\":\"{\\\"problem_seconds\\\": 9.93, \\\"search_seconds\\\": 13.14, \\\"alternatives_seconds\\\": 39.84, \\\"discovery_seconds\\\": 10.54, \\\"model_retries\\\": 0}\",\"prev_hash\":\"bd6304f578b0c1f8eabc4633a60e87535e176fd4fba265345d7a6d6fa99f6a74\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:23.225632+00:00\"}",
+      "detail": "problem 9.93s, search 13.14s, alternatives 39.84s, discovery 10.54s"
+    },
+    {
+      "action": "SEARCH_SNAPSHOT",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:23.449506+00:00",
+      "prev_hash": "4586844de66315a41e7c59b276f955f2639af1c8440a49324056ac7525ad2f28",
+      "line_hash": "45a8c9534d18e6abac572605da3861abaadad467ad885d18c4a6812cf2ab593d",
+      "canonical": "{\"action\":\"SEARCH_SNAPSHOT\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"SEARCH_SNAPSHOT\",\"input_summary\":\"{\\\"repo_id\\\": \\\"request/request\\\", \\\"commit\\\": \\\"3c0cddc7c8eb60b470e9519da85896ed7ee0081e\\\"}\",\"output_summary\":\"{\\\"snapshot_sha256\\\": \\\"8bab56576d3206901943b06b414dbe9907bddb2c085fedc4ba0d1bd8f018bed7\\\", \\\"refreshed\\\": false, \\\"records\\\": 33, \\\"model_calls\\\": 3}\",\"prev_hash\":\"4586844de66315a41e7c59b276f955f2639af1c8440a49324056ac7525ad2f28\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:23.449506+00:00\"}",
+      "detail": "{\"snapshot_sha256\": \"8bab56576d3206901943b06b414dbe9907bddb2c085fedc4ba0d1bd8f018bed7\", \"refreshed\": false, \"records\": 33, \"model_calls\": 3}"
+    },
+    {
+      "action": "RUN_SEAL",
+      "step": "",
+      "status": "ok",
+      "timestamp": "2026-11-17T18:27:23.449772+00:00",
+      "prev_hash": "45a8c9534d18e6abac572605da3861abaadad467ad885d18c4a6812cf2ab593d",
+      "line_hash": "291bb148acb68b1fc9bfc2a37a14a4ef1755c4edb9b3f50c3a51f784620d405b",
+      "canonical": "{\"action\":\"RUN_SEAL\",\"agent_name\":\"orchestrator\",\"confidence\":null,\"event\":\"RUN_SEAL\",\"input_summary\":\"{\\\"prev_hash\\\": \\\"45a8c9534d18e6abac572605da3861abaadad467ad885d18c4a6812cf2ab593d\\\"}\",\"output_summary\":\"Final run hash is this line's line_hash.\",\"prev_hash\":\"45a8c9534d18e6abac572605da3861abaadad467ad885d18c4a6812cf2ab593d\",\"retry_count\":0,\"run_id\":\"run-74b14cc6c066\",\"status\":\"ok\",\"target_agent\":null,\"timestamp\":\"2026-11-17T18:27:23.449772+00:00\"}",
+      "detail": "Run seal. The line hash is the run hash."
+    }
+  ],
+  "rescue": null,
+  "rescue_note": "A rescue plan is written only for a worth-reviving verdict, and it is sealed with the trace.",
+  "injection": {
+    "detected": false,
+    "neutralised": false,
+    "count": 0,
+    "findings": []
+  },
+  "provider": "nvidia",
+  "source": "recorded-live-judge",
+  "source_note": "Judged live on 2026-11-17 on build 9763a0d, hosted NVIDIA path, cold run. A replay from the sealed snapshot gave the same verdict, blocker, candidate list and rescue text. The snapshot is stored with this example. Packed with scripts/pro_add_live_example.py --snapshot.",
+  "demo": true,
+  "model_calls": 3,
+  "commit": "3c0cddc7c8eb60b470e9519da85896ed7ee0081e",
+  "snapshot_sha256": "8bab56576d3206901943b06b414dbe9907bddb2c085fedc4ba0d1bd8f018bed7",
+  "snapshot_refreshed": false,
+  "human_label": {},
+  "osv": [
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "aws-sign2",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "aws4",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "caseless",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "combined-stream",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "extend",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "forever-agent",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "form-data",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "har-validator",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "http-signature",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "is-typedarray",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "isstream",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "json-stringify-safe",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "mime-types",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "oauth-sign",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "performance-now",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "qs",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "safe-buffer",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "tough-cookie",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "tunnel-agent",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "uuid",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "bluebird",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "browserify",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "browserify-istanbul",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "buffer-equal",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "codecov",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "coveralls",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "function-bind",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "karma",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "karma-browserify",
+      "note": "version unknown",
+      "version": ""
+    },
+    {
+      "ecosystem": "npm",
+      "ids": [],
+      "name": "karma-cli",
+      "note": "version unknown",
+      "version": ""
+    }
+  ],
+  "plain_reason": "A maintained alternative already does this job. The quote was found in that alternative's own text.",
+  "quote_verified": true,
+  "responsibility": {
+    "model_decides": [
+      "What the repository's problem and user are, in the problem step.",
+      "Whether a found alternative is the same job, and at what overlap.",
+      "A draft rescue plan, when gate 1 has already returned CANDIDATE and a model call is still allowed."
+    ],
+    "code_decides": [
+      "A quote is kept only when quote_in_text finds it in the cited text.",
+      "A full-overlap alternative blocks only when the maturity and licence checks also pass. A failed check is recorded under must-beat and does not block.",
+      "BUDGET_EXHAUSTED cannot produce CANDIDATE. A search that stops early is NEEDS_REVIEW or UNJUDGED.",
+      "Prompt-injection spans in a README are removed before the text is stored for the model.",
+      "The trace hash. Each line's line_hash is SHA-256 of the canonical JSON body, and the next line's prev_hash must equal it.",
+      "The per-run model-call cap and the daily run caps. A cache hit spends neither."
+    ],
+    "injection": {
+      "detected": false,
+      "neutralised": false,
+      "count": 0,
+      "findings": []
+    },
+    "limitations": [
+      "A verified quote shows those words were in the cited text. It does not show that the alternative is a good product, or that the verdict is the one a human would write.",
+      "The scored set had four false passes: CANDIDATE where the human label's only acceptable verdict was ALREADY_EXISTS (Invoice generator, ScrapeServ, raindrop-wordpress-linkblog-sync, go-file-sync). They are listed in docs/JUDGES.md.",
+      "The hash chain shows the recorded lines were not edited after sealing. It does not show the lines are true.",
+      "A Gemini fallback is not a Nemotron answer. The trace flags MODEL_MISMATCH when the served id is outside nvidia/nemotron-*.",
+      "On a free Render service the result cache lives on an ephemeral disk and is empty after a restart or spin-down."
+    ],
+    "verify": [
+      "On the trace page, Verify hashes each canonical line with SHA-256 in the browser and checks that each prev_hash equals the previous line_hash.",
+      "Tamper edits a copy of one line in the browser. The committed file is not written.",
+      "From a checkout: python scripts/verify_trace.py TRACE --expected-run-hash HASH"
+    ],
+    "run_hash": "291bb148acb68b1fc9bfc2a37a14a4ef1755c4edb9b3f50c3a51f784620d405b",
+    "trace_file": "pro/examples/traces/live-request.jsonl"
+  },
+  "id": "live-request",
+  "cached": true,
+  "recorded_on": "2026-11-17",
+  "snapshot_file": "pro/examples/snapshots/live-request.snapshot.json"
+}

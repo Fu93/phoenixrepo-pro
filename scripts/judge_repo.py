@@ -9,11 +9,13 @@ evidence report. It never uses the repository's own stars or forks as evidence o
 from __future__ import annotations
 
 import argparse
+import contextvars
 import csv
 import json
 import re
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -34,6 +36,9 @@ DEMAND_HEADER = "repo_id,signal_id,kind,url,excerpt,metric_name,metric_value,com
 _URL_RE = re.compile(r"^(?:https?://)?(?:www\.)?github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+?)(?:\.git)?/?(?:[#?].*)?$")
 
 
+_github_cache: contextvars.ContextVar[dict | None] = contextvars.ContextVar("phoenix_github_cache", default=None)
+
+
 class JudgeError(RuntimeError):
     """The repository could not be turned into a judgeable row. The message says why."""
 
@@ -50,6 +55,10 @@ def parse_repo_url(url: str) -> str:
 def _get(url: str, token: str, accept: str = "application/vnd.github+json") -> Any:
     from app.github_auth import mark_unauthorized, token_usable
 
+    cache = _github_cache.get()
+    key = (url, accept, bool(token))
+    if cache is not None and key in cache:
+        return cache[key]
     headers = {"Accept": accept, "User-Agent": "phoenixrepo-judge"}
     if token_usable(token):
         headers["Authorization"] = f"Bearer {token}"
@@ -62,10 +71,20 @@ def _get(url: str, token: str, accept: str = "application/vnd.github+json") -> A
             # An expired token: GitHub refuses even public data. Mark it and ask once without it.
             mark_unauthorized(token)
             return _get(url, token, accept)
+        if exc.code in (403, 429):
+            raise JudgeError(
+                "GitHub rate limit reached. Anonymous access allows about 60 requests an hour. "
+                "Set GITHUB_TOKEN and try again."
+            ) from exc
+        if exc.code == 404 and "/repos/" in url and "/contents" not in url and "/readme" not in url and "/git/" not in url and "/commits/" not in url:
+            raise JudgeError("repository not found") from exc
         raise JudgeError(f"GitHub returned HTTP {exc.code} for {url.split('?')[0]}") from exc
     except (urllib.error.URLError, TimeoutError) as exc:
         raise JudgeError(f"could not reach GitHub: {exc}") from exc
-    return body.decode("utf-8", errors="replace") if accept.endswith("raw") else json.loads(body)
+    parsed = body.decode("utf-8", errors="replace") if accept.endswith("raw") else json.loads(body)
+    if cache is not None:
+        cache[key] = parsed
+    return parsed
 
 
 def fetch_repo(full_name: str, token: str | None = None, getter=_get) -> dict[str, Any]:
@@ -134,10 +153,39 @@ def write_snapshot(row: dict[str, str], directory: Path) -> Path:
     return directory
 
 
-def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None) -> dict[str, Any]:
+def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None, plan_rescue: bool = False, commit: str = "", refresh_search: bool = False, toolbox=None) -> dict[str, Any]:
     """Judge one repository. Returns {repo_id, verdict, reason, run_id, run_hash, report}."""
+    from app.agents.search_snapshot import bind, open_snapshot, reset, wrap_github
+
     full_name = parse_repo_url(url)
-    collected_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    session = open_snapshot(full_name, commit, refresh=refresh_search) if commit else None
+    snap_token = bind(session)
+    if session is not None:
+        getter = wrap_github(session, getter)
+    cache_token = _github_cache.set({})
+    try:
+        judged = _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue, commit, toolbox)
+        if session is not None and session.sealed_hash:
+            judged["snapshot_sha256"] = session.sealed_hash
+            judged["snapshot_refreshed"] = session.refreshed
+        return judged
+    finally:
+        if session is not None:
+            session.close()
+        reset(snap_token)
+        _github_cache.reset(cache_token)
+
+
+def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue=False, commit="", toolbox=None):
+    from app.agents.search_snapshot import current_session
+
+    session = current_session()
+    if session is not None and session.replaying and session.collected_at:
+        collected_at = session.collected_at
+    else:
+        collected_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        if session is not None:
+            session.collected_at = collected_at
     fetched = fetch_repo(full_name, getter=getter)
     row = build_row(fetched, collected_at)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
@@ -161,10 +209,38 @@ def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: s
             # function just wrote, and the trace records evidence_source=csv.
             evidence_source="csv",
         )
+        rescue_plans: list[dict] = []
         if scorer is None:
+            score_kwargs["head_commit"] = commit
+            score_kwargs["stable_getter"] = getter
+            if toolbox is not None:
+                score_kwargs["custom_toolbox"] = toolbox
             from app.agents.repo_facts import RepoFactsClient
 
             score_kwargs["facts_client"] = RepoFactsClient(cache_dir=snap / ".cache" / "repo_facts")
+            if relevance_client is not None:
+                score_kwargs["relevance_client"] = relevance_client
+            if plan_rescue and relevance_client is not None:
+                def _before_seal(trace, candidates, _ineligible):
+                    from app.rescue_plan import build_plan
+
+                    for row in candidates or []:
+                        if str(row.get("verdict") or "") != "CANDIDATE":
+                            continue
+                        started = time.perf_counter()
+                        try:
+                            rescue_plans.append(build_plan(row, client=relevance_client, trace=trace, use_llm=True))
+                        except Exception as exc:  # noqa: BLE001 — the verdict is already decided
+                            rescue_plans.append({"error": f"{type(exc).__name__}: {exc}"})
+                        trace.event(
+                            agent_name="orchestrator",
+                            action="STAGE_TIME",
+                            input_summary={"stage": "rescue"},
+                            output_summary={"rescue_seconds": round(time.perf_counter() - started, 2)},
+                            status="ok",
+                        )
+
+                score_kwargs["before_seal"] = _before_seal
             results = score_candidates.score_all(**score_kwargs)
         else:
             results = scorer(**score_kwargs)
@@ -202,6 +278,7 @@ def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: s
         "served_models": {row["served_model"]: row["calls"] for row in model_rows},
         "answers_used": used,
         "answers_by_nemotron": by_nemotron,
+        "rescue_plans": rescue_plans if plan_rescue else [],
     }
 
 
@@ -211,9 +288,14 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--no-llm", action="store_true", help="Plumbing test only: skip the LLM judgement.")
     ap.add_argument("--run-id", default=None)
+    ap.add_argument("--commit", default="", help="Head commit. With this set, search is sealed and replayed.")
+    ap.add_argument("--refresh-search", action="store_true", help="Record a new search snapshot for this commit.")
     args = ap.parse_args()
     try:
-        res = judge(args.url, out_dir=args.out, use_llm=not args.no_llm, run_id=args.run_id)
+        res = judge(
+            args.url, out_dir=args.out, use_llm=not args.no_llm, run_id=args.run_id,
+            commit=args.commit, refresh_search=args.refresh_search,
+        )
     except JudgeError as exc:
         sys.stderr.write(f"cannot judge: {exc}\n")
         return 2

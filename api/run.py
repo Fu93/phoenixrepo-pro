@@ -5,16 +5,29 @@ import os
 import uvicorn
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 
 from app.errors import InvestigationError
 from app.investigation import InvestigationOrchestrator
 from config.settings import Settings
 from config.versions import INVESTIGATION_VERSION, PIPELINE_VERSION
+from pro.api import router as pro_router
 from schemas.input import RunRequest
 from schemas.output import RunResponse
 
-app = FastAPI(title="PhoenixRepo", version=INVESTIGATION_VERSION)
+def hosted_mode() -> bool:
+    return os.environ.get("PHOENIX_HOSTED", "").strip().lower() in {"1", "true", "yes"}
+
+
+_HOSTED = hosted_mode()
+app = FastAPI(
+    title="PhoenixRepo",
+    version=INVESTIGATION_VERSION,
+    docs_url=None if _HOSTED else "/docs",
+    redoc_url=None if _HOSTED else "/redoc",
+    openapi_url=None if _HOSTED else "/openapi.json",
+)
+app.include_router(pro_router)
 
 
 def get_settings() -> Settings:
@@ -22,8 +35,27 @@ def get_settings() -> Settings:
 
 
 @app.get("/health")
+def health_legacy():
+    if hosted_mode():
+        return RedirectResponse("/healthz", status_code=307)
+    return _health_body()
+
+
+@app.get("/healthz")
 def health() -> dict:
+    return _health_body()
+
+
+def _health_body() -> dict:
     settings = get_settings()
+    if hosted_mode():
+        from pro.hosted import provider_mode
+
+        return {
+            "status": "ok",
+            "service": "phoenixrepo-pro",
+            "llm_provider": provider_mode(settings),
+        }
     provider = "sample-standin" if settings.sample_mode else settings.llm_provider
     return {
         "status": "ok",
@@ -36,8 +68,20 @@ def health() -> dict:
     }
 
 
+def _hidden_when_hosted():
+    if hosted_mode():
+        return JSONResponse(
+            status_code=404,
+            content={"error": {"type": "NotFound", "message": "Not available on the hosted site."}},
+        )
+    return None
+
+
 @app.post("/run", response_model=RunResponse)
 def run(request: RunRequest):
+    hidden = _hidden_when_hosted()
+    if hidden is not None:
+        return hidden
     settings = get_settings()
     if request.mode == "live" and settings.sample_mode:
         return JSONResponse(
@@ -90,6 +134,9 @@ def _nightshift_token_configured(settings: Settings) -> bool:
 
 @app.post("/judge")
 def judge_endpoint(request: JudgeRequest):
+    hidden = _hidden_when_hosted()
+    if hidden is not None:
+        return hidden
     """Judge one repository when a Nightshift token is configured.
 
     With no token this returns HTTP 503 and does not call the judge, so no
@@ -122,10 +169,24 @@ def judge_endpoint(request: JudgeRequest):
         return JSONResponse(status_code=502, content={"error": {"type": "LLMUnavailable", "message": str(exc)}})
 
 
+@app.get("/")
+def pro_home():
+    """PhoenixRepo Pro. The recorded replay page stays at /ui."""
+
+    from pro.api import ui_response
+
+    return ui_response()
+
+
 @app.get("/ui")
 def replay_ui():
-    """Static replay page. No build step and no external assets."""
+    """Static replay page. No build step and no external assets.
 
+    A hosted deploy sends people to PhoenixRepo Pro. Local checkouts keep /ui.
+    """
+
+    if hosted_mode():
+        return RedirectResponse("/pro", status_code=307)
     from app.replay_ui import ui_path
 
     return FileResponse(ui_path(), media_type="text/html; charset=utf-8")
@@ -133,6 +194,9 @@ def replay_ui():
 
 @app.get("/api/replays")
 def list_replays():
+    hidden = _hidden_when_hosted()
+    if hidden is not None:
+        return hidden
     from app.replay_ui import catalog
 
     return catalog()
