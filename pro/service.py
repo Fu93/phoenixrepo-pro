@@ -231,7 +231,11 @@ class ProService:
             time.sleep(0.05)
 
     def snapshot_file(self, result_id: str) -> Path:
-        return self.results / f"{_safe_id(result_id)}.snapshot.json"
+        ident = _safe_id(result_id)
+        live = self.results / f"{ident}.snapshot.json"
+        if live.is_file():
+            return live
+        return self.examples.directory / "snapshots" / f"{ident}.snapshot.json"
 
     def get_result(self, result_id: str) -> dict[str, Any]:
         example = self.examples.get(result_id)
@@ -581,7 +585,7 @@ class ProService:
                 "snapshot_sha256": str(judged.get("snapshot_sha256") or ""),
                 "snapshot_refreshed": bool(judged.get("snapshot_refreshed")),
                 "human_label": {},
-                "osv": _osv(job.repo_id),
+                "osv": _osv(job.repo_id, job.commit),
             }
         )
 
@@ -607,15 +611,14 @@ class ProService:
         return result
 
     def _copy_snapshot(self, result: dict[str, Any], ident: str) -> None:
-        from app.agents.search_snapshot import load_snapshot
+        from app.agents.search_snapshot import snapshot_path
 
-        doc = load_snapshot(str(result.get("repo_id") or ""), str(result.get("commit") or ""))
-        if not doc:
+        source = snapshot_path(str(result.get("repo_id") or ""), str(result.get("commit") or ""))
+        if not source.is_file():
             return
         try:
-            (self.results / f"{ident}.snapshot.json").write_text(
-                json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8",
-            )
+            self.results.mkdir(parents=True, exist_ok=True)
+            (self.results / f"{ident}.snapshot.json").write_bytes(source.read_bytes())
         except OSError:
             pass
 
@@ -676,11 +679,18 @@ def read_trace_events(job: Job, seen: int) -> tuple[list[dict[str, Any]], int]:
     return fresh, seen + len(fresh)
 
 
-def _osv(repo_id: str) -> list:
+def _osv(repo_id: str, commit: str = "") -> list:
     try:
+        from app.agents.search_snapshot import load_snapshot
+
+        if commit:
+            saved = load_snapshot(repo_id, commit)
+            if isinstance(saved, dict) and isinstance(saved.get("osv"), dict):
+                rows = saved["osv"].get("advisories")
+                return list(rows) if isinstance(rows, list) else []
         from pro.osv import advisories_for_repo
 
-        return advisories_for_repo(repo_id)
+        return advisories_for_repo(repo_id, commit=commit)
     except Exception:
         return []
 

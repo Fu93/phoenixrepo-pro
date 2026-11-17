@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import random
 import threading
 import time
 from typing import Any
@@ -103,7 +104,8 @@ class HostedRelevanceClient(RelevanceClient):
         self.providers_used: list[str] = []
         self.parallel_batches = True
         self.alternative_batch_size = 4
-        self.retry_backoff = 1.0
+        self.retry_backoff = 0.5
+        self.model_retries = 0
         self._trace_lock = threading.Lock()
         self._pace = shared_pace()
 
@@ -194,12 +196,15 @@ class HostedRelevanceClient(RelevanceClient):
     def _call_nvidia(self, messages: list[dict[str, str]], model: str, step: str = "") -> tuple[str, str]:
         last: Exception | None = None
         timeout = call_timeout(step, float(self.wall_clock_timeout or 45))
-        for attempt in range(2):
+        deadline = time.monotonic() + max(1.0, timeout)
+        for attempt in range(3):
+            if time.monotonic() >= deadline:
+                break
             client = NvidiaDirect(
                 api_key=self._nvidia_key,
                 base_url=self.nvidia_base_url or DEFAULT_BASE_URL,
                 model=model,
-                timeout_seconds=timeout,
+                timeout_seconds=max(1.0, deadline - time.monotonic()),
                 max_tokens=int(self.max_tokens),
                 transport=self._nvidia_transport,
             )
@@ -207,10 +212,17 @@ class HostedRelevanceClient(RelevanceClient):
                 text = client.complete(messages, model=model)
             except NvidiaError as exc:
                 last = exc
-                if attempt == 0 and _retryable(str(exc)):
-                    time.sleep(self.retry_backoff)
-                    continue
-                raise
+                status = getattr(exc, "status_code", None)
+                if attempt == 2 or not _retryable(str(exc), status):
+                    raise
+                delay = self.retry_backoff * (2 ** attempt)
+                delay *= 0.75 + (random.random() * 0.5)
+                if time.monotonic() + delay >= deadline:
+                    raise
+                self.model_retries += 1
+                if delay > 0:
+                    time.sleep(delay)
+                continue
             served = client.last_served_model or ""
             return text, served
         raise RelevanceLLMError(f"hosted model call failed: {last}")
@@ -285,9 +297,11 @@ def call_timeout(step: str, default: float) -> float:
     return float(default or 90)
 
 
-def _retryable(message: str) -> bool:
+def _retryable(message: str, status: int | None = None) -> bool:
+    if status in {429, 503}:
+        return True
     text = message.casefold()
-    return "429" in text or "timed out" in text
+    return "429" in text or "503" in text or "timed out" in text
 
 
 def build_hosted_client(settings: Settings, **kwargs) -> HostedRelevanceClient:

@@ -124,7 +124,9 @@ class SnapshotSession:
         source_status: dict[str, str] | None = None,
         search_events: list[dict[str, str]] | None = None,
         captured: bool = False,
+        complete: bool = False,
         rescue: Any = None,
+        osv: Any = None,
     ) -> None:
         self.repo_id = repo_id
         self.commit = commit
@@ -141,7 +143,9 @@ class SnapshotSession:
         self.source_status = dict(source_status or {})
         self.search_events = list(search_events or [])
         self.captured = captured
+        self.complete = complete
         self.rescue = rescue
+        self.osv = osv
         self.replaying = replaying
         self.live_calls = 0
         self.blocked = 0
@@ -200,9 +204,11 @@ class SnapshotSession:
         return {
             "captured": self.captured,
             "collected_at": self.collected_at,
+            "complete": self.complete,
             "commit": self.commit,
             "fetched_at": self.fetched_at,
             "model_calls": self.model_calls,
+            "osv": self.osv,
             "problem": self.problem,
             "queries": self.queries,
             "records": self.records,
@@ -251,11 +257,25 @@ class SnapshotSession:
     def seal(self, trace: Any | None) -> str:
         return self.finish(trace)
 
+    def discard(self) -> None:
+        """A failed run must not become the snapshot the next run replays."""
+
+        self._finished = True
+        self.sealed_hash = ""
+        self.complete = False
+        try:
+            if self.path.is_file():
+                self.path.unlink()
+        except OSError:
+            pass
+
     def close(self) -> None:
         if self._finished:
             return
-        if self.captured or self.records or self.model_calls:
+        if self.complete:
             self.finish(None)
+        else:
+            self.discard()
 
     def model_get(self, prompt_sha256: str, model: str, temperature: float) -> dict[str, Any] | None:
         for item in self.model_calls:
@@ -287,7 +307,7 @@ def open_snapshot(repo_id: str, commit: str, *, refresh: bool = False, directory
             saved = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             saved = {}
-        if isinstance(saved, dict) and (saved.get("records") or saved.get("captured") or saved.get("model_calls")):
+        if isinstance(saved, dict) and saved.get("complete") is True:
             return SnapshotSession(
                 repo_id,
                 commit,
@@ -305,7 +325,9 @@ def open_snapshot(repo_id: str, commit: str, *, refresh: bool = False, directory
                 source_status=dict(saved.get("source_status") or {}),
                 search_events=list(saved.get("search_events") or []),
                 captured=bool(saved.get("captured")),
+                complete=True,
                 rescue=saved.get("rescue"),
+                osv=saved.get("osv"),
             )
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     return SnapshotSession(

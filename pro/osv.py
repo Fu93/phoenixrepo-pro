@@ -85,22 +85,40 @@ def parse_requirements(text: str) -> list[dict[str, str]]:
     return rows
 
 
-def advisories_for_repo(repo_id: str, *, getter=None, transport: httpx.BaseTransport | None = None) -> list[dict[str, Any]]:
-    """Best-effort. A network failure returns an empty list and does not change the verdict."""
+def advisories_for_repo(
+    repo_id: str,
+    *,
+    commit: str = "",
+    getter=None,
+    transport: httpx.BaseTransport | None = None,
+    session: Any | None = None,
+) -> list[dict[str, Any]]:
+    """Best-effort. Manifests are read at the judged commit. A replay uses the stored response."""
 
+    if session is not None and getattr(session, "replaying", False) and isinstance(getattr(session, "osv", None), dict):
+        stored = session.osv.get("advisories")
+        return list(stored) if isinstance(stored, list) else []
+    ref = commit or "HEAD"
     fetch = getter or _github_text
+    requirements = fetch(repo_id, "requirements.txt", ref)
+    package_json = fetch(repo_id, "package.json", ref)
     packages: list[dict[str, str]] = []
-    requirements = fetch(repo_id, "requirements.txt")
     if requirements:
         packages.extend(parse_requirements(requirements))
-    package_json = fetch(repo_id, "package.json")
     if package_json:
         packages.extend(parse_package_json(package_json))
-    return query_batch(packages[:30], transport=transport)
+    rows = query_batch(packages[:30], transport=transport)
+    if session is not None and not getattr(session, "replaying", False):
+        session.osv = {
+            "commit": ref,
+            "manifests": {"requirements.txt": requirements or "", "package.json": package_json or ""},
+            "advisories": rows,
+        }
+    return rows
 
 
-def _github_text(repo_id: str, path: str) -> str:
-    url = f"https://raw.githubusercontent.com/{repo_id}/HEAD/{path}"
+def _github_text(repo_id: str, path: str, ref: str = "HEAD") -> str:
+    url = f"https://raw.githubusercontent.com/{repo_id}/{ref}/{path}"
     try:
         with httpx.Client(timeout=10.0) as client:
             response = client.get(url)

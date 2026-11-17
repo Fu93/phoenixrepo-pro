@@ -11,6 +11,7 @@ the copy and is not part of the sealed chain. The copy has to verify against the
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -26,7 +27,7 @@ FORBIDDEN = re.compile(r"/workspace|/home/|/tmp/|nvapi-|AIza|Bearer |ghp_|github
 DROP = {"cache_key"}
 
 
-def pack(result_path: Path, trace_path: Path, example_id: str, title: str, day: str, note: str) -> Path:
+def pack(result_path: Path, trace_path: Path, example_id: str, title: str, day: str, note: str, snapshot: Path | None = None) -> Path:
     raw = json.loads(result_path.read_text(encoding="utf-8"))
     result = raw.get("result") if isinstance(raw.get("result"), dict) else raw
     run_hash = str(result.get("run_hash") or "")
@@ -64,12 +65,27 @@ def pack(result_path: Path, trace_path: Path, example_id: str, title: str, day: 
     )
     if isinstance(row.get("responsibility"), dict):
         row["responsibility"] = {**row["responsibility"], "trace_file": rel}
+    if snapshot is not None:
+        raw_bytes = snapshot.read_bytes()
+        sealed = str(row.get("snapshot_sha256") or "")
+        digest = hashlib.sha256(raw_bytes).hexdigest()
+        if sealed and digest != sealed:
+            dest.unlink()
+            raise SystemExit("snapshot bytes do not match snapshot_sha256")
+        snap_dir = EXAMPLES / "snapshots"
+        snap_dir.mkdir(parents=True, exist_ok=True)
+        snap_path = snap_dir / f"{example_id}.snapshot.json"
+        snap_path.write_bytes(raw_bytes)
+        row["snapshot_sha256"] = sealed or digest
+        row["snapshot_file"] = f"pro/examples/snapshots/{example_id}.snapshot.json"
     text = json.dumps(row, indent=2, ensure_ascii=False) + "\n"
     # An adapter prefix in an error message names an internal route; the page already shows it as "the model route".
     text = re.sub(r"(?i)\b(?:meterless|nightshift) ", "", text)
     hit = FORBIDDEN.search(text) or FORBIDDEN.search(dest.read_text(encoding="utf-8"))
     if hit:
         dest.unlink()
+        if snapshot is not None:
+            (EXAMPLES / "snapshots" / f"{example_id}.snapshot.json").unlink(missing_ok=True)
         raise SystemExit(f"refusing to write: found {hit.group(0)!r}")
     out = EXAMPLES / f"{example_id}.json"
     out.write_text(text, encoding="utf-8")
@@ -84,9 +100,10 @@ def main() -> int:
     parser.add_argument("--title", required=True)
     parser.add_argument("--day", default="2026-11-17")
     parser.add_argument("--note", default="")
+    parser.add_argument("--snapshot", type=Path, default=None, help="Exact snapshot bytes sealed in the trace.")
     args = parser.parse_args()
     note = args.note or f"Judged live on {args.day}, during SLAY HACKS, with the hosted NVIDIA path. Packed with scripts/pro_add_live_example.py."
-    print(pack(args.result, args.trace, args.id, args.title, args.day, note))
+    print(pack(args.result, args.trace, args.id, args.title, args.day, note, args.snapshot))
     return 0
 
 

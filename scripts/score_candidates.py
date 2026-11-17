@@ -1115,12 +1115,10 @@ def _do_score_candidates(
                     reason = f"UNJUDGED (PROBLEM_EXTRACTION_FAILED): {err}. No judgment was made and prior-art search was not run; rerun this repo."
                 else:
                     verdict = "NEEDS_REVIEW"
-                    if search_session is not None and search_session.replaying and not search_session.captured:
-                        reason = f"search snapshot for {repo_id}@{head_commit} is missing or incomplete. Prior-art search was not run again."
+                    if search_session is not None and search_session.replaying:
+                        reason = f"search snapshot for {repo_id}@{head_commit} is incomplete"
                     else:
                         reason = f"PROBLEM_EXTRACTION_FAILED: {err}. Prior-art search was not run. Method: llm+verified quote (requested={meta_prob.get('requested_model')}, served={meta_prob.get('served_model')})."
-                if search_session is not None and not search_session.replaying:
-                    search_session.capture(problem=None, queries=[], results=[])
                 trace.event(
                     agent_name="orchestrator",
                     action="DISCOVERY_FILTER",
@@ -1875,6 +1873,7 @@ def _do_score_candidates(
             "search_seconds": _stage_times.get("search_seconds", 0),
             "alternatives_seconds": _stage_times.get("alternatives_seconds", 0),
             "discovery_seconds": _stage_times.get("discovery_seconds", 0),
+            "model_retries": int(getattr(relevance_client, "model_retries", 0) or 0),
         },
         status="ok",
     )
@@ -1884,7 +1883,21 @@ def _do_score_candidates(
         before_seal(trace, candidates_output, ineligible_repos)
 
     if search_session is not None:
-        search_session.finish(trace)
+        rows = list(ineligible_repos) + list(candidates_output)
+        failed = any(
+            str(row.get("verdict") or "") == "UNJUDGED" or "PROBLEM_EXTRACTION_FAILED" in str(row.get("reason") or "")
+            for row in rows
+        )
+        if rows and not failed and (search_session.captured or search_session.replaying):
+            search_session.complete = True
+        if search_session.complete and head_commit:
+            from pro.osv import advisories_for_repo
+
+            advisories_for_repo(search_session.repo_id, commit=head_commit, session=search_session)
+        if search_session.complete:
+            search_session.finish(trace)
+        else:
+            search_session.discard()
 
     # 6. Seal trace
     run_hash = trace.seal()
@@ -2135,7 +2148,7 @@ def _discovery_output(
 def _is_infra_failure(err: str) -> bool:
     """True when an LLM failure is infrastructure (5xx, 429, timeout, invalid JSON), not evidence."""
     low = str(err or "").lower()
-    return any(k in low for k in ("http 5", "http 429", "timed out", "timeout", "nightshift request", "invalid json", "exceeded total timeout"))
+    return any(k in low for k in ("http 5", "503", "http 429", "429", "timed out", "timeout", "nightshift request", "invalid json", "exceeded total timeout"))
 
 
 def main() -> int:

@@ -125,6 +125,7 @@ def test_the_same_snapshot_replays_the_candidate_list_verdict_and_search_hash(tm
             [],
             client=client,
         )
+        session.complete = True
         session.finish(trace_one)
     finally:
         session.close()
