@@ -312,7 +312,8 @@ def _mature(candidate: dict[str, Any], alternative: dict[str, Any]) -> tuple[boo
         return True, f"{stars} stars, at least half of the candidate's {cand}"
     if official and (dated or pricing) and classify_page(alternative) == "product":
         return True, "official or commercial product with a dated release or a pricing page"
-    return False, f"stars={stars}, candidate_stars={cand}, official={official}"
+    shown = "unknown" if stars is None else str(stars)
+    return False, f"stars={shown}, candidate_stars={cand}, official={official}"
 
 
 def evaluate_blocker(candidate: dict[str, Any], alternative: dict[str, Any], *, as_of: date) -> dict[str, Any]:

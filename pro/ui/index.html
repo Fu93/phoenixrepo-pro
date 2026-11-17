@@ -198,7 +198,7 @@
     };
 
     function plainReason(result) {
-      const text = result.plain_reason || result.reason || "";
+      const text = (result.plain_reason || result.reason || "").replace(/web:/g, "");
       const cut = text.split("Method:")[0].trim();
       return cut || "No reason was stored.";
     }
@@ -603,6 +603,7 @@
         el("p", {}, [el("a", { href: "/pro/api/results/" + result.id + "/rescue.md" }, ["Download Markdown"])]),
         el("h1", {}, ["Rescue plan"]),
         el("p", { class: "muted" }, [result.rescue_note || ("Drafted by " + (result.rescue.drafted_by || "the engine"))]),
+        fallbackNote(result),
         el("div", { class: "cols" }, stages.map(stageCard)),
       ]);
     }
@@ -647,9 +648,26 @@
     }
 
     function durations(result) {
-      const line = (result.trace || []).find((event) => event.action === "STAGE_TIME");
-      if (!line || !line.detail) return el("p", {});
-      return el("p", { class: "muted" }, ["Stage time: " + line.detail]);
+      const lines = (result.trace || []).filter((event) => event.action === "STAGE_TIME" && event.detail);
+      if (!lines.length) return el("p", {});
+      return el("p", { class: "muted" }, ["Stage time: " + lines.map((event) => event.detail).join("; ")]);
+    }
+
+    function fallbackNote(result) {
+      const gate = result.rescue && result.rescue.gate1 ? result.rescue.gate1 : {};
+      const calls = gate.fallback_calls || [];
+      const flags = gate.flags || [];
+      if (calls.length) {
+        return el("p", { class: "muted" }, [
+          "A model fallback applied only to " + calls.join(", ") + ". The plan author above is separate.",
+        ]);
+      }
+      if (flags.indexOf("LLM_FALLBACK") >= 0) {
+        return el("p", { class: "muted" }, [
+          "LLM_FALLBACK is from an earlier scoring step, not from this rescue plan.",
+        ]);
+      }
+      return el("span");
     }
 
     function shown(text) {

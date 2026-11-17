@@ -356,7 +356,12 @@ def build_plan(
     _ensure_test_item(plan, org, index)
     result = {
         "repo_id": repo_id,
-        "gate1": {"verdict": row.get("verdict"), "total": row.get("total"), "flags": row.get("flags") or []},
+        "gate1": {
+            "verdict": row.get("verdict"),
+            "total": row.get("total"),
+            "flags": row.get("flags") or [],
+            "fallback_calls": list(row.get("fallback_calls") or []),
+        },
         "drafted_by": drafted_by,
         "requested_model": requested,
         "served_model": served,

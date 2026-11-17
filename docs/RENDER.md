@@ -26,6 +26,8 @@ Do not put key values in the repo.
 
 The daily cap reads `CF-Connecting-IP` only when `PHOENIX_TRUST_CF=true` (set in `render.yaml`, because Render's public edge sits behind Cloudflare). The value has to parse as an IP address. Otherwise the cap uses the last `X-Forwarded-For` hop that parses as an IP. A name or a fake prefix is ignored.
 
+This assumes traffic arrives through Render and Cloudflare, which set or append those headers. A request that reaches the process directly can send a forged `X-Forwarded-For` and pick its own bucket. Do not expose the container port on the public internet.
+
 ## Free tier
 
 A free web service spins down after about 15 minutes without traffic. The next request cold-starts. The filesystem is ephemeral. `PHOENIX_PRO_DIR` defaults to `data/pro-runtime` on that disk, so the result cache, the daily counters, and live traces are wiped on every restart, spin-down, and deploy. A repeat request is free only until that happens. Free web services cannot attach a persistent disk, so there is no durable place to point `PHOENIX_PRO_DIR` on the free plan. The three committed examples are in the image and survive a restart. `PHOENIX_PRO_STORE`, if set to a directory or an `https://` folder of JSON files, is an optional extra copy. A missing permalink says so instead of a bare error.

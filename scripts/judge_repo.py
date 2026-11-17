@@ -15,6 +15,7 @@ import json
 import re
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -201,10 +202,18 @@ def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, score
                     for row in candidates or []:
                         if str(row.get("verdict") or "") != "CANDIDATE":
                             continue
+                        started = time.perf_counter()
                         try:
                             rescue_plans.append(build_plan(row, client=relevance_client, trace=trace, use_llm=True))
                         except Exception as exc:  # noqa: BLE001 — the verdict is already decided
                             rescue_plans.append({"error": f"{type(exc).__name__}: {exc}"})
+                        trace.event(
+                            agent_name="orchestrator",
+                            action="STAGE_TIME",
+                            input_summary={"stage": "rescue"},
+                            output_summary={"rescue_seconds": round(time.perf_counter() - started, 2)},
+                            status="ok",
+                        )
 
                 score_kwargs["before_seal"] = _before_seal
             results = score_candidates.score_all(**score_kwargs)

@@ -91,9 +91,15 @@ def detail_for(action: str, summary: dict[str, Any]) -> str:
     if action == "RUN_SEAL":
         return "Run seal. The line hash is the run hash."
     if action == "STAGE_TIME":
-        problem = summary.get("problem_seconds")
-        search = summary.get("search_seconds")
-        return f"problem {problem}s, search {search}s"
+        labels = (
+            ("problem_seconds", "problem"),
+            ("search_seconds", "search"),
+            ("alternatives_seconds", "alternatives"),
+            ("discovery_seconds", "discovery"),
+            ("rescue_seconds", "rescue"),
+        )
+        parts = [f"{label} {summary.get(key)}s" for key, label in labels if key in summary]
+        return ", ".join(parts)
     text = summary.get("text")
     if isinstance(text, str) and text:
         return text[:240]
@@ -285,6 +291,10 @@ def scrub_hosted_names(text: str) -> str:
     return _HOSTED_NAME.sub("the model route", text)
 
 
+def without_web_prefix(text: str) -> str:
+    return str(text or "").replace("web:", "")
+
+
 def public_result(fields: dict[str, Any]) -> dict[str, Any]:
     """Attach the responsible-AI block. Does not drop caller fields."""
 
@@ -298,8 +308,12 @@ def public_result(fields: dict[str, Any]) -> dict[str, Any]:
             rows.append(row)
     if rows:
         result["alternatives"] = rows
+    if isinstance(result.get("reason"), str):
+        result["reason"] = without_web_prefix(result["reason"])
     if not result.get("plain_reason"):
         result["plain_reason"] = plain_verdict_reason(str(result.get("verdict") or ""), str(result.get("reason") or ""))
+    elif isinstance(result.get("plain_reason"), str):
+        result["plain_reason"] = without_web_prefix(result["plain_reason"])
     verified_rows = [row for row in result.get("alternatives") or [] if row.get("quote_verified")]
     result["quote_verified"] = bool(result.get("quote")) and bool(verified_rows or (
         result.get("quote") and not any(

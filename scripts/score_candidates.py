@@ -1033,6 +1033,7 @@ def _do_score_candidates(
             }
         )
 
+    _stage_times: dict[str, float] = {}
     for candidate in candidates_raw:
         repo_id = candidate["repo_id"]
         prior_for_repo = [r for r in prior_raw if r["repo_id"] == repo_id]
@@ -1064,6 +1065,7 @@ def _do_score_candidates(
             if is_client_configured(relevance_client):
                 problem_stmt, meta_prob = extract_problem_statement(candidate, client=relevance_client)
             _problem_seconds = round(time.perf_counter() - _problem_started, 2)
+            _stage_times["problem_seconds"] = _problem_seconds
             rescue = _rescue_future.result()
         rescue_by_repo[repo_id] = rescue
         must_beat = []
@@ -1143,6 +1145,7 @@ def _do_score_candidates(
                     parallel_web=bool(getattr(relevance_client, "parallel_batches", False)),
                 )
                 _search_seconds = round(time.perf_counter() - _search_started, 2)
+                _stage_times["search_seconds"] = _search_seconds
 
                 trace.event(
                     agent_name="orchestrator",
@@ -1233,6 +1236,7 @@ def _do_score_candidates(
                 judgement_evidence: list[dict[str, Any]] = []
                 try:
                     # Alternative relevance step
+                    _alt_started = time.perf_counter()
                     problem_alternatives = filter_relevant_alternatives(
                         problem_statement=problem_stmt,
                         candidate_repo_id=repo_id,
@@ -1262,9 +1266,20 @@ def _do_score_candidates(
                         summary_limit=EVIDENCE_SUMMARY_LIMIT,
                     )
 
+                    _alt_seconds = round(time.perf_counter() - _alt_started, 2)
+                    if problem_alternatives:
+                        from app.agents.github_metadata import attach_github_metadata
+
+                        problem_alternatives = attach_github_metadata(
+                            problem_alternatives, trace=trace, limit=5,
+                        )
                     # Combined union of prior_art.csv rows and problem_alternatives
                     if facts_client is not None and problem_alternatives:
-                        problem_alternatives = [facts_client.fetch_alternative(r) for r in problem_alternatives]
+                        problem_alternatives = [
+                            row if row.get("metadata_status") else facts_client.fetch_alternative(row)
+                            for row in problem_alternatives
+                        ]
+                    _disc_started = time.perf_counter()
                     combined_priors = []
                     seen_alts = set()
                     for r in list(prior_for_repo or []) + list(problem_alternatives or []):
@@ -1283,6 +1298,8 @@ def _do_score_candidates(
                         source_counts=getattr(search_results, "source_counts", None),
                         insufficient_coverage=getattr(search_results, "insufficient_coverage", False),
                     )
+                    _stage_times["alternatives_seconds"] = _alt_seconds
+                    _stage_times["discovery_seconds"] = round(time.perf_counter() - _disc_started, 2)
                     verdict, reason = judged
                     judgement_evidence = list(getattr(judged, "evidence", []) or [])
                     must_beat = list(getattr(judged, "must_beat", []) or [])
@@ -1388,8 +1405,10 @@ def _do_score_candidates(
         cand_caps, meta_caps = extract_capabilities(candidate, client=relevance_client)
         fallback_caps = bool(meta_caps.get("fallback"))
         flags: list[str] = []
+        fallback_calls: list[str] = []
         if fallback_caps:
             flags.append("LLM_FALLBACK")
+            fallback_calls.append("capabilities")
         if relevance_client and repo_id in relevance_client.repo_mismatches:
             if "MODEL_MISMATCH" not in flags:
                 flags.append("MODEL_MISMATCH")
@@ -1469,16 +1488,24 @@ def _do_score_candidates(
                         status="LLM_FALLBACK",
                     )
             else:
-                trace.event(
-                    agent_name="venture_analyst",
-                    action="LLM_FALLBACK",
-                    input_summary={"repo_id": repo_id, "error": "LLM client not configured"},
-                    output_summary="Falling back to deterministic baseline analyst.",
-                    status="LLM_FALLBACK",
-                )
+                if relevance_client is not None and is_client_configured(relevance_client):
+                    # Discovery and the rescue plan use that client. The venture-analyst
+                    # scorer was not requested, so this is not a fallback of the plan.
+                    llm_success = True
+                else:
+                    trace.event(
+                        agent_name="venture_analyst",
+                        action="LLM_FALLBACK",
+                        input_summary={"repo_id": repo_id, "error": "LLM client not configured"},
+                        output_summary="Falling back to deterministic baseline analyst.",
+                        status="LLM_FALLBACK",
+                    )
+                    fallback_calls.append("venture_analyst")
 
             if not llm_success and "LLM_FALLBACK" not in flags:
                 flags.append("LLM_FALLBACK")
+                if "venture_analyst" not in fallback_calls:
+                    fallback_calls.append("venture_analyst")
 
         # Initial scorecard
         scorecard = Scorecard(
@@ -1594,6 +1621,7 @@ def _do_score_candidates(
                 "total": scorecard.total,
                 "feasibility": scorecard.feasibility_score,
                 "flags": flags,
+                "fallback_calls": fallback_calls,
                 "criteria": criteria_dict,
                 "capabilities": cand_caps,
                 "evidence": [
@@ -1710,8 +1738,10 @@ def _do_score_candidates(
         action="STAGE_TIME",
         input_summary={"stages": ["problem", "search"]},
         output_summary={
-            "problem_seconds": locals().get("_problem_seconds", 0),
-            "search_seconds": locals().get("_search_seconds", 0),
+            "problem_seconds": _stage_times.get("problem_seconds", 0),
+            "search_seconds": _stage_times.get("search_seconds", 0),
+            "alternatives_seconds": _stage_times.get("alternatives_seconds", 0),
+            "discovery_seconds": _stage_times.get("discovery_seconds", 0),
         },
         status="ok",
     )

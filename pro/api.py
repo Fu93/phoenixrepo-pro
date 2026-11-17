@@ -107,6 +107,7 @@ def og_image():
     return FileResponse(OG_PATH, media_type="image/svg+xml")
 
 
+@router.get("/og.png")
 @router.get("/pro/og.png")
 def og_png(title: str = "PhoenixRepo Pro"):
     from fastapi.responses import Response
