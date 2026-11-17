@@ -308,6 +308,8 @@ def _mature(candidate: dict[str, Any], alternative: dict[str, Any]) -> tuple[boo
     official = bool(alternative.get("official") or alternative.get("commercial"))
     dated = _as_date(alternative.get("released_at")) is not None or _as_date(alternative.get("page_checked_at")) is not None
     pricing = bool(alternative.get("pricing_page") or alternative.get("free_tier"))
+    if alternative.get("registry_mature") is True:
+        return True, str(alternative.get("registry_reason") or "registry package has a recent release")
     if star_ok:
         return True, f"{stars} stars, at least half of the candidate's {cand}"
     if official and (dated or pricing) and classify_page(alternative) == "product":

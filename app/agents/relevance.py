@@ -1966,15 +1966,21 @@ def judge_discovery(
     combined_priors: list[dict[str, Any]] = []
     seen_ids: dict[str, dict[str, Any]] = {}
 
+    from app.agents.alt_key import canonical_alternative_key
+
     for r in list(prior_rows or []) + list(problem_alternatives or []):
         alt_id = str(r.get("alternative_id") or r.get("url") or "").strip()
-        alt_key = alt_id.casefold()
+        alt_key = canonical_alternative_key(r) or alt_id.casefold()
         if not alt_key:
             continue
         if alt_key in seen_ids:
             existing = seen_ids[alt_key]
-            if r.get("overlap") and not existing.get("overlap"):
+            if r.get("overlap") == "full" and existing.get("overlap") != "full":
+                existing["overlap"] = "full"
+            elif r.get("overlap") and not existing.get("overlap"):
                 existing["overlap"] = r["overlap"]
+            if r.get("overlap_reads") == "disagree":
+                existing["overlap_reads"] = "disagree"
             if r.get("same_problem") is not None and existing.get("same_problem") is None:
                 existing["same_problem"] = r["same_problem"]
             if r.get("excerpt") and not existing.get("excerpt"):
@@ -2362,6 +2368,13 @@ def judge_discovery(
         reason = f"unverified LLM quote: unexpected verdict '{raw_verdict}'"
         path_label = "unexpected"
 
+    disagreed = [row for row in combined_priors if row.get("overlap_reads") == "disagree"]
+    if disagreed and verdict == "CANDIDATE" and not blocking_full:
+        verdict = "NEEDS_REVIEW"
+        reason = "overlap judged differently on two reads"
+        path_label = "overlap-reread"
+        picked = []
+
     hold = capability_hold(verdict, must_beat, cand_text)
     if hold:
         verdict = "NEEDS_REVIEW"
@@ -2612,8 +2625,12 @@ def search_prior_art(
             "reason": why,
         })
 
+    from app.agents.alt_key import canonical_alternative_key
+
     results: list[dict[str, Any]] = []
     seen_ids: set[str] = {cand_id.casefold()}
+    if "/" in cand_id:
+        seen_ids.add("github.com/" + cand_id.casefold())
     if cand_url:
         seen_ids.add(cand_url)
 
@@ -2834,14 +2851,24 @@ def search_prior_art(
                     per_source[src].append(bk[cur[bi]])
                     cur[bi] += 1
                     moved = True
+    def _already(key: str, row: dict[str, Any]) -> bool:
+        canon = canonical_alternative_key(row)
+        return key in seen_ids or bool(canon and canon in seen_ids)
+
+    def _remember(key: str, row: dict[str, Any]) -> None:
+        seen_ids.add(key)
+        canon = canonical_alternative_key(row)
+        if canon:
+            seen_ids.add(canon)
+
     leftovers: list[tuple[str, dict[str, Any]]] = []
     for src in ("web", "github", "npm"):
         taken = 0
         for key, row in per_source[src]:
-            if key in seen_ids:
+            if _already(key, row):
                 continue
             if taken < quotas[src] and len(results) < max_results:
-                seen_ids.add(key)
+                _remember(key, row)
                 results.append(row)
                 source_counts[row["source"]] = source_counts.get(row["source"], 0) + 1
                 taken += 1
@@ -2850,9 +2877,9 @@ def search_prior_art(
     for key, row in leftovers:
         if len(results) >= max_results:
             break
-        if key in seen_ids:
+        if _already(key, row):
             continue
-        seen_ids.add(key)
+        _remember(key, row)
         results.append(row)
         source_counts[row["source"]] = source_counts.get(row["source"], 0) + 1
 
@@ -2895,6 +2922,134 @@ def search_prior_art(
     return found
 
 
+def _compare_reads(first: dict[str, Any], second: dict[str, Any], alt_id: str, trace: Any | None) -> dict[str, Any]:
+    agreed = first.get("overlap") == second.get("overlap") and second.get("overlap") in {"full", "partial", "none"}
+    merged = dict(first)
+    if agreed:
+        merged["overlap_reads"] = "agree"
+    else:
+        merged["overlap"] = "unresolved"
+        merged["overlap_reads"] = "disagree"
+        merged["same_problem"] = True
+        merged["reason"] = "overlap judged differently on two reads"
+    if trace is not None:
+        trace.event(
+            agent_name="orchestrator",
+            action="OVERLAP_RUBRIC",
+            input_summary={"alternative": alt_id},
+            output_summary={
+                "first": first.get("rubric") or {},
+                "second": second.get("rubric") or {},
+                "first_overlap": first.get("overlap"),
+                "second_overlap": second.get("overlap"),
+                "result": "agree" if agreed else "disagree",
+            },
+            status="ok",
+        )
+    return merged
+
+
+def _settle_with_reread(
+    obj: dict[str, Any],
+    client: Any | None,
+    problem_statement: dict[str, Any],
+    repo_id: str,
+    alt_id: str,
+    result_text: str,
+    system: str,
+    trace: Any | None,
+) -> dict[str, Any]:
+    from app.agents.overlap import RUBRIC_FIELDS, rubric_answers, settle_entry
+
+    first = settle_entry(obj)
+    if client is None or not first.get("borderline"):
+        return first
+    prompt = (
+        f"Candidate Problem: {problem_statement.get('problem', '')}\n"
+        f"Target User: {problem_statement.get('target_user', '')}\n"
+        f"Alternative: {alt_id}\n"
+        f"Description and README Excerpt:\n```\n{result_text[:900]}\n```\n\n"
+        "Second read of the same alternative. "
+        + RUBRIC_FIELDS
+        + " Reply as strict JSON with the four booleans and verbatim quotes."
+    )
+    try:
+        text, _req, _srv = client.complete(
+            prompt, system, repo_id=repo_id, step="alternative_reread",
+        )
+        second_obj = extract_json_object(text) or {}
+    except Exception as exc:
+        if trace is not None:
+            trace.event(
+                agent_name="orchestrator",
+                action="OVERLAP_RUBRIC",
+                input_summary={"alternative": alt_id},
+                output_summary={"status": "second read failed", "error": str(exc)[:160]},
+                status="error",
+            )
+        return first
+    if rubric_answers(second_obj) is None:
+        if trace is not None:
+            trace.event(
+                agent_name="orchestrator",
+                action="OVERLAP_RUBRIC",
+                input_summary={"alternative": alt_id},
+                output_summary={"status": "second read had no rubric", "first_overlap": first.get("overlap")},
+                status="error",
+            )
+        return first
+    return _compare_reads(first, settle_entry(second_obj), alt_id, trace)
+
+
+def _reread_borderline(
+    entries: list[dict[str, Any]],
+    items: list[tuple[int, dict[str, Any], str]],
+    client: Any | None,
+    problem_statement: dict[str, Any],
+    repo_id: str,
+    system: str,
+    trace: Any | None,
+) -> list[dict[str, Any]]:
+    from app.agents.overlap import settle_entry
+
+    settled = [settle_entry(entry) for entry in entries if isinstance(entry, dict)]
+    borderline = [entry for entry in settled if entry.get("borderline")]
+    if not borderline or client is None:
+        return settled
+    by_index = {index: (res, text) for index, res, text in items}
+
+    def one(entry: dict[str, Any]) -> dict[str, Any]:
+        try:
+            index = int(entry.get("index"))
+        except (TypeError, ValueError):
+            return entry
+        res, text = by_index.get(index, ({}, ""))
+        alt_id = str(res.get("alternative_id") or "")
+        updated = _settle_with_reread(entry, client, problem_statement, repo_id, alt_id, text, system, trace)
+        updated["index"] = index
+        updated["quotes"] = entry.get("quotes") or updated.get("quotes")
+        return updated
+
+    from pro.pace import map_ordered
+
+    redone = map_ordered(one, borderline, workers=4)
+    by_done: dict[int, dict[str, Any]] = {}
+    for entry in redone:
+        try:
+            by_done[int(entry.get("index"))] = entry
+        except (TypeError, ValueError):
+            continue
+    out: list[dict[str, Any]] = []
+    for entry in settled:
+        try:
+            index = int(entry.get("index"))
+        except (TypeError, ValueError):
+            out.append(entry)
+            continue
+        out.append(by_done.get(index, entry))
+    return out
+
+
 def judge_alternative_relevance(
     problem_statement: dict[str, Any],
     candidate_repo_id: str,
@@ -2919,6 +3074,8 @@ def judge_alternative_relevance(
     if client is None:
         client = RelevanceClient()
 
+    from app.agents.overlap import RUBRIC_FIELDS
+
     prompt_record = load_prompt("relevance_alternative")
     user_prompt = (
         f"Candidate Problem: {problem_statement.get('problem', '')}\n"
@@ -2927,8 +3084,9 @@ def judge_alternative_relevance(
         f"Alternative Repository: {alt_id}\n"
         f"URL: {search_result.get('url', '')}\n"
         f"Description and README Excerpt:\n```\n{result_text}\n```\n\n"
-        "Judge whether this alternative solves the same core user problem, the overlap degree (full, partial, none), "
-        "and provide verbatim supporting quotes as strict JSON."
+        "Judge whether this alternative solves the same core user problem. "
+        + RUBRIC_FIELDS
+        + " Provide verbatim supporting quotes as strict JSON."
     )
 
     try:
@@ -2957,6 +3115,9 @@ def judge_alternative_relevance(
             "dropped": True,
         }
 
+    obj = _settle_with_reread(
+        obj, client, problem_statement, candidate_repo_id, alt_id, result_text, prompt_record.text, trace,
+    )
     same_problem = bool(obj.get("same_problem"))
     overlap = str(obj.get("overlap") or "none").strip().lower()
     reason = str(obj.get("reason") or "").strip()
@@ -3010,6 +3171,8 @@ def judge_alternative_relevance(
         "same_problem": True,
         "overlap": overlap,
         "reason": reason,
+        "overlap_reads": str(obj.get("overlap_reads") or ""),
+        "rubric": obj.get("rubric") or {},
         "quotes": [str(q).strip() for q in quotes if str(q).strip()],
         "quote_verified": True,
         "source": str(search_result.get("source") or ""),
@@ -3027,7 +3190,9 @@ def judge_alternative_relevance(
 BATCH_INSTRUCTION = (
     "\n\nBATCH MODE: you will receive several numbered alternatives. Judge EACH one independently "
     "with the rules above. Output strict JSON only, in the form "
-    '{"results": [{"index": <number>, "same_problem": true|false, "overlap": "full"|"partial"|"none", '
+    '{"results": [{"index": <number>, "same_problem": true|false, '
+    '"same_core_job": true|false, "same_input_output": true|false, "same_target_user": true|false, '
+    '"covers_main_features": true|false, '
     '"reason": "...", "quotes": ["verbatim quote from THAT alternative\'s text"]}]} '
     "with exactly one entry per alternative index. Use the index numbers shown in brackets. Do not renumber."
 )
@@ -3141,6 +3306,9 @@ def _row_from_entry(
     The entry was judged either way. A failed quote is not sent back to the model: the guard
     already rejected it.
     """
+    from app.agents.overlap import settle_entry
+
+    entry = settle_entry(entry)
     if not bool(entry.get("same_problem")):
         return None
     alt_id = str(res.get("alternative_id") or "").strip()
@@ -3176,6 +3344,8 @@ def _row_from_entry(
         "required_terms": "",
         "same_problem": True,
         "overlap": str(entry.get("overlap") or "none").strip().lower(),
+        "overlap_reads": str(entry.get("overlap_reads") or ""),
+        "rubric": entry.get("rubric") or {},
         "reason": str(entry.get("reason") or "").strip(),
         "quotes": [str(q).strip() for q in quotes if str(q).strip()],
         "quote_verified": True,
@@ -3390,6 +3560,9 @@ def judge_alternatives_batch(
         _fallback(why)
         return None
 
+    entries = _reread_borderline(
+        entries, items, client, problem_statement, candidate_repo_id, prompt_record.text, trace,
+    )
     verified, missing = _apply_entries(entries, items, candidate_repo_id, problem_statement, trace)
     if missing:
         # One follow-up for the indexes the first reply did not contain. A single missing
@@ -3590,7 +3763,9 @@ def filter_relevant_alternatives(
     """
     from app.agents.own_identity import build_identity, split_own
 
-    rows = list(search_results)
+    from app.agents.alt_key import dedupe_alternatives
+
+    rows = dedupe_alternatives(list(search_results))
     identity = build_identity(candidate or {"repo_id": candidate_repo_id})
     rows, dropped = split_own(identity, rows)
     _trace_own(trace, candidate_repo_id, identity, dropped)

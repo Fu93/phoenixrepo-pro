@@ -1273,6 +1273,11 @@ def _do_score_candidates(
                         problem_alternatives = attach_github_metadata(
                             problem_alternatives, trace=trace, limit=5,
                         )
+                        from app.agents.registry_maturity import attach_registry_metadata
+
+                        problem_alternatives = attach_registry_metadata(
+                            problem_alternatives, trace=trace, limit=5,
+                        )
                     # Combined union of prior_art.csv rows and problem_alternatives
                     if facts_client is not None and problem_alternatives:
                         problem_alternatives = [
