@@ -513,6 +513,7 @@ class ProService:
                 getter=getter,
                 relevance_client=client,
                 plan_rescue=True,
+                commit=job.commit,
             )
         except JudgeError as exc:
             raise ProError(str(exc), status=422, kind="CannotJudge") from exc

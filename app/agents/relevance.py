@@ -1822,7 +1822,12 @@ def _evidence_rows(rows: list[dict[str, Any]] | None) -> list[dict[str, str]]:
         if key in seen:
             continue
         seen.add(key)
-        out.append({"alternative": name, "overlap": overlap, "quote": quote, "reason": why})
+        item: dict[str, Any] = {"alternative": name, "overlap": overlap, "quote": quote, "reason": why}
+        if isinstance(r.get("rubric"), dict) and r.get("rubric"):
+            item["rubric"] = r["rubric"]
+        if isinstance(r.get("rubric_second"), dict) and r.get("rubric_second"):
+            item["rubric_second"] = r["rubric_second"]
+        out.append(item)
     return out
 
 
@@ -2927,11 +2932,13 @@ def _compare_reads(first: dict[str, Any], second: dict[str, Any], alt_id: str, t
     merged = dict(first)
     if agreed:
         merged["overlap_reads"] = "agree"
+        merged["rubric_second"] = second.get("rubric") or {}
     else:
         merged["overlap"] = "unresolved"
         merged["overlap_reads"] = "disagree"
         merged["same_problem"] = True
         merged["reason"] = "overlap judged differently on two reads"
+        merged["rubric_second"] = second.get("rubric") or {}
     if trace is not None:
         trace.event(
             agent_name="orchestrator",
@@ -3737,6 +3744,17 @@ def _filter_chunks_parallel(problem_statement, candidate_repo_id, rows, client, 
     return verified_alts
 
 
+def _row_blocks(candidate: dict[str, Any] | None, row: dict[str, Any]) -> bool:
+    if candidate is None or str(row.get("overlap") or "") != "full" or row.get("quote_verified") is False:
+        return False
+    from datetime import date as _date
+
+    from app.agents.blocker import evaluate_blocker
+
+    decision = evaluate_blocker(candidate, row, as_of=_date.today())
+    return bool(decision.get("blocks"))
+
+
 def filter_relevant_alternatives(
     problem_statement: dict[str, Any],
     candidate_repo_id: str,
@@ -3746,6 +3764,7 @@ def filter_relevant_alternatives(
     candidate: dict[str, Any] | None = None,
     fallback_budget: FallbackBudget | None = None,
     clock: Callable[[], float] | None = None,
+    skip_immature: bool = False,
 ) -> list[dict[str, Any]]:
     """Evaluate candidate search results and return only those with same_problem=true and verified quotes.
 
@@ -3764,8 +3783,36 @@ def filter_relevant_alternatives(
     from app.agents.own_identity import build_identity, split_own
 
     from app.agents.alt_key import dedupe_alternatives
+    from app.agents.stable_search import rank_key
 
     rows = dedupe_alternatives(list(search_results))
+    if skip_immature and candidate is not None:
+        from datetime import date as _date
+
+        from app.agents.blocker import block_obstacle
+
+        kept: list[dict[str, Any]] = []
+        skipped: list[dict[str, str]] = []
+        when = _date.today()
+        for row in rows:
+            why = block_obstacle(candidate, row, as_of=when)
+            if why:
+                skipped.append({
+                    "alternative": str(row.get("alternative_id") or row.get("url") or ""),
+                    "reason": why,
+                })
+            else:
+                kept.append(row)
+        if trace is not None and skipped:
+            trace.event(
+                agent_name="orchestrator",
+                action="ALTERNATIVES_SKIPPED",
+                input_summary={"repo_id": candidate_repo_id, "count": len(skipped)},
+                output_summary={"skipped": skipped[:12]},
+                status="ok",
+            )
+        rows = kept
+        rows.sort(key=rank_key)
     identity = build_identity(candidate or {"repo_id": candidate_repo_id})
     rows, dropped = split_own(identity, rows)
     _trace_own(trace, candidate_repo_id, identity, dropped)
@@ -3778,7 +3825,7 @@ def filter_relevant_alternatives(
     verified_alts: list[dict[str, Any]] = []
     verified_chunk_indexes: list[int] = []
     finished = 0
-    if getattr(client, "parallel_batches", False) and chunk_count > 1:
+    if getattr(client, "parallel_batches", False) and chunk_count > 1 and not skip_immature:
         return _filter_chunks_parallel(
             problem_statement, candidate_repo_id, rows, client, trace, budget, identity, chunk_count, len(search_results), chunk_size,
         )
@@ -3795,10 +3842,21 @@ def filter_relevant_alternatives(
                 if batch is not None:
                     verified_alts.extend(batch)
                     judged = True
+                    if any(_row_blocks(candidate, row) for row in batch):
+                        if trace is not None:
+                            trace.event(
+                                agent_name="orchestrator",
+                                action="ALTERNATIVES_SHORT_CIRCUIT",
+                                input_summary={"repo_id": candidate_repo_id},
+                                output_summary={"stopped_after_chunk": chunk_index},
+                                status="ok",
+                            )
+                        break
             if not judged:
                 if budget.time_exhausted():
                     raise budget.stop("time_cap")
                 per_item_failures = 0
+                halted = False
                 for res in chunk:
                     if budget.time_exhausted():
                         raise budget.stop("time_cap")
@@ -3811,9 +3869,24 @@ def filter_relevant_alternatives(
                         per_item_failures += 1
                     if alt_row is not None:
                         verified_alts.append(alt_row)
-                # A batch that failed open can still finish on the per-item salvage.
-                # Those rows are judged. A per-item infrastructure error leaves the chunk unjudged.
+                        if _row_blocks(candidate, alt_row):
+                            halted = True
+                            break
+                # A clean chunk that already found a blocker stops. A chunk that failed
+                # open still has to count those failures, or the infra cap never trips.
+                if halted and per_item_failures == 0 and trace is not None:
+                    trace.event(
+                        agent_name="orchestrator",
+                        action="ALTERNATIVES_SHORT_CIRCUIT",
+                        input_summary={"repo_id": candidate_repo_id},
+                        output_summary={"stopped_after_chunk": chunk_index},
+                        status="ok",
+                    )
                 judged = per_item_failures == 0
+                if halted and per_item_failures == 0 and budget.failures < FALLBACK_INFRA_LIMIT:
+                    verified_chunk_indexes.append(chunk_index)
+                    finished += 1
+                    break
             if judged:
                 verified_chunk_indexes.append(chunk_index)
                 finished += 1

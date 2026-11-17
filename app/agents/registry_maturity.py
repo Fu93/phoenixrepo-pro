@@ -183,6 +183,11 @@ def _fill_npm(row: dict[str, Any], name: str, getter: Callable[[str], Any], now:
     row["registry_checked"] = True
     row["registry_status"] = "ok"
     row["registry_package"] = name
+    licence = meta.get("license")
+    spdx = licence.get("type") if isinstance(licence, dict) else licence
+    spdx = str(spdx or "").strip()
+    if spdx and spdx.casefold() not in {"unlicensed", "see license in license", "none"} and not row.get("licence_spdx"):
+        row["licence_spdx"] = spdx
     if released:
         row["released_at"] = released
     if downloads is not None:

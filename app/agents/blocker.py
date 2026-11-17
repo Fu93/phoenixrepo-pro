@@ -318,6 +318,23 @@ def _mature(candidate: dict[str, Any], alternative: dict[str, Any]) -> tuple[boo
     return False, f"stars={shown}, candidate_stars={cand}, official={official}"
 
 
+def block_obstacle(candidate: dict[str, Any], alternative: dict[str, Any], *, as_of: date) -> str:
+    """Why this alternative cannot block, before any overlap call. Empty when overlap is the open question."""
+
+    if alternative.get("archived") is True:
+        return "archived"
+    maintained, maintain_why = _maintained(alternative, as_of)
+    if not maintained:
+        return maintain_why
+    mature, mature_why = _mature(candidate, alternative)
+    if not mature:
+        return "not mature or official: " + mature_why
+    cand_free = candidate.get("free", True) is not False and candidate.get("self_hostable", True) is not False
+    if cand_free and not _licence_ok(alternative):
+        return "no permissive licence or free tier"
+    return ""
+
+
 def evaluate_blocker(candidate: dict[str, Any], alternative: dict[str, Any], *, as_of: date) -> dict[str, Any]:
     """Decide whether this alternative may refuse the candidate.
 

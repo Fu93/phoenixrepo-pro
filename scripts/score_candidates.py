@@ -800,6 +800,8 @@ def score_all(
     evidence_source: str | None = None,
     zetaris_client: Any | None = None,
     before_seal: Any | None = None,
+    head_commit: str = "",
+    stable_getter: Any | None = None,
 ) -> dict[str, Any]:
     """Main execution pipeline for candidate scoring and protagonist selection."""
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -830,6 +832,8 @@ def score_all(
             evidence_source=evidence_source,
             zetaris_client=zetaris_client,
             before_seal=before_seal,
+            head_commit=head_commit,
+            stable_getter=stable_getter,
         )
     except RelevanceLLMError as exc:
         trace.event(
@@ -871,6 +875,8 @@ def _do_score_candidates(
     evidence_source: str | None = None,
     zetaris_client: Any | None = None,
     before_seal: Any | None = None,
+    head_commit: str = "",
+    stable_getter: Any | None = None,
 ) -> dict[str, Any]:
     require_llm = use_llm and ("--llm" in (command_str or "").split())
     llm_bound = None
@@ -1237,6 +1243,31 @@ def _do_score_candidates(
                 try:
                     # Alternative relevance step
                     _alt_started = time.perf_counter()
+                    from app.agents.stable_search import merge_ranked, stable_github_candidates
+
+                    extra = []
+                    if stable_getter is not None:
+                        try:
+                            extra = stable_github_candidates(
+                                candidate, getter=stable_getter, commit=head_commit, trace=trace,
+                            )
+                        except Exception as exc:  # noqa: BLE001 — web results still stand
+                            trace.event(
+                                agent_name="orchestrator",
+                                action="STABLE_SEARCH",
+                                input_summary={"repo_id": repo_id},
+                                output_summary={"status": "metadata unavailable", "error": str(exc)[:180]},
+                                status="error",
+                            )
+                    if extra:
+                        merged = merge_ranked(list(search_results) + extra)
+                        search_results.clear()
+                        search_results.extend(merged[:15])
+                    from app.agents.github_metadata import attach_github_metadata
+                    from app.agents.registry_maturity import attach_registry_metadata
+
+                    attach_github_metadata(list(search_results), trace=trace, limit=5)
+                    attach_registry_metadata(list(search_results), trace=trace, limit=5)
                     problem_alternatives = filter_relevant_alternatives(
                         problem_statement=problem_stmt,
                         candidate_repo_id=repo_id,
@@ -1244,6 +1275,7 @@ def _do_score_candidates(
                         client=relevance_client,
                         trace=trace,
                         candidate=candidate,
+                        skip_immature=True,
                     )
                     trace.event(
                         agent_name="orchestrator",
@@ -1267,17 +1299,6 @@ def _do_score_candidates(
                     )
 
                     _alt_seconds = round(time.perf_counter() - _alt_started, 2)
-                    if problem_alternatives:
-                        from app.agents.github_metadata import attach_github_metadata
-
-                        problem_alternatives = attach_github_metadata(
-                            problem_alternatives, trace=trace, limit=5,
-                        )
-                        from app.agents.registry_maturity import attach_registry_metadata
-
-                        problem_alternatives = attach_registry_metadata(
-                            problem_alternatives, trace=trace, limit=5,
-                        )
                     # Combined union of prior_art.csv rows and problem_alternatives
                     if facts_client is not None and problem_alternatives:
                         problem_alternatives = [

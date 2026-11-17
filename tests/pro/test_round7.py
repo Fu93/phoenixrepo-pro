@@ -23,11 +23,12 @@ def _answers(**flags):
 
 def test_full_and_partial_come_from_the_four_answers():
     assert derive_overlap(_answers()) == "full"
-    assert derive_overlap(_answers(covers_main_features=False)) == "partial"
-    assert derive_overlap(_answers(same_core_job=False, covers_main_features=False)) == "none"
-    assert is_borderline(_answers(covers_main_features=False)) is True
+    assert derive_overlap(_answers(covers_main_features=False)) == "full"
+    assert derive_overlap(_answers(same_input_output=False)) == "partial"
+    assert derive_overlap(_answers(same_core_job=False)) == "none"
+    assert is_borderline(_answers(same_input_output=False)) is True
+    assert is_borderline(_answers(covers_main_features=False)) is False
     assert is_borderline(_answers()) is False
-    assert is_borderline(_answers(same_input_output=False, covers_main_features=False)) is False
 
 
 def test_a_clear_full_is_not_asked_twice_and_a_split_reread_needs_review(tmp_path):
@@ -39,7 +40,7 @@ def test_a_clear_full_is_not_asked_twice_and_a_split_reread_needs_review(tmp_pat
         if "Second read" in prompt:
             body = _answers()
         else:
-            body = _answers(covers_main_features=False)
+            body = _answers(same_input_output=False)
         body.update({
             "reason": "same listing tool",
             "quotes": [text],
@@ -84,7 +85,7 @@ def test_two_agreeing_borderline_reads_keep_the_stricter_label(tmp_path):
 
     def handler(prompt, _system):
         calls["n"] += 1
-        body = _answers(covers_main_features=False)
+        body = _answers(same_input_output=False)
         body.update({"reason": "missing one feature", "quotes": [text]})
         return json.dumps(body)
 

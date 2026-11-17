@@ -1,7 +1,10 @@
 """Turn yes/no overlap answers into full, partial, or none.
 
-The model does not choose the word. A second read happens only when the first
-read is one answer away from full, and the two reads have to agree.
+Full is the same core job, the same input and output, and the same user.
+covers_main_features is stored with the answers and does not change the label:
+live reads disagreed only on that bit. A second read happens only when one of
+the two blocking answers is missing, and only for an alternative that could
+already block on maturity.
 """
 
 from __future__ import annotations
@@ -44,22 +47,17 @@ def rubric_answers(entry: dict[str, Any]) -> dict[str, bool] | None:
 def derive_overlap(answers: dict[str, bool]) -> str:
     if not answers["same_core_job"]:
         return "none"
-    rest = ("same_input_output", "same_target_user", "covers_main_features")
-    if all(answers[key] for key in rest):
+    if answers["same_input_output"] and answers["same_target_user"]:
         return "full"
     return "partial"
 
 
 def is_borderline(answers: dict[str, bool]) -> bool:
-    """One criterion short of full. A clear full, a clear partial, or a miss is not re-asked."""
+    """One of the two blocking answers is missing. The feature-list bit is not a second read."""
 
     if not answers["same_core_job"]:
         return False
-    missing = sum(
-        1
-        for key in ("same_input_output", "same_target_user", "covers_main_features")
-        if not answers[key]
-    )
+    missing = sum(1 for key in ("same_input_output", "same_target_user") if not answers[key])
     return missing == 1
 
 
@@ -84,5 +82,5 @@ RUBRIC_FIELDS = (
     "Answer these four questions true or false, about the alternative versus the candidate: "
     "same_core_job (the same core job), same_input_output (the same kind of input and output), "
     "same_target_user (the same kind of user), covers_main_features (it covers the candidate README's main feature list). "
-    "Do not decide the words full or partial. Code derives that label from these four answers."
+    "Code sets full only from the first three. covers_main_features is recorded and does not change the label."
 )

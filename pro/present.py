@@ -205,6 +205,8 @@ def alternatives_from_discovery(summary: dict[str, Any]) -> list[dict[str, Any]]
                 "overlap": str(item.get("overlap") or ""),
                 "quote": str(item.get("quote") or ""),
                 "reason": str(item.get("reason") or ""),
+                **({"rubric": item["rubric"]} if isinstance(item.get("rubric"), dict) and item.get("rubric") else {}),
+                **({"rubric_second": item["rubric_second"]} if isinstance(item.get("rubric_second"), dict) and item.get("rubric_second") else {}),
             },
             blocked_flag=True,
         ))
@@ -219,6 +221,8 @@ def alternatives_from_discovery(summary: dict[str, Any]) -> list[dict[str, Any]]
                 "overlap": str(item.get("overlap") or ""),
                 "quote": str(item.get("quote") or ""),
                 "reason": str(item.get("reason") or ""),
+                **({"rubric": item["rubric"]} if isinstance(item.get("rubric"), dict) and item.get("rubric") else {}),
+                **({"rubric_second": item["rubric_second"]} if isinstance(item.get("rubric_second"), dict) and item.get("rubric_second") else {}),
             },
             blocked_flag=False,
         ))

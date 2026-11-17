@@ -153,17 +153,17 @@ def write_snapshot(row: dict[str, str], directory: Path) -> Path:
     return directory
 
 
-def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None, plan_rescue: bool = False) -> dict[str, Any]:
+def judge(url: str, out_dir: Path | None = None, use_llm: bool = True, run_id: str | None = None, log_dir: Path | None = None, getter=_get, scorer=None, relevance_client=None, plan_rescue: bool = False, commit: str = "") -> dict[str, Any]:
     """Judge one repository. Returns {repo_id, verdict, reason, run_id, run_hash, report}."""
     full_name = parse_repo_url(url)
     cache_token = _github_cache.set({})
     try:
-        return _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue)
+        return _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue, commit)
     finally:
         _github_cache.reset(cache_token)
 
 
-def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue=False):
+def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, scorer, relevance_client, plan_rescue=False, commit=""):
     collected_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     fetched = fetch_repo(full_name, getter=getter)
     row = build_row(fetched, collected_at)
@@ -190,6 +190,8 @@ def _judge_body(url, full_name, out_dir, use_llm, run_id, log_dir, getter, score
         )
         rescue_plans: list[dict] = []
         if scorer is None:
+            score_kwargs["head_commit"] = commit
+            score_kwargs["stable_getter"] = getter
             from app.agents.repo_facts import RepoFactsClient
 
             score_kwargs["facts_client"] = RepoFactsClient(cache_dir=snap / ".cache" / "repo_facts")

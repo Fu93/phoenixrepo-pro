@@ -584,7 +584,21 @@
           row.quote || "No quote stored.",
         ]),
         el("p", { class: "muted" }, [row.reason || ""]),
+        rubricLine(row),
       ]);
+    }
+
+    function rubricLine(row) {
+      const first = row.rubric || {};
+      const keys = ["same_core_job", "same_input_output", "same_target_user", "covers_main_features"];
+      if (!keys.some((key) => key in first)) return el("span");
+      const bit = (answers, key) => (answers[key] === true ? "yes" : answers[key] === false ? "no" : "—");
+      const text = keys.map((key) => key.replace(/_/g, " ") + " " + bit(first, key)).join("; ");
+      const second = row.rubric_second || {};
+      const extra = keys.some((key) => key in second)
+        ? " Second read: " + keys.map((key) => bit(second, key)).join("/") + "."
+        : "";
+      return el("p", { class: "muted" }, ["Rubric: " + text + "." + extra + " The feature-list answer is recorded and does not set full or partial."]);
     }
 
     function rescueView(result) {
