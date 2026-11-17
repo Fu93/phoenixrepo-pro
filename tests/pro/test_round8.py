@@ -84,7 +84,7 @@ def test_an_immature_alternative_is_not_sent_to_the_model(tmp_path):
     assert "old/thing" in text
 
 
-def test_short_circuit_stops_after_a_blocker(tmp_path):
+def test_every_mature_row_is_judged_before_a_blocker(tmp_path):
     calls = {"n": 0}
     quote = "does the same job for the same user"
 
@@ -125,9 +125,8 @@ def test_short_circuit_stops_after_a_blocker(tmp_path):
         candidate={"repo_id": "example/app", "description": "Do a job", "stars": 10, "readme_excerpt": quote},
         skip_immature=True,
     )
-    assert calls["n"] == 1
-    assert any(row["alternative_id"] == "big/one" for row in found)
-    assert "ALTERNATIVES_SHORT_CIRCUIT" in trace.path.read_text(encoding="utf-8")
+    assert calls["n"] >= 2
+    assert {row["alternative_id"] for row in found} == {"big/one", "big/two", "big/three"}
 
 
 def test_yarnpkg_docs_block_when_the_npm_package_is_mature():

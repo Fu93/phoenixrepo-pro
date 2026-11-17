@@ -5,6 +5,10 @@ from __future__ import annotations
 import re
 from typing import Any
 
+_MIRROR_HOST = re.compile(
+    r"(?:https?://)?(?:www\.)?(?:qgithub\.com|kgithub\.com|github\.com\.cn)",
+    re.IGNORECASE,
+)
 _GITHUB = re.compile(r"github\.com/([^/\s?#]+)/([^/\s?#]+)", re.IGNORECASE)
 _BARE = re.compile(r"^([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)$")
 _NPM = re.compile(r"(?:www\.)?npmjs\.com/package/([^/\s?#]+)", re.IGNORECASE)
@@ -20,6 +24,7 @@ def github_owner_repo(value: str) -> str | None:
     text = str(value or "").strip()
     if text.startswith("web:"):
         text = text[4:]
+    text = _MIRROR_HOST.sub("github.com", text)
     match = _GITHUB.search(text)
     if match:
         owner, repo = match.group(1), _clean_repo(match.group(2))
@@ -74,7 +79,15 @@ def dedupe_alternatives(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             index[key] = row
             kept.append(row)
             continue
-        for field in ("readme", "description", "excerpt", "pushed_at", "licence_spdx", "released_at"):
+        current_id = str(current.get("alternative_id") or "")
+        incoming_id = str(row.get("alternative_id") or "")
+        if github_owner_repo(incoming_id) == incoming_id and github_owner_repo(current_id) != current_id:
+            current["alternative_id"] = incoming_id
+            if row.get("url"):
+                current["url"] = row["url"]
+            if row.get("source"):
+                current["source"] = row["source"]
+        for field in ("readme", "description", "excerpt", "pushed_at", "licence_spdx", "released_at", "stars"):
             if not current.get(field) and row.get(field):
                 current[field] = row[field]
         if current.get("stars") in (None, "", 0) and row.get("stars") not in (None, "", 0):

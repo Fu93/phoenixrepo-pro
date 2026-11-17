@@ -48,9 +48,8 @@ def test_queries_use_category_words_and_drop_dotfile_junk():
     queries = keyword_queries(candidate)
     assert len(queries) <= 3
     assert queries == keyword_queries(candidate)
-    assert "stars:>=50" in queries[0]
-    assert "language:JavaScript" in queries[0]
-    assert "http" in queries[0].casefold()
+    assert queries[0] == "Simplified HTTP request client"
+    assert any("stars:>=50" in query and "language:JavaScript" in query for query in queries)
     assert "topic:http-client" in " ".join(queries)
     assert is_junk_repo("zszszszsz/.config")
     items = [
@@ -78,11 +77,9 @@ def test_web_hits_are_not_crowded_out_by_github_fill():
         {"alternative_id": f"org/junk{i}", "url": f"https://github.com/org/junk{i}", "source": "github", "stars": 80 + i}
         for i in range(15)
     ]
+    web[0]["stars"] = 14963
     merged = merge_preserving_web(web, github, limit=15)
-    assert merged[0]["alternative_id"] != "sindresorhus/got" or any(
-        row["alternative_id"] == "sindresorhus/got" for row in merged
-    )
-    assert any(row["alternative_id"] == "sindresorhus/got" for row in merged)
+    assert merged[0]["alternative_id"] == "sindresorhus/got"
     assert len(merged) == 15
 
 
@@ -93,8 +90,7 @@ def test_all_skipped_does_not_say_there_was_no_prior_art():
         {"alternative": "org/old", "reason": "last update 2010-01-01 is 5000 days before 2026-11-17"},
         {"alternative": "org/tiny", "reason": "not mature or official: stars=2"},
     ])
-    assert text.startswith("2 alternatives were checked")
-    assert "org/old" in text and "org/tiny" in text
+    assert text == "2 alternatives were checked and none could block."
     assert "Zero alternatives" not in text
     assert "no prior art" not in text.casefold()
 

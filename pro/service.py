@@ -554,6 +554,7 @@ class ProService:
                 "reason": reason,
                 "quote": primary_quote(verdict, reason, alternatives),
                 "alternatives": alternatives,
+                "skipped": discovery.get("skipped") or [],
                 "problem": problem,
                 "run_id": str(judged.get("run_id") or job.id),
                 "run_hash": run_hash,

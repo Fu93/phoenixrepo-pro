@@ -1144,6 +1144,7 @@ def _do_score_candidates(
 
                 candidate["_manifest_texts"] = load_manifests(toolbox, repo_id)
                 _search_started = time.perf_counter()
+                candidate["_head_commit"] = head_commit
                 search_results = search_prior_art(
                     candidate=candidate,
                     queries=queries,
@@ -1269,8 +1270,8 @@ def _do_score_candidates(
                     from app.agents.github_metadata import attach_github_metadata
                     from app.agents.registry_maturity import attach_registry_metadata
 
-                    attach_github_metadata(list(search_results), trace=trace, limit=5)
                     attach_registry_metadata(list(search_results), trace=trace, limit=5)
+                    attach_github_metadata(list(search_results), trace=trace, limit=5)
                     problem_alternatives = filter_relevant_alternatives(
                         problem_statement=problem_stmt,
                         candidate_repo_id=repo_id,
@@ -1394,7 +1395,8 @@ def _do_score_candidates(
             action="DISCOVERY_FILTER",
             input_summary={"repo_id": repo_id},
             output_summary=_discovery_output(
-                verdict, reason, evidence_mode, evidence=judgement_evidence, must_beat=must_beat
+                verdict, reason, evidence_mode, evidence=judgement_evidence, must_beat=must_beat,
+                skipped=skipped_alts,
             ),
             status="ok",
             summary_limit=EVIDENCE_SUMMARY_LIMIT,
@@ -2013,9 +2015,7 @@ def _evidence_mode(explicit: str | None) -> str:
 
 
 def _skipped_reason(skipped: list[dict[str, str]]) -> str:
-    shown = "; ".join(f"{item['alternative']} ({item['reason']})" for item in skipped[:8])
-    more = f"; and {len(skipped) - 8} more" if len(skipped) > 8 else ""
-    return f"{len(skipped)} alternatives were checked and none could block. {shown}{more}."
+    return f"{len(skipped)} alternatives were checked and none could block."
 
 
 def _discovery_output(
@@ -2024,12 +2024,15 @@ def _discovery_output(
     evidence_mode: str,
     evidence: list[dict[str, Any]] | None = None,
     must_beat: list[dict[str, Any]] | None = None,
+    skipped: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {"verdict": verdict, "reason": reason, "evidence_source": evidence_mode}
     if evidence is not None:
         payload["evidence"] = evidence
     if must_beat is not None:
         payload["must_beat"] = must_beat
+    if skipped:
+        payload["skipped"] = skipped
     return payload
 
 

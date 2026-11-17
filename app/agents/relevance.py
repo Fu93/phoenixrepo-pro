@@ -2114,6 +2114,15 @@ def judge_discovery(
     raw_verdict = str(obj.get("verdict") or "NO_GO").strip().upper()
     reason = str(obj.get("reason") or "").strip()
     problem_quote = str(obj.get("problem_quote") or "").strip()
+    if (
+        problem_quote
+        and problem_quote.casefold() not in {"unknown", "none", "null"}
+        and cand_text
+        and not quote_in_text(problem_quote, cand_text)
+    ):
+        replacement = _retry_verified_quote(client, repo_id, cand_text, problem_quote)
+        if replacement:
+            problem_quote = replacement
     alt_repo = str(obj.get("alternative_repo") or "").strip() if obj.get("alternative_repo") else None
     alt_quote = str(obj.get("alternative_quote") or "").strip() if obj.get("alternative_quote") else None
 
@@ -2378,6 +2387,28 @@ def judge_discovery(
         reason = f"unverified LLM quote: unexpected verdict '{raw_verdict}'"
         path_label = "unexpected"
 
+    verified_ready: list[tuple[dict[str, Any], list[str]]] = []
+    for row in blocking_full:
+        own_text = f"{row.get('excerpt', '')} {row.get('description', '')} {row.get('text', '')} {row.get('readme', '')}"
+        own_quotes = [str(q) for q in (row.get("quotes") or []) if str(q).strip() and quote_in_text(str(q), own_text)]
+        if own_quotes:
+            verified_ready.append((row, own_quotes))
+    if verified_ready and verdict != "ALREADY_EXISTS":
+        # The maturity gate does not wait for the model's verdict word. A mature
+        # full-overlap row blocks even when the model said NO_GO and named nothing.
+        # The row still needs a quote that is actually in its own text.
+        m, quotes = verified_ready[0]
+        verdict = "ALREADY_EXISTS"
+        reason = (
+            f"verified full-overlap alternative {m.get('url') or m.get('alternative_id')} already solves the same problem"
+            + (f" (quote: '{quotes[0]}')" if quotes else "")
+            + f"; the model said {raw_verdict}"
+        )
+        picked = [{**m, "quotes": quotes, "overlap": "full", "reason": reason, "rubric": m.get("rubric") or {}}]
+        path_label = "BF"
+        gate_row = m
+        gate_decision = _stored(m)
+
     disagreed = [row for row in combined_priors if row.get("overlap_reads") == "disagree"]
     if disagreed and verdict == "CANDIDATE" and not blocking_full:
         verdict = "NEEDS_REVIEW"
@@ -2414,6 +2445,23 @@ def judge_discovery(
         str(p.get("alternative_id") or p.get("alternative") or p.get("url") or "").casefold()
         for p in picked
     }
+    from app.agents.alt_key import canonical_alternative_key
+
+    winner_keys = {canonical_alternative_key(row) for row in picked if isinstance(row, dict)}
+    for row in combined_priors:
+        if row.get("same_problem") is not True:
+            continue
+        key = canonical_alternative_key(row)
+        if key and key in winner_keys:
+            continue
+        quotes = [str(q).strip() for q in (row.get("quotes") or []) if str(q).strip()]
+        must_beat.append({
+            "alternative": str(row.get("alternative_id") or row.get("url") or ""),
+            "overlap": str(row.get("overlap") or ""),
+            "quote": quotes[0] if quotes else "",
+            "reason": str(row.get("reason") or "checked"),
+            "rubric": row.get("rubric") if isinstance(row.get("rubric"), dict) else {},
+        })
     deduped: list[dict[str, str]] = []
     seen_beat: set[str] = set()
     for item in must_beat:
@@ -2561,6 +2609,31 @@ def _indexes_to_quotes(obj: dict[str, Any], sentences: list[str]) -> list[str]:
     return picked
 
 
+def _retry_verified_quote(client, repo_id: str, source_text: str, rejected: str) -> str:
+    """One more extraction. The model may only point at a sentence in the source text."""
+
+    sentences = _numbered_sentences(source_text)
+    if not sentences or client is None:
+        return ""
+    numbered = "\n".join(f"{index}. {sentence}" for index, sentence in enumerate(sentences))
+    prompt = (
+        "The previous quote was not in the source. The exact source text is numbered below. "
+        "Return strict JSON {\"sentence_indexes\": [n]}. Do not write a new sentence.\n"
+        f"Rejected quote: {rejected!r}\n{numbered}"
+    )
+    try:
+        text, _req, _srv = client.complete(
+            prompt, "Quote only by sentence index from the source text.", repo_id=repo_id, step="problem_quote_retry",
+        )
+        obj = extract_json_object(text) or {}
+    except Exception:
+        return ""
+    for quote in _indexes_to_quotes(obj, sentences):
+        if quote_in_text(quote, source_text):
+            return quote
+    return ""
+
+
 def _retry_problem_statement(client, system_prompt: str, repo_id: str, desc: str, readme: str, prob: str, rejected: str, cand_text: str):
     """One more call. The model returns sentence indexes, not a free-text quote."""
 
@@ -2606,6 +2679,38 @@ class SearchResultsList(list):
         self.source_counts: dict[str, int] = source_counts or {}
         self.source_status: dict[str, str] = source_status or {}
         self.insufficient_coverage: bool = insufficient_coverage
+
+
+def _cached_web_call(candidate: dict[str, Any], repo_id: str, toolbox: Any, tool_name: str, query: str) -> Any:
+    """Reuse a web-search body for the same repository, commit, and query."""
+
+    from app.agents.stable_search import cached_payload
+
+    commit = str(candidate.get("_head_commit") or "")
+    if not commit:
+        return toolbox.call(tool_name, {"query": query})
+    cache_dir = candidate.get("_search_cache")
+
+    def produce() -> dict[str, Any]:
+        result = toolbox.call(tool_name, {"query": query})
+        data = result.data if getattr(result, "ok", False) and isinstance(getattr(result, "data", None), dict) else {}
+        return {
+            "ok": bool(getattr(result, "ok", False)),
+            "error": str(getattr(result, "error", "") or ""),
+            "items": list((data or {}).get("items") or [])[:6],
+        }
+
+    payload = cached_payload(
+        "web", repo_id, commit, query, produce,
+        cache_dir=Path(cache_dir) if cache_dir else None,
+    )
+
+    class _Hit:
+        ok = bool(payload.get("ok"))
+        data = {"items": payload.get("items") or []}
+        error = str(payload.get("error") or "")
+
+    return _Hit()
 
 
 def search_prior_art(
@@ -2693,7 +2798,7 @@ def search_prior_art(
         tool_name = "web_search" if (hasattr(toolbox, "has") and toolbox.has("web_search")) or (hasattr(toolbox, "tools") and "web_search" in getattr(toolbox, "tools", {})) else "web"
 
         def _fetch_web(query: str):
-            return query, toolbox.call(tool_name, {"query": query})
+            return query, _cached_web_call(candidate, cand_id, toolbox, tool_name, query)
 
         for query, result in map_ordered(_fetch_web, list(queries), workers=4):
             web_prefetch[query] = result
@@ -2810,7 +2915,7 @@ def search_prior_art(
             tool_name = "web_search" if (hasattr(toolbox, "has") and toolbox.has("web_search")) or (hasattr(toolbox, "tools") and "web_search" in toolbox.tools) else "web"
             web_res = web_prefetch.get(q)
             if web_res is None:
-                web_res = toolbox.call(tool_name, {"query": q})
+                web_res = _cached_web_call(candidate, cand_id, toolbox, tool_name, q)
             if web_res.ok and isinstance(web_res.data, dict):
                 for it in (web_res.data.get("items") or [])[:6]:
                     url = str(it.get("url") or "").strip()
@@ -3857,21 +3962,10 @@ def filter_relevant_alternatives(
                 if batch is not None:
                     verified_alts.extend(batch)
                     judged = True
-                    if any(_row_blocks(candidate, row) for row in batch):
-                        if trace is not None:
-                            trace.event(
-                                agent_name="orchestrator",
-                                action="ALTERNATIVES_SHORT_CIRCUIT",
-                                input_summary={"repo_id": candidate_repo_id},
-                                output_summary={"stopped_after_chunk": chunk_index},
-                                status="ok",
-                            )
-                        break
             if not judged:
                 if budget.time_exhausted():
                     raise budget.stop("time_cap")
                 per_item_failures = 0
-                halted = False
                 for res in chunk:
                     if budget.time_exhausted():
                         raise budget.stop("time_cap")
@@ -3884,24 +3978,7 @@ def filter_relevant_alternatives(
                         per_item_failures += 1
                     if alt_row is not None:
                         verified_alts.append(alt_row)
-                        if _row_blocks(candidate, alt_row):
-                            halted = True
-                            break
-                # A clean chunk that already found a blocker stops. A chunk that failed
-                # open still has to count those failures, or the infra cap never trips.
-                if halted and per_item_failures == 0 and trace is not None:
-                    trace.event(
-                        agent_name="orchestrator",
-                        action="ALTERNATIVES_SHORT_CIRCUIT",
-                        input_summary={"repo_id": candidate_repo_id},
-                        output_summary={"stopped_after_chunk": chunk_index},
-                        status="ok",
-                    )
                 judged = per_item_failures == 0
-                if halted and per_item_failures == 0 and budget.failures < FALLBACK_INFRA_LIMIT:
-                    verified_chunk_indexes.append(chunk_index)
-                    finished += 1
-                    break
             if judged:
                 verified_chunk_indexes.append(chunk_index)
                 finished += 1

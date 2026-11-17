@@ -73,15 +73,18 @@ def keyword_queries(candidate: dict[str, Any]) -> list[str]:
 
     language = str(candidate.get("primary_language") or candidate.get("language") or "").strip()
     found: list[str] = []
+    plain = ecosystem_query(candidate)
+    if plain:
+        found.append(plain)
 
-    def add(text: str) -> None:
-        query = _qualify(text, language if len(found) == 0 else "")
+    def add(text: str, *, with_language: bool = False) -> None:
+        query = _qualify(text, language if with_language else "")
         if text.strip() and query.casefold() not in {item.casefold() for item in found}:
             found.append(query)
 
     phrase = _phrase(str(candidate.get("description") or ""))
     if phrase:
-        add(phrase)
+        add(phrase, with_language=True)
     topics = _topics(candidate)
     if topics:
         add(" ".join(f"topic:{topic}" for topic in topics[:2]))
@@ -98,9 +101,36 @@ def keyword_queries(candidate: dict[str, Any]) -> list[str]:
 
 def is_junk_repo(full_name: str) -> bool:
     repo = str(full_name or "").split("/")[-1]
+    folded = repo.casefold()
     if not repo or repo.startswith("."):
         return True
-    return _JUNK_REPO.search(repo) is not None
+    if _JUNK_REPO.search(repo):
+        return True
+    if folded == "awesome" or folded.startswith("awesome-") or "awesome-list" in folded:
+        return True
+    if folded in {"mirror", "mirrors"} or folded.endswith("-mirror") or folded.endswith(".mirror"):
+        return True
+    return False
+
+
+_ECOSYSTEM_STOP = frozenset(
+    "a an the of to for and or with from your our this that free web online open source into over "
+    "than then just more most some any all not but its app tool software using".split()
+)
+
+
+def ecosystem_query(candidate: dict[str, Any]) -> str:
+    """The short description query from round 8. It is what surfaced pnpm for Bower."""
+
+    words: list[str] = []
+    for word in re.findall(r"[A-Za-z][A-Za-z0-9+#-]*", str(candidate.get("description") or "")):
+        if len(word) <= 2 or word.casefold() in _ECOSYSTEM_STOP:
+            continue
+        if word.casefold() not in {item.casefold() for item in words}:
+            words.append(word)
+        if len(words) >= 6:
+            break
+    return " ".join(words)
 
 
 def rank_key(row: dict[str, Any]) -> tuple[int, str]:
@@ -123,20 +153,39 @@ def merge_preserving_web(
     *,
     limit: int = 15,
 ) -> list[dict[str, Any]]:
-    """Keep web hits even when their star count is still unknown.
+    """Sort the union by stars, then by repository key, and only then keep ``limit`` rows."""
 
-    GitHub search rows fill only the seats the web list did not take. A web hit
-    such as sindresorhus/got is not dropped to make room for an unrelated repo.
-    """
+    return merge_ranked(list(web_rows) + list(github_rows))[:limit]
 
-    web = merge_ranked(web_rows)
-    taken = {canonical_alternative_key(row) for row in web}
-    github = [row for row in merge_ranked(github_rows) if canonical_alternative_key(row) not in taken]
-    chosen = web[:limit]
-    room = limit - len(chosen)
-    if room > 0:
-        chosen.extend(github[:room])
-    return merge_ranked(chosen)
+
+def cached_payload(
+    kind: str,
+    repo_id: str,
+    commit: str,
+    query: str,
+    produce: Callable[[], dict[str, Any]],
+    *,
+    cache_dir: Path | None = None,
+    store_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Read or store one search body. ``kind`` keeps web results apart from GitHub results."""
+
+    directory = cache_dir or Path(os.environ.get("PHOENIX_PRO_DIR") or "data/pro-runtime") / "search-cache"
+    digest = hashlib.sha256(f"{kind}\n{repo_id}\n{commit}\n{query}".encode("utf-8")).hexdigest()
+    path = directory / f"{digest}.json"
+    stored = _read_json(path)
+    if stored is None and store_dir is not None:
+        stored = _read_json(store_dir / f"{digest}.json")
+    if stored is None:
+        stored = produce()
+        if not isinstance(stored, dict):
+            stored = {}
+        try:
+            directory.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(stored), encoding="utf-8")
+        except OSError:
+            pass
+    return stored
 
 
 def _cache_file(directory: Path, repo_id: str, commit: str, query: str) -> Path:

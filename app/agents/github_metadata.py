@@ -16,10 +16,26 @@ _GITHUB_REPO = re.compile(r"github\.com/([^/\s?#]+)/([^/\s?#]+)", re.IGNORECASE)
 _SKIP_OWNERS = {"topics", "orgs", "features", "settings", "marketplace", "sponsors"}
 
 
+def _linked_github_repo(row: dict[str, Any]) -> str | None:
+    """A github.com path on the row, including a mirror host or a URL inside the page text."""
+
+    for field in ("repository_url", "url", "alternative_id", "description", "readme", "excerpt"):
+        repo = github_repo_from_url(str(row.get(field) or ""))
+        if repo:
+            return repo
+    return None
+
+
 def github_repo_from_url(value: str) -> str | None:
     text = str(value or "")
     if text.startswith("web:"):
         text = text[4:]
+    text = re.sub(
+        r"(?:https?://)?(?:www\.)?(?:qgithub\.com|kgithub\.com|github\.com\.cn)",
+        "https://github.com",
+        text,
+        flags=re.IGNORECASE,
+    )
     match = _GITHUB_REPO.search(text)
     if match is None:
         return None
@@ -81,7 +97,7 @@ def attach_github_metadata(
     used = 0
     for index in order:
         row = rows[index]
-        repo = github_repo_from_url(str(row.get("url") or row.get("alternative_id") or ""))
+        repo = _linked_github_repo(row)
         if repo is None:
             if str(row.get("source") or "") != "github":
                 _mark_unknown(row)

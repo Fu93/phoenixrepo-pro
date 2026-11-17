@@ -521,6 +521,7 @@
           result.quote,
         ]) : el("p", { class: "muted" }, ["No verified quote was stored with this verdict."]),
         el("p", {}, [plainReason(result)]),
+        skippedList(result),
         durations(result),
         detailsFor(result),
         result.verdict === "NOT_ENOUGH" ? notEnough(result) : el("span"),
@@ -658,6 +659,15 @@
         el("div", { class: "chips" }, [verify, tamper]),
         out,
         el("section", { class: "panel" }, [list]),
+      ]);
+    }
+
+    function skippedList(result) {
+      const rows = result.skipped || [];
+      if (!rows.length) return el("span");
+      return el("details", {}, [
+        el("summary", {}, [rows.length + " alternatives were checked and skipped"]),
+        ...rows.map((row) => el("p", { class: "muted" }, [(row.alternative || "alternative") + " — " + (row.reason || "")])),
       ]);
     }
 

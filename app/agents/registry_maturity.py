@@ -190,6 +190,10 @@ def _fill_npm(row: dict[str, Any], name: str, getter: Callable[[str], Any], now:
         row["licence_spdx"] = spdx
     if released:
         row["released_at"] = released
+    repository = meta.get("repository")
+    repo_url = repository.get("url") if isinstance(repository, dict) else repository if isinstance(repository, str) else ""
+    if isinstance(repo_url, str) and repo_url.strip():
+        row["repository_url"] = repo_url.strip()
     if downloads is not None:
         row["weekly_downloads"] = downloads
     official = _host(row) in DOCS_TO_NPM
